@@ -34,6 +34,9 @@ public class User {
     @Column(name = "tenant_id", nullable = false, length = 50) // 租户ID，用于多租户隔离
     private String tenantId;
 
+    @Column(name = "refresh_token", length = 500) // Refresh Token 字段
+    private String refreshToken;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

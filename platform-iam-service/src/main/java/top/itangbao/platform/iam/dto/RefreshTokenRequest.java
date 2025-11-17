@@ -1,5 +1,6 @@
 package top.itangbao.platform.iam.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoginResponse {
-    private String accessToken;
-    private String refreshToken; // 新增 Refresh Token
-    private String tokenType = "Bearer";
-    private UserDTO user;
+public class RefreshTokenRequest {
+    @NotBlank(message = "Refresh token cannot be empty")
+    private String refreshToken;
 }

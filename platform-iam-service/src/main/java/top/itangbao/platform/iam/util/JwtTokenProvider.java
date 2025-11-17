@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID; // 引入 UUID
 import java.util.stream.Collectors;
 
 @Component
@@ -20,41 +21,58 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    @Value("${app.jwtSecret}") // 从 application.yml 获取密钥
+    @Value("${app.jwtSecret}")
     private String jwtSecret;
 
-    @Value("${app.jwtExpirationMs}") // 从 application.yml 获取过期时间 (毫秒)
+    @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
-    // 从 Base64 编码的密钥字符串生成 Key
+    @Value("${app.jwtRefreshExpirationMs}") // 新增 Refresh Token 过期时间
+    private int jwtRefreshExpirationMs;
+
     private Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
     /**
-     * 生成 JWT Token
+     * 生成 JWT Access Token
      * @param authentication 认证信息
-     * @return JWT Token 字符串
+     * @return JWT Access Token 字符串
      */
-    public String generateToken(Authentication authentication) {
+    public String generateAccessToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
 
-        // 提取用户权限/角色
         String roles = userPrincipal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername())) // 用户名作为 Subject
-                .claim("roles", roles) // 将角色作为自定义 Claim
+                .setSubject((userPrincipal.getUsername()))
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(key(), SignatureAlgorithm.HS512) // 使用 HS512 算法和密钥签名
+                .signWith(key(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
     /**
-     * 从 JWT Token 中获取用户名
+     * 生成 JWT Refresh Token
+     * Refresh Token 不包含业务数据，通常是一个随机字符串，用于验证用户是否可以获取新的 Access Token
+     * @return JWT Refresh Token 字符串
+     */
+    public String generateRefreshToken() {
+        // Refresh Token 可以是随机的 UUID，然后存储在数据库中进行校验
+        // 也可以是一个带有过期时间的 JWT，但通常不包含敏感信息
+        return Jwts.builder()
+                .setId(UUID.randomUUID().toString()) // 使用 UUID 作为 Refresh Token 的 ID
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtRefreshExpirationMs))
+                .signWith(key(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    /**
+     * 从 JWT Token 中获取用户名 (适用于 Access Token)
      * @param token JWT Token 字符串
      * @return 用户名
      */
@@ -64,7 +82,7 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 验证 JWT Token
+     * 验证 JWT Token (适用于 Access Token 和 Refresh Token)
      * @param authToken JWT Token 字符串
      * @return 如果 Token 有效返回 true，否则返回 false
      */

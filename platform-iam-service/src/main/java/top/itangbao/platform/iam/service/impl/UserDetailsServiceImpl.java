@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import top.itangbao.platform.iam.domain.User;
 import top.itangbao.platform.iam.repository.UserRepository;
+import top.itangbao.platform.iam.security.CustomUserDetails;
 
 import java.util.Collections; // 暂时用空的权限集合
 import java.util.List;
@@ -31,25 +32,24 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseGet(() -> userRepository.findByEmail(identifier)
                         .orElseThrow(() -> new UsernameNotFoundException("User not found with identifier: " + identifier)));
 
-        // 构建用户的权限列表 (包括角色和直接权限)
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName())) // 角色前缀通常是 ROLE_
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
                 .collect(Collectors.toList());
 
         user.getPermissions().stream()
                 .map(permission -> new SimpleGrantedAuthority(permission.getName()))
                 .forEach(authorities::add);
 
-        // 同时添加角色对应的权限
         user.getRoles().stream()
                 .flatMap(role -> role.getPermissions().stream())
                 .map(permission -> new SimpleGrantedAuthority(permission.getName()))
                 .forEach(authorities::add);
 
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUserDetails( // 返回 CustomUserDetails
+                user.getId(), // 传入用户ID
                 user.getUsername(),
                 user.getPassword(),
-                authorities // 现在包含了用户的角色和权限
+                authorities
         );
     }
 }

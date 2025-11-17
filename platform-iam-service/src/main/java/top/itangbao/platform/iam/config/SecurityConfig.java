@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 禁用会话管理，无状态
                 .authorizeHttpRequests(authorize -> authorize
                         // 允许对注册和登录端点进行公共访问
-                        .requestMatchers("/api/iam/auth/register", "/api/iam/auth/login").permitAll()
+                        .requestMatchers("/api/iam/auth/register", "/api/iam/auth/login", "/api/iam/auth/refresh-token").permitAll()
                         // 允许对 Actuator 端点进行公共访问 (用于健康检查等)
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()

@@ -36,4 +36,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return 如果存在返回 true，否则返回 false
      */
     boolean existsByEmail(String email);
+
+    Optional<User> findByRefreshToken(String refreshToken);
 }

@@ -5,6 +5,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,7 @@ import top.itangbao.platform.iam.dto.LoginRequest;
 import top.itangbao.platform.iam.dto.LoginResponse;
 import top.itangbao.platform.iam.dto.RegisterRequest;
 import top.itangbao.platform.iam.dto.UserDTO;
+import top.itangbao.platform.iam.dto.UserUpdateRequest; // 引入
 import top.itangbao.platform.iam.exception.ResourceNotFoundException;
 import top.itangbao.platform.iam.exception.UserAlreadyExistsException;
 import top.itangbao.platform.iam.repository.RoleRepository;
@@ -31,24 +34,25 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder; // 用于密码加密
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
-                           JwtTokenProvider jwtTokenProvider) {
+                           JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.userDetailsService = userDetailsService; // 注入
     }
 
-
     @Override
-    @Transactional // 事务管理
+    @Transactional
     public UserDTO registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new UserAlreadyExistsException("User with username " + request.getUsername() + " already exists.");
@@ -59,7 +63,7 @@ public class UserServiceImpl implements UserService {
 
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // 密码加密存储
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
         user.setTenantId(request.getTenantId());
 
@@ -77,26 +81,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public LoginResponse loginUser(LoginRequest request) {
-        // 使用 AuthenticationManager 进行认证
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword())
         );
-
-        // 将认证信息设置到 SecurityContext
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // 生成 JWT Token
-        String jwt = jwtTokenProvider.generateToken(authentication);
+        String accessToken = jwtTokenProvider.generateAccessToken(authentication);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(); // 生成 Refresh Token
 
-        // 获取认证后的 UserDetails
-        User user = (User) userRepository.findByUsername(request.getIdentifier())
+        User user = userRepository.findByUsername(request.getIdentifier())
                 .orElseGet(() -> userRepository.findByEmail(request.getIdentifier())
                         .orElseThrow(() -> new ResourceNotFoundException("User not found with identifier: " + request.getIdentifier())));
 
+        user.setRefreshToken(refreshToken); // 保存 Refresh Token 到数据库
+        userRepository.save(user); // 更新用户
 
         return LoginResponse.builder()
-                .accessToken(jwt)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken) // 返回 Refresh Token
                 .user(convertToDTO(user))
                 .build();
     }
@@ -122,8 +126,76 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public UserDTO updateUser(Long id, UserUpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+
+        // 检查更新后的用户名或邮箱是否已存在 (排除当前用户自身)
+        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername()) && userRepository.existsByUsername(request.getUsername())) {
+            throw new UserAlreadyExistsException("User with username " + request.getUsername() + " already exists.");
+        }
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+            throw new UserAlreadyExistsException("User with email " + request.getEmail() + " already exists.");
+        }
+
+        // 使用 BeanUtils.copyProperties 复制非空属性，避免覆盖 null 值
+        // 注意：这里需要手动处理密码加密和 tenantId 逻辑
+        if (request.getUsername() != null) {
+            user.setUsername(request.getUsername());
+        }
+        if (request.getEmail() != null) {
+            user.setEmail(request.getEmail());
+        }
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getTenantId() != null) {
+            user.setTenantId(request.getTenantId());
+        }
+
+        User updatedUser = userRepository.save(user);
+        return convertToDTO(updatedUser);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("User not found with ID: " + id);
+        }
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<User> findUserByRefreshToken(String refreshToken) {
+        return userRepository.findByRefreshToken(refreshToken);
+    }
+
+    @Override
+    @Transactional
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void clearRefreshToken(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+        user.setRefreshToken(null); // 清除 Refresh Token
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        return userDetailsService.loadUserByUsername(username);
+    }
+
     // 辅助方法：将 User 实体转换为 UserDTO
-    private UserDTO convertToDTO(User user) {
+    @Override
+    public UserDTO convertToDTO(User user) {
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
