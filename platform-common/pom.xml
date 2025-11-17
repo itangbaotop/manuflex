@@ -53,6 +53,7 @@
             <artifactId>spring-security-core</artifactId>
             <scope>provided</scope> <!-- common 模块不直接运行，所以是 provided -->
         </dependency>
+
     </dependencies>
 
 </project>

@@ -1,4 +1,4 @@
-package top.itangbao.platform.metadata.domain;
+package top.itangbao.platform.metadata.enums;
 
 public enum FieldType {
     STRING,

@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import top.itangbao.platform.metadata.domain.FieldType;
+import top.itangbao.platform.metadata.enums.FieldType;
 
 @Data
 @NoArgsConstructor
