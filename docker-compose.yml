@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0 # 使用 MySQL 8.0 官方镜像
+    container_name: manuflex-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password # ⚠️ 生产环境请使用更复杂的密码
+      MYSQL_DATABASE: manuflex_paas # 数据库名称
+      MYSQL_USER: manuflex_user # 数据库用户
+      MYSQL_PASSWORD: manuflex_password # 数据库用户密码
+    volumes:
+      - mysql_data:/var/lib/mysql # 数据持久化
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql # 初始化 SQL 脚本 (可选，但推荐)
+    healthcheck: # 健康检查
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - manuflex-network
+
+  # Redis Cache Service
+  redis:
+    image: redis:7.0-alpine # 使用 Redis 7.0 Alpine 镜像，更小巧
+    container_name: manuflex-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data # 数据持久化
+    networks:
+      - manuflex-network
+
+  # Zookeeper Service (for Kafka)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0 # 使用 Confluent 提供的 Zookeeper 镜像
+    container_name: manuflex-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - manuflex-network
+
+  # Kafka Broker Service
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0 # 使用 Confluent 提供的 Kafka 镜像
+    container_name: manuflex-kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093" # 用于内部通信，也可用于外部访问
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181 # 连接到 Zookeeper 服务
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093 # Kafka 监听器配置
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT # 安全协议映射
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT # 内部通信监听器
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    depends_on:
+      - zookeeper # 依赖 Zookeeper 启动
+    networks:
+      - manuflex-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  manuflex-network:
+    driver: bridge
