@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import top.itangbao.platform.iam.service.impl.UserDetailsServiceImpl;
-import top.itangbao.platform.iam.util.JwtTokenProvider;
+import top.itangbao.platform.common.util.JwtTokenProvider;
 
 import java.io.IOException;
 

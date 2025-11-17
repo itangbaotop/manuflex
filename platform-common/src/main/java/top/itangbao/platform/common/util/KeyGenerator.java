@@ -1,4 +1,4 @@
-package top.itangbao.platform.iam.util;
+package top.itangbao.platform.common.util;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;

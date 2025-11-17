@@ -1,4 +1,4 @@
-package top.itangbao.platform.iam.util;
+package top.itangbao.platform.common.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -30,7 +30,7 @@ public class JwtTokenProvider {
     @Value("${app.jwtRefreshExpirationMs}") // 新增 Refresh Token 过期时间
     private int jwtRefreshExpirationMs;
 
-    private Key key() {
+    public Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
@@ -100,5 +100,14 @@ public class JwtTokenProvider {
             logger.error("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * 从 JWT Token 中获取所有 Claims
+     * @param token JWT Token 字符串
+     * @return Claims 对象
+     */
+    public Claims getAllClaimsFromToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(token).getBody();
     }
 }

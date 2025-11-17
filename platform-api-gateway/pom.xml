@@ -14,25 +14,23 @@
     <description>API Gateway for ManuFlex PaaS</description>
 
     <dependencies>
+        <!-- Spring Cloud Gateway -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
+        <!-- Spring Cloud LoadBalancer (Gateway 默认使用它进行服务发现和负载均衡) -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId> <!-- Gateway 是基于 WebFlux 的 -->
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
+        <!-- Spring Security (用于在网关层进行认证) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- Common module dependency -->
+        <!-- Common module dependency (如果需要复用 JwtTokenProvider 等) -->
         <dependency>
             <groupId>top.itangbao.platform</groupId>
             <artifactId>platform-common</artifactId>

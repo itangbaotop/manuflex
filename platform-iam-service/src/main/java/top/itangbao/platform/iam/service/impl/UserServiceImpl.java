@@ -22,7 +22,7 @@ import top.itangbao.platform.iam.exception.UserAlreadyExistsException;
 import top.itangbao.platform.iam.repository.RoleRepository;
 import top.itangbao.platform.iam.repository.UserRepository;
 import top.itangbao.platform.iam.service.UserService;
-import top.itangbao.platform.iam.util.JwtTokenProvider;
+import top.itangbao.platform.common.util.JwtTokenProvider;
 
 import java.util.Collections;
 import java.util.List;

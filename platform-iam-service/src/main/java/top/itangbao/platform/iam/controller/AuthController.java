@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import top.itangbao.platform.iam.domain.User;
 import top.itangbao.platform.iam.dto.*;
 import top.itangbao.platform.iam.service.UserService;
-import top.itangbao.platform.iam.util.JwtTokenProvider;
+import top.itangbao.platform.common.util.JwtTokenProvider;
 
 @RestController
 @RequestMapping("/api/iam/auth")
