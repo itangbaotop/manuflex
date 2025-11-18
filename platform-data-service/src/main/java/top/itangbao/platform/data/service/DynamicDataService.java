@@ -1,7 +1,8 @@
 package top.itangbao.platform.data.service;
 
-import top.itangbao.platform.data.dto.DynamicDataRequest;
-import top.itangbao.platform.data.dto.DynamicDataResponse;
+
+import top.itangbao.platform.data.api.dto.DynamicDataRequest;
+import top.itangbao.platform.data.api.dto.DynamicDataResponse;
 
 import java.util.List;
 import java.util.Map;

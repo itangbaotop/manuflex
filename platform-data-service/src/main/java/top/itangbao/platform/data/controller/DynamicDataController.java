@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize; // 引入 @PreAuthorize
 import org.springframework.web.bind.annotation.*;
-import top.itangbao.platform.data.dto.DynamicDataRequest;
-import top.itangbao.platform.data.dto.DynamicDataResponse;
+import top.itangbao.platform.data.api.dto.DynamicDataRequest;
+import top.itangbao.platform.data.api.dto.DynamicDataResponse;
 import top.itangbao.platform.data.service.DynamicDataService;
 
 import java.util.List;

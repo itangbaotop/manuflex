@@ -24,6 +24,11 @@ spring:
           predicates:
             - Path=/api/data/** # 匹配以 /api/data/ 开头的所有请求
 
+        - id: lims-service
+          uri: http://localhost:8084 # LIMS 服务的地址
+          predicates:
+            - Path=/api/lims/** # 匹配以 /api/lims/ 开头的所有请求
+
 app:
   jwtSecret: xi5G429vyD9/rLxktYqsZU723o3V5OB65KWoU76ORtFqihOS3gSQSqEWfDzDdc1ThsPv9D2v0AdqvcdXg+2vqg==
   jwtExpirationMs: 3600000 # Access Token 过期时间，例如 1 小时 (3600 * 1000 毫秒)

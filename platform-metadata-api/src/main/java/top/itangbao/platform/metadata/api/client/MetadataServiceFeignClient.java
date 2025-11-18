@@ -1,9 +1,8 @@
 package top.itangbao.platform.metadata.api.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import top.itangbao.platform.metadata.api.dto.MetadataSchemaCreateRequest;
 import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
 
 /**
@@ -20,5 +19,12 @@ public interface MetadataServiceFeignClient {
     @GetMapping("/api/metadata/schemas/{id}")
     MetadataSchemaDTO getSchemaById(@PathVariable("id") Long id);
 
+    /**
+     * 创建元数据模式
+     * @param request 创建请求体
+     * @return 创建成功的模式信息
+     */
+    @PostMapping("/api/metadata/schemas") // 对应 MetadataSchemaController 中的 @PostMapping
+    MetadataSchemaDTO createSchema(@RequestBody MetadataSchemaCreateRequest request);
     // 可以添加更多 Metadata Service 的 API 方法
 }

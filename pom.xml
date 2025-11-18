@@ -17,6 +17,8 @@
         <module>platform-common</module>
         <module>platform-data-service</module>
         <module>platform-metadata-api</module>
+        <module>platform-lims-service</module>
+        <module>platform-data-api</module>
     </modules>
 
     <properties>

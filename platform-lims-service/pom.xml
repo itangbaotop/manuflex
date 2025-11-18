@@ -9,9 +9,9 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>platform-data-service</artifactId>
-    <name>Platform Data Service</name>
-    <description>Dynamic Data Management Service for ManuFlex PaaS</description>
+    <artifactId>platform-lims-service</artifactId>
+    <name>Platform LIMS Service</name>
+    <description>Laboratory Information Management System Service for ManuFlex PaaS</description>
 
     <dependencies>
         <dependency>
@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId> <!-- LIMS 可能有自己的固定实体，或者仅用于配置 -->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -58,6 +58,7 @@
         <dependency>
             <groupId>top.itangbao.platform</groupId>
             <artifactId>platform-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- SpringDoc OpenAPI (Swagger UI) -->
@@ -67,6 +68,17 @@
             <version>2.3.0</version>
         </dependency>
 
+        <!-- Spring Cloud OpenFeign (用于调用 Data Service 和 Metadata Service) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+
+        <!-- 引入 platform-metadata-api，以便使用 Metadata Service 的 DTOs 和 Feign 客户端 -->
         <dependency>
             <groupId>top.itangbao.platform.metadata</groupId>
             <artifactId>platform-metadata-api</artifactId>
