@@ -9,7 +9,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import top.itangbao.platform.data.security.GatewayAuthFilter; // 导入我们即将创建的过滤器
+import top.itangbao.platform.common.security.GatewayAuthFilter; // 导入我们即将创建的过滤器
 
 @Configuration
 @EnableWebSecurity

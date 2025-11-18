@@ -1,4 +1,4 @@
-package top.itangbao.platform.data.security;
+package top.itangbao.platform.common.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

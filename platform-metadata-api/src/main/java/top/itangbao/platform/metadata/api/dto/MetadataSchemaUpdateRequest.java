@@ -1,4 +1,4 @@
-package top.itangbao.platform.metadata.dto;
+package top.itangbao.platform.metadata.api.dto;
 
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

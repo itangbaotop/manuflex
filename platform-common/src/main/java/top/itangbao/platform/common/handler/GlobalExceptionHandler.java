@@ -1,4 +1,4 @@
-package top.itangbao.platform.metadata.handler;
+package top.itangbao.platform.common.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,9 +7,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import top.itangbao.platform.metadata.dto.ErrorResponse;
-import top.itangbao.platform.metadata.exception.ResourceAlreadyExistsException;
-import top.itangbao.platform.metadata.exception.ResourceNotFoundException;
+import top.itangbao.platform.common.dto.ErrorResponse;
+import top.itangbao.platform.common.exception.ResourceAlreadyExistsException;
+import top.itangbao.platform.common.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

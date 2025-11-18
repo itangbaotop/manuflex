@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import top.itangbao.platform.metadata.dto.MetadataFieldDTO;
-import top.itangbao.platform.metadata.dto.MetadataSchemaDTO;
+import top.itangbao.platform.metadata.api.dto.MetadataFieldDTO;
+import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
 
 
 import java.util.stream.Collectors;
@@ -132,10 +132,10 @@ public class DynamicTableManager {
      */
     private boolean tableExists(String tableName) {
         try {
-            // 查询 information_schema.tables 检查表是否存在
+            // 使用位置参数 (?)
             Object result = entityManager.createNativeQuery(
-                            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = :tableName")
-                    .setParameter("tableName", tableName)
+                            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?1") // 使用 ?1
+                    .setParameter(1, tableName) // 绑定位置参数 1
                     .getSingleResult();
             return ((Number) result).intValue() > 0;
         } catch (Exception e) {
@@ -152,10 +152,11 @@ public class DynamicTableManager {
      */
     private boolean columnExists(String tableName, String columnName) {
         try {
+            // 使用位置参数 (?)
             Object result = entityManager.createNativeQuery(
-                            "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = :tableName AND column_name = :columnName")
-                    .setParameter("tableName", tableName)
-                    .setParameter("columnName", columnName)
+                            "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ?1 AND column_name = ?2") // 使用 ?1 和 ?2
+                    .setParameter(1, tableName) // 绑定位置参数 1
+                    .setParameter(2, columnName) // 绑定位置参数 2
                     .getSingleResult();
             return ((Number) result).intValue() > 0;
         } catch (Exception e) {

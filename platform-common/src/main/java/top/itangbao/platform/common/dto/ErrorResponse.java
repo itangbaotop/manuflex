@@ -1,4 +1,4 @@
-package top.itangbao.platform.metadata.dto;
+package top.itangbao.platform.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

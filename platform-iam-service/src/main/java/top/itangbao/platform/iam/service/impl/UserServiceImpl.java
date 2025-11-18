@@ -17,8 +17,8 @@ import top.itangbao.platform.iam.dto.LoginResponse;
 import top.itangbao.platform.iam.dto.RegisterRequest;
 import top.itangbao.platform.iam.dto.UserDTO;
 import top.itangbao.platform.iam.dto.UserUpdateRequest; // 引入
-import top.itangbao.platform.iam.exception.ResourceNotFoundException;
-import top.itangbao.platform.iam.exception.UserAlreadyExistsException;
+import top.itangbao.platform.common.exception.ResourceNotFoundException;
+import top.itangbao.platform.common.exception.UserAlreadyExistsException;
 import top.itangbao.platform.iam.repository.RoleRepository;
 import top.itangbao.platform.iam.repository.UserRepository;
 import top.itangbao.platform.iam.service.UserService;

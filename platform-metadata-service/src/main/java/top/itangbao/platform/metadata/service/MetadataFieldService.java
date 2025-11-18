@@ -1,8 +1,8 @@
 package top.itangbao.platform.metadata.service;
 
-import top.itangbao.platform.metadata.dto.MetadataFieldCreateRequest;
-import top.itangbao.platform.metadata.dto.MetadataFieldDTO;
-import top.itangbao.platform.metadata.dto.MetadataFieldUpdateRequest;
+import top.itangbao.platform.metadata.api.dto.MetadataFieldCreateRequest;
+import top.itangbao.platform.metadata.api.dto.MetadataFieldDTO;
+import top.itangbao.platform.metadata.api.dto.MetadataFieldUpdateRequest;
 
 import java.util.List;
 

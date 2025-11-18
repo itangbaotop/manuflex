@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.itangbao.platform.iam.domain.Permission;
-import top.itangbao.platform.iam.exception.ResourceAlreadyExistsException;
+import top.itangbao.platform.common.exception.ResourceAlreadyExistsException;
 import top.itangbao.platform.iam.repository.PermissionRepository;
 import top.itangbao.platform.iam.service.PermissionService;
 

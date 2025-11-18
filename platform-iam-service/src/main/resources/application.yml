@@ -23,7 +23,9 @@ spring:
       database: 0
       timeout: 5000ms
 
-
+metadata:
+  service:
+    url: http://localhost:8082 # Metadata Service 的实际地址
 
 springdoc:
   swagger-ui:

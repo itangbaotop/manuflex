@@ -1,4 +1,4 @@
-package top.itangbao.platform.iam.exception;
+package top.itangbao.platform.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -7,5 +7,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {
         super(message);
+    }
+
+    public ResourceNotFoundException(String message, Exception e) {
+        super(message, e);
     }
 }

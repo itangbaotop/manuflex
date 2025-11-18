@@ -67,12 +67,6 @@
             <version>2.3.0</version>
         </dependency>
 
-        <!-- HttpClient for calling Metadata Service (如果需要直接调用，否则通过 Gateway) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId> <!-- 使用 WebFlux 的 HttpClient -->
-        </dependency>
-
         <dependency>
             <groupId>top.itangbao.platform.metadata</groupId>
             <artifactId>platform-metadata-api</artifactId>

@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize; // 引入 @PreAuthorize
 import org.springframework.web.bind.annotation.*;
-import top.itangbao.platform.metadata.dto.MetadataSchemaCreateRequest;
-import top.itangbao.platform.metadata.dto.MetadataSchemaDTO;
-import top.itangbao.platform.metadata.dto.MetadataSchemaUpdateRequest;
+import top.itangbao.platform.metadata.api.dto.MetadataSchemaCreateRequest;
+import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
+import top.itangbao.platform.metadata.api.dto.MetadataSchemaUpdateRequest;
 import top.itangbao.platform.metadata.service.MetadataSchemaService;
 
 import java.util.List;

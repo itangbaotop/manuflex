@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import top.itangbao.platform.common.exception.ResourceNotFoundException;
 import top.itangbao.platform.iam.domain.User;
 import top.itangbao.platform.iam.dto.*;
 import top.itangbao.platform.iam.service.UserService;
@@ -68,7 +69,7 @@ public class AuthController {
 
         // 从数据库查找持有该 Refresh Token 的用户
         User user = userService.findUserByRefreshToken(requestRefreshToken) // 需要在 UserService 中添加这个方法
-                .orElseThrow(() -> new top.itangbao.platform.iam.exception.ResourceNotFoundException("Invalid Refresh Token"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid Refresh Token"));
 
         // 验证 Refresh Token 是否与数据库中的匹配
         if (!user.getRefreshToken().equals(requestRefreshToken)) {

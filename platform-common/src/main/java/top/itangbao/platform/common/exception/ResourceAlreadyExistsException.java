@@ -1,4 +1,4 @@
-package top.itangbao.platform.metadata.exception;
+package top.itangbao.platform.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

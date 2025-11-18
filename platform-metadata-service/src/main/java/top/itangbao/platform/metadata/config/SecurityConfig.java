@@ -13,7 +13,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // 导入
-import top.itangbao.platform.metadata.security.GatewayAuthFilter; // 导入我们即将创建的过滤器
+import top.itangbao.platform.common.security.GatewayAuthFilter;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,8 +1,8 @@
 package top.itangbao.platform.metadata.service;
 
-import top.itangbao.platform.metadata.dto.MetadataSchemaCreateRequest;
-import top.itangbao.platform.metadata.dto.MetadataSchemaDTO;
-import top.itangbao.platform.metadata.dto.MetadataSchemaUpdateRequest;
+import top.itangbao.platform.metadata.api.dto.MetadataSchemaCreateRequest;
+import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
+import top.itangbao.platform.metadata.api.dto.MetadataSchemaUpdateRequest;
 
 import java.util.List;
 

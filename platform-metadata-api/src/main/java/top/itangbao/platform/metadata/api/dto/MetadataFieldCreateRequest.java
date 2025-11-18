@@ -1,4 +1,4 @@
-package top.itangbao.platform.metadata.dto;
+package top.itangbao.platform.metadata.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import top.itangbao.platform.metadata.enums.FieldType;
+import top.itangbao.platform.metadata.api.enums.FieldType;
 
 @Data
 @NoArgsConstructor
