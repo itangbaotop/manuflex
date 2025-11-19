@@ -26,7 +26,10 @@ camunda.bpm:
     password: admin
     firstName: Admin
     lastName: User
-  default-history-time-to-live: P30D # 设置默认历史数据存活时间为 30 天 (P30D 是 ISO 8601 Duration 格式)
+  generic-properties:
+    properties:
+      #设置默认历史数据保留 180 天 (推荐生产环境使用)
+      history-time-to-live: P180D
 
 logging:
   level:
