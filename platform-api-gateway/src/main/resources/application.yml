@@ -32,9 +32,7 @@ spring:
         - id: workflow-service
           uri: http://localhost:8085 # Workflow 服务的地址
           predicates:
-            - Path=/api/workflow/** # 匹配以 /api/workflow/ 开头的所有自定义 API 请求
-            - Path=/engine-rest/** # 路由 Camunda REST API
-            - Path=/camunda/** # 路由 Camunda Webapp UI
+            - Path=/api/workflow/**, /engine-rest/**, /camunda/**
 
 app:
   jwtSecret: xi5G429vyD9/rLxktYqsZU723o3V5OB65KWoU76ORtFqihOS3gSQSqEWfDzDdc1ThsPv9D2v0AdqvcdXg+2vqg==

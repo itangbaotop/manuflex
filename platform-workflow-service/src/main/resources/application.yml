@@ -12,26 +12,21 @@ spring:
 
 ## Camunda BPM 配置
 camunda.bpm:
-  # 启用 Camunda REST API
+  authorization:
+    enabled: false
   rest:
     enabled: true
-  # 启用 Camunda Webapp (Admin/Cockpit/Tasklist)
   webapp:
     enabled: true
-  # 数据库配置 (Camunda 会使用 Spring 的数据源配置)
   database:
     type: mysql
     schema-update: true # 首次启动时自动创建 Camunda 的表结构，生产环境请谨慎或设置为 false
-  # 禁用 Camunda Webapp 自己的 Spring Security 集成
-  # ⚠️ Camunda 7.15+ 默认禁用，但为了明确，可以显式配置
-  # webapp.security.enabled: false # 这个配置在 Camunda 7.15+ 已经移除，不需要了
-  generic-properties:
-    properties:
-      # 禁用 Camunda 内部的授权检查，我们通过 Spring Security 统一管理
-      authorization-enabled: false
-      # 允许匿名用户访问 Camunda REST API (如果不需要认证的话)，但我们通过 Gateway 和 Spring Security 控制
-      allow-anonymous-user: true # 如果设置为 false，则需要 Camunda 内部用户认证
-      # 更多 Camunda 配置可以在这里添加
+  admin-user:
+    id: admin
+    password: admin
+    firstName: Admin
+    lastName: User
+  default-history-time-to-live: P30D # 设置默认历史数据存活时间为 30 天 (P30D 是 ISO 8601 Duration 格式)
 
 logging:
   level:

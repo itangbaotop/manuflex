@@ -33,6 +33,7 @@ public class SecurityConfig {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/camunda/**", "/engine-rest/**").permitAll()
                         .pathMatchers("/api/iam/auth/register", "/api/iam/auth/login", "/api/iam/auth/refresh-token").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
@@ -56,7 +57,9 @@ public class SecurityConfig {
                             path.startsWith("/api/iam/auth/refresh-token") ||
                             path.startsWith("/actuator") ||
                             path.startsWith("/swagger-ui") ||
-                            path.startsWith("/v3/api-docs")) {
+                            path.startsWith("/v3/api-docs") ||
+                            path.startsWith("/camunda") ||
+                            path.startsWith("/engine-rest")) {
                         return Mono.empty();
                     }
                     return new PathPatternParserServerWebExchangeMatcher("/**").matches(exchange);
