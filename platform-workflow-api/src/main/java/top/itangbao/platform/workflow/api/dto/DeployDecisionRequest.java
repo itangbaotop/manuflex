@@ -1,4 +1,4 @@
-package top.itangbao.platform.workflow.dto;
+package top.itangbao.platform.workflow.api.dto; // 包名已修改
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DeployProcessRequest {
+public class DeployDecisionRequest {
     @NotBlank(message = "Deployment name cannot be empty")
     private String deploymentName;
 
-    private String bpmnXml; // BPMN 流程定义的 XML 内容
+    @NotBlank(message = "DMN XML content cannot be empty")
+    private String dmnXml; // DMN 决策定义的 XML 内容
 
-    @NotBlank(message = "tenantId content cannot be empty")
-    private String tenantId; // 部署到哪个租户下 (Camunda 7 支持租户隔离)
+    private String tenantId; // 部署到哪个租户下
 }

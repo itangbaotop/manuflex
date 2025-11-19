@@ -9,6 +9,14 @@ spring:
     username: manuflex_user
     password: manuflex_password
     driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # Camunda 会管理自己的表，这里禁用 Hibernate 自动 DDL
+    show-sql: false # Camunda 会打印很多 SQL，这里可以关闭
+    properties:
+      hibernate:
+        format_sql: false
+
 
 ## Camunda BPM 配置
 camunda.bpm:
@@ -30,6 +38,16 @@ camunda.bpm:
     properties:
       #设置默认历史数据保留 180 天 (推荐生产环境使用)
       history-time-to-live: P180D
+
+# Camunda 外部任务客户端配置 (新增)
+camunda.bpm.client:
+  base-url: http://localhost:8085/engine-rest # 外部任务客户端连接 Camunda 引擎 REST API 的地址
+  subscriptions:
+    sample-topic: # 对应 SampleExternalTaskWorker 中的 @ExternalTaskSubscription("sample-topic")
+      lock-duration: 10000 # 任务锁定时间 (毫秒)
+      auto-fetch-and-lock: true # 自动拉取和锁定任务
+      async-response-timeout: 5000 # 异步响应超时时间
+
 
 logging:
   level:

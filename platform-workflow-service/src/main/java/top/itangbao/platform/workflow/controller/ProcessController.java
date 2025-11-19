@@ -8,10 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import top.itangbao.platform.workflow.dto.DeployProcessRequest;
-import top.itangbao.platform.workflow.dto.DeployProcessResponse;
-import top.itangbao.platform.workflow.dto.ProcessInstanceResponse;
-import top.itangbao.platform.workflow.dto.StartProcessRequest;
+import top.itangbao.platform.workflow.api.dto.DeployProcessRequest;
+import top.itangbao.platform.workflow.api.dto.DeployProcessResponse;
+import top.itangbao.platform.workflow.api.dto.ProcessInstanceResponse;
+import top.itangbao.platform.workflow.api.dto.StartProcessRequest;
 import top.itangbao.platform.workflow.service.ProcessService;
 
 import java.io.IOException;

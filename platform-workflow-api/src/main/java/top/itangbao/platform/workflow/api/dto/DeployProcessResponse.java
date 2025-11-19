@@ -1,4 +1,4 @@
-package top.itangbao.platform.workflow.dto;
+package top.itangbao.platform.workflow.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

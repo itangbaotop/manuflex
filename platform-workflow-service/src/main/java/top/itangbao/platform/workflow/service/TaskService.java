@@ -1,12 +1,11 @@
 package top.itangbao.platform.workflow.service;
 
-import top.itangbao.platform.workflow.dto.ClaimTaskRequest;
-import top.itangbao.platform.workflow.dto.CompleteTaskRequest;
-import top.itangbao.platform.workflow.dto.ExternalTaskResponse;
-import top.itangbao.platform.workflow.dto.TaskResponse;
+import top.itangbao.platform.workflow.api.dto.ClaimTaskRequest;
+import top.itangbao.platform.workflow.api.dto.CompleteTaskRequest;
+import top.itangbao.platform.workflow.api.dto.ExternalTaskResponse;
+import top.itangbao.platform.workflow.api.dto.TaskResponse;
 
 import java.util.List;
-import java.util.Map;
 
 public interface TaskService {
     /**

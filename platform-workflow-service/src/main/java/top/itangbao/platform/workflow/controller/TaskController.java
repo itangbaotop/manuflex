@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import top.itangbao.platform.workflow.dto.ClaimTaskRequest;
-import top.itangbao.platform.workflow.dto.CompleteTaskRequest;
-import top.itangbao.platform.workflow.dto.ExternalTaskResponse;
-import top.itangbao.platform.workflow.dto.TaskResponse;
+import top.itangbao.platform.workflow.api.dto.ClaimTaskRequest;
+import top.itangbao.platform.workflow.api.dto.CompleteTaskRequest;
+import top.itangbao.platform.workflow.api.dto.ExternalTaskResponse;
+import top.itangbao.platform.workflow.api.dto.TaskResponse;
 import top.itangbao.platform.workflow.service.TaskService;
 
 import java.util.List;

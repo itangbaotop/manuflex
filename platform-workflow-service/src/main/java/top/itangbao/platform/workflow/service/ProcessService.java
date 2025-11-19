@@ -1,9 +1,9 @@
 package top.itangbao.platform.workflow.service;
 
-import top.itangbao.platform.workflow.dto.DeployProcessRequest;
-import top.itangbao.platform.workflow.dto.DeployProcessResponse;
-import top.itangbao.platform.workflow.dto.ProcessInstanceResponse;
-import top.itangbao.platform.workflow.dto.StartProcessRequest;
+import top.itangbao.platform.workflow.api.dto.DeployProcessRequest;
+import top.itangbao.platform.workflow.api.dto.DeployProcessResponse;
+import top.itangbao.platform.workflow.api.dto.ProcessInstanceResponse;
+import top.itangbao.platform.workflow.api.dto.StartProcessRequest;
 
 import java.util.List;
 import java.util.Map;

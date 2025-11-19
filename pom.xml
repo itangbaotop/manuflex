@@ -49,6 +49,7 @@
         <module>platform-lims-service</module>
         <module>platform-data-api</module>
         <module>platform-workflow-service</module>
+        <module>platform-workflow-api</module>
     </modules>
 
 

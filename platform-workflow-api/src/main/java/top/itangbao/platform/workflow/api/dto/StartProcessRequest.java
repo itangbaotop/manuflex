@@ -1,4 +1,4 @@
-package top.itangbao.platform.workflow.dto;
+package top.itangbao.platform.workflow.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
