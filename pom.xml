@@ -9,6 +9,35 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <name>ManuFlex PaaS</name>
+    <description>PaaS Platform for High-End Manufacturing</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Spring Boot and Spring Cloud Versions -->
+        <spring-boot.version>3.2.0</spring-boot.version>
+        <spring-cloud.version>2023.0.0</spring-cloud.version>
+
+        <!-- Database & Cache -->
+        <mysql.version>8.0.33</mysql.version>
+        <mysql-connector-j.version>8.2.0</mysql-connector-j.version> <!-- 统一 MySQL 连接器版本 -->
+        <redis.version>2.6.1</redis.version>
+
+        <!-- Kafka -->
+        <spring-kafka.version>3.1.0</spring-kafka.version>
+
+        <!-- Camunda -->
+        <camunda.bpm.version>7.21.0</camunda.bpm.version> <!-- 统一 Camunda 版本 -->
+
+        <!-- Other dependencies -->
+        <lombok.version>1.18.30</lombok.version>
+        <springdoc.version>2.3.0</springdoc.version>
+        <jjwt.version>0.11.5</jjwt.version>
+    </properties>
 
     <modules>
         <module>platform-api-gateway</module>
@@ -19,30 +48,9 @@
         <module>platform-metadata-api</module>
         <module>platform-lims-service</module>
         <module>platform-data-api</module>
+        <module>platform-workflow-service</module>
     </modules>
 
-    <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- Spring Boot and Spring Cloud Versions -->
-        <spring-boot.version>3.2.0</spring-boot.version> <!-- 推荐使用最新稳定版本 -->
-        <spring-cloud.version>2023.0.0</spring-cloud.version> <!-- 推荐使用最新稳定版本 -->
-
-        <!-- Database & Cache -->
-        <mysql.version>8.0.33</mysql.version>
-        <redis.version>2.6.1</redis.version> <!-- lettuce-core version, managed by Spring Boot -->
-
-        <!-- Kafka -->
-        <spring-kafka.version>3.1.0</spring-kafka.version>
-
-        <!-- Other dependencies -->
-        <lombok.version>1.18.30</lombok.version>
-
-        <springdoc.version>2.3.0</springdoc.version>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -69,12 +77,27 @@
                 <artifactId>platform-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>top.itangbao.platform</groupId>
+                <artifactId>platform-metadata-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.itangbao.platform</groupId>
+                <artifactId>platform-data-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- MySQL Connector -->
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysql-connector-j.version}</version>
             </dependency>
 
             <!-- Kafka -->
@@ -92,13 +115,47 @@
                 <scope>provided</scope>
             </dependency>
 
+            <!-- SpringDoc OpenAPI (Swagger UI) -->
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
-                <scope>provided</scope>
             </dependency>
 
+            <!-- JWT -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+
+            <!-- Camunda BPM Spring Boot Starter -->
+            <dependency>
+                <groupId>org.camunda.bpm.springboot</groupId>
+                <artifactId>camunda-bpm-spring-boot-starter-rest</artifactId>
+                <version>${camunda.bpm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.camunda.bpm.springboot</groupId>
+                <artifactId>camunda-bpm-spring-boot-starter-webapp</artifactId>
+                <version>${camunda.bpm.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.h2database</groupId>
+                        <artifactId>h2</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

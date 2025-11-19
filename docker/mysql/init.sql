@@ -41,3 +41,10 @@ INSERT IGNORE INTO `mf_roles` (`id`, `name`, `description`) VALUES
 (1, 'ADMIN', 'Administrator Role'),
 (2, 'TENANT_ADMIN', 'Tenant Administrator Role'),
 (3, 'USER', 'Standard User Role');
+
+
+
+-- 创建 Camunda 数据库
+CREATE DATABASE IF NOT EXISTS camunda_bpm CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+GRANT ALL PRIVILEGES ON camunda_bpm.* TO 'manuflex_user'@'%';
+FLUSH PRIVILEGES;
