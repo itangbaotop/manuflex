@@ -1,0 +1,55 @@
+server:
+  port: 8082 # 元数据服务的端口，与其他服务区分开
+
+spring:
+  application:
+    name: platform-metadata-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: manuflex_user
+    password: manuflex_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # 启动时自动更新数据库 schema，开发环境推荐，生产环境请谨慎使用或设为 none
+    show-sql: true # 在控制台打印 SQL 语句
+    properties:
+      hibernate:
+        format_sql: true # 格式化 SQL 语句
+
+app: # JWT 配置 (LIMS 也需要 JwtTokenProvider)
+  jwtSecret: xi5G429vyD9/rLxktYqsZU723o3V5OB65KWoU76ORtFqihOS3gSQSqEWfDzDdc1ThsPv9D2v0AdqvcdXg+2vqg==
+  jwtExpirationMs: 3600000
+  jwtRefreshExpirationMs: 604800000
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
+  info:
+    title: ManuFlex PaaS - Metadata Service API
+    description: Metadata Management Service APIs for ManuFlex PaaS.
+    version: 1.0.0
+    contact:
+      name: itangbao
+      email: itangbao@example.com
+    license:
+      name: Apache 2.0
+      url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    top.itangbao.platform.metadata: DEBUG # 调整为您服务的包名，方便调试
+    org.hibernate.SQL: DEBUG # 打印 Hibernate 生成的 SQL 语句
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE # 打印 SQL 参数
+    org.springframework.security: DEBUG # ⬅️ 新增或修改
+    org.springframework.security.web: DEBUG # ⬅️ 新增或修改
+    org.springframework.security.authentication: DEBUG

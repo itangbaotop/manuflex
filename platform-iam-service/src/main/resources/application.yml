@@ -1,69 +1,20 @@
-server:
-  port: 8081 # IAM 服务的端口，与其他服务区分开
-
 spring:
   application:
-    name: platform-iam-service
-  datasource:
-    url: jdbc:mysql://localhost:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-    username: manuflex_user
-    password: manuflex_password
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update # 启动时自动更新数据库 schema，开发环境推荐，生产环境请谨慎使用或设为 none
-    show-sql: true # 在控制台打印 SQL 语句
-    properties:
-      hibernate:
-        format_sql: true # 格式化 SQL 语句
-  data:
-    redis:
-      host: redis
-      port: 6379
-      database: 0
-      timeout: 5000ms
+    name: platform-iam-service # ⬅️ 应用名称，与 application.yml 中的一致
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # Nacos Server 地址 (Docker Compose 中 nacos 服务名)
+        namespace: # 命名空间ID (可选，如果使用默认命名空间可以留空)
+      config:
+        server-addr: localhost:8848 # Nacos Server 地址
+        file-extension: yml # 配置文件的扩展名
+        group: DEFAULT_GROUP # 配置组
+        namespace: # 命名空间ID (可选)
+        refresh-enabled: true # 启用动态刷新配置
 
-metadata:
-  service:
-    url: http://localhost:8082 # Metadata Service 的实际地址
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html # 自定义 Swagger UI 的访问路径，默认为 /swagger-ui/index.html
-    tags-sorter: alpha # 按字母顺序排序标签
-    operations-sorter: method # 按 HTTP 方法排序操作
-  api-docs:
-    path: /v3/api-docs # OpenAPI 3.0 JSON 文档的路径，默认为 /v3/api-docs
-  # 自定义 OpenAPI 文档信息
-  info:
-    title: ManuFlex PaaS - IAM Service API
-    description: Identity and Access Management (IAM) Service APIs for ManuFlex PaaS.
-    version: 1.0.0
-    contact:
-      name: itangbao
-      email: itangbao@example.com
-    license:
-      name: Apache 2.0
-      url: https://www.apache.org/licenses/LICENSE-2.0.html
-  # 配置 Spring Security 认证信息 (JWT) - 稍后集成 JWT 时会用到
-  # security:
-  #   oauth2:
-  #     authorization-url: /oauth2/authorization
-  #     token-url: /oauth2/token
-  #     flows:
-  #       password:
-  #         token-url: /oauth2/token
-
-#jwt配置
-app:
-  jwtSecret: xi5G429vyD9/rLxktYqsZU723o3V5OB65KWoU76ORtFqihOS3gSQSqEWfDzDdc1ThsPv9D2v0AdqvcdXg+2vqg==
-  jwtExpirationMs: 3600000 # Access Token 过期时间，例如 1 小时 (3600 * 1000 毫秒)
-  jwtRefreshExpirationMs: 604800000 # Refresh Token 过期时间，例如 7 天 (7 * 24 * 3600 * 1000 毫秒)
-
-logging:
-  level:
-    root: INFO
-    org.springframework.web: INFO
-    top.itangbao.platform.iam: DEBUG # 调整为您服务的包名，方便调试
-    org.hibernate.SQL: DEBUG # 打印 Hibernate 生成的 SQL 语句
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE # 打印 SQL 参数
+  config:
+    import:
+      # ⚠️ 关键修正：显式指定 DataId。默认 DataId 为 ${应用名}.yml
+      # 格式为: nacos:[dataId]?[group]&[refresh]
+      - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}

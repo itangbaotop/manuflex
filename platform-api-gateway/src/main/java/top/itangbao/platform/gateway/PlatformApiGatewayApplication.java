@@ -2,10 +2,12 @@ package top.itangbao.platform.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"top.itangbao.platform.gateway", "top.itangbao.platform.common"})
+@EnableDiscoveryClient
 public class PlatformApiGatewayApplication {
 
     public static void main(String[] args) {

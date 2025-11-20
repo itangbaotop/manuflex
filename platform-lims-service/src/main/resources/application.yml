@@ -1,59 +1,20 @@
-server:
-  port: 8084 # LIMS 服务的端口
-
 spring:
   application:
-    name: platform-lims-service
-  datasource:
-    url: jdbc:mysql://localhost:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-    username: manuflex_user
-    password: manuflex_password
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update # LIMS 可能有自己的实体，所以这里设置为 update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+    name: platform-lims-service # ⬅️ 应用名称，与 application.yml 中的一致
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # Nacos Server 地址 (Docker Compose 中 nacos 服务名)
+        namespace: # 命名空间ID (可选，如果使用默认命名空间可以留空)
+      config:
+        server-addr: localhost:8848 # Nacos Server 地址
+        file-extension: yml # 配置文件的扩展名
+        group: DEFAULT_GROUP # 配置组
+        namespace: # 命名空间ID (可选)
+        refresh-enabled: true # 启用动态刷新配置
 
-# 元数据服务的地址 (Feign 客户端使用)
-metadata:
-  service:
-    url: http://localhost:8082
-
-# 数据服务的地址 (Feign 客户端使用)
-data:
-  service:
-    url: http://localhost:8083
-
-logging:
-  level:
-    root: INFO
-    org.springframework.web: INFO
-    top.itangbao.platform.lims: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: method
-  api-docs:
-    path: /v3/api-docs
-  info:
-    title: ManuFlex PaaS - LIMS Service API
-    description: Laboratory Information Management System (LIMS) Service APIs for ManuFlex PaaS.
-    version: 1.0.0
-    contact:
-      name: itangbao
-      email: itangbao@example.com
-    license:
-      name: Apache 2.0
-      url: https://www.apache.org/licenses/LICENSE-2.0.html
-
-app: # JWT 配置 (LIMS 也需要 JwtTokenProvider)
-  jwtSecret: xi5G429vyD9/rLxktYqsZU723o3V5OB65KWoU76ORtFqihOS3gSQSqEWfDzDdc1ThsPv9D2v0AdqvcdXg+2vqg==
-  jwtExpirationMs: 3600000
-  jwtRefreshExpirationMs: 604800000
+  config:
+    import:
+      # ⚠️ 关键修正：显式指定 DataId。默认 DataId 为 ${应用名}.yml
+      # 格式为: nacos:[dataId]?[group]&[refresh]
+      - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
