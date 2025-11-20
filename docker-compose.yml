@@ -150,9 +150,25 @@ services:
     networks:
       - manuflex-network
     depends_on:
-      - nacos
+      nacos:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8091/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: manuflex-zipkin
+    environment:
+      - STORAGE_TYPE=mem # 开发环境存内存，重启丢失。生产建议用 elasticsearch
+    ports:
+      - "9411:9411"
+    networks:
+      - manuflex-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9411/health" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -163,6 +179,7 @@ volumes:
   nacos_data:
   sentinel_dashboard_data:
   seata_server_data:
+  zipkin_data:
 
 networks:
   manuflex-network:

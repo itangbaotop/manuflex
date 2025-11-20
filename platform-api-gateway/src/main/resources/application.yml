@@ -32,3 +32,16 @@ spring:
       # ⚠️ 关键修正：显式指定 DataId。默认 DataId 为 ${应用名}.yml
       # 格式为: nacos:[dataId]?[group]&[refresh]
       - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
+
+# =================================================
+# 👇 Zipkin 与 Tracing 核心配置
+# =================================================
+management:
+  tracing:
+    sampling:
+      probability: 1.0 # 采样率：1.0 = 100% 采集（开发环境）；生产环境建议 0.1
+  zipkin:
+    tracing:
+      # Zipkin 服务器地址
+      # 如果 Zipkin 跑在 Docker 且映射了端口，本地开发写 localhost:9411
+      endpoint: http://localhost:9411/api/v2/spans

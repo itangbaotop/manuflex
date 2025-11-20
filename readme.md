@@ -1,5 +1,7 @@
 细化权限 
-seata
+继续集成 zipkin， plumusus grafna
+
+哪些配置放到nacos，那些配置必须在application
 
 
 当前进度概览
