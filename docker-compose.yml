@@ -66,9 +66,34 @@ services:
     networks:
       - manuflex-network
 
+  nacos:
+    image: nacos/nacos-server:v2.5.2 # ⬅️ 使用 Nacos Server 镜像，请选择一个稳定版本
+    container_name: manuflex-nacos
+    environment:
+      # 单机模式启动
+      MODE: standalone
+      # 数据库配置 (Nacos 默认使用嵌入式 Derby，生产环境推荐外部 MySQL)
+      # 如果希望使用外部 MySQL，需要配置 NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_EXPIRE_SECONDS, NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_HEADER, NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_SECRET_KEY, NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_VALIDATE_INTERVAL_SECONDS
+      # 并添加 MYSQL_MASTER_SERVICE_DB_URL, MYSQL_MASTER_SERVICE_DB_USER, MYSQL_MASTER_SERVICE_DB_PASSWORD
+    ports:
+      - "8848:8848" # Nacos 控制台和 API 端口
+      - "9848:9848" # Nacos gRPC 端口
+      - "9849:9849" # Nacos gRPC 端口 (可选)
+    volumes:
+      - nacos_data:/home/nacos/data # Nacos 数据持久化
+      - ./docker/nacos/logs:/home/nacos/logs # Nacos 日志持久化
+    networks:
+      - manuflex-network
+    healthcheck: # 健康检查
+      test: [ "CMD", "curl", "-f", "http://localhost:8848/nacos/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   mysql_data:
   redis_data:
+  nacos_data:
 
 networks:
   manuflex-network:

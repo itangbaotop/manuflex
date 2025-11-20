@@ -2,6 +2,7 @@ package top.itangbao.platform.gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ReactiveAuthenticationManager; // 导入 ReactiveAuthenticationManager
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -37,6 +38,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/iam/auth/register", "/api/iam/auth/login", "/api/iam/auth/refresh-token").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtAuthenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION);
@@ -52,6 +54,13 @@ public class SecurityConfig {
         authenticationWebFilter.setRequiresAuthenticationMatcher(
                 exchange -> {
                     String path = exchange.getRequest().getPath().value();
+                    HttpMethod method = exchange.getRequest().getMethod(); // ⬅️ 获取请求方法
+
+                    // 允许 OPTIONS 请求通过，不需要 JWT 验证
+                    if (HttpMethod.OPTIONS.equals(method)) {
+                        return Mono.empty();
+                    }
+
                     if (path.startsWith("/api/iam/auth/register") ||
                             path.startsWith("/api/iam/auth/login") ||
                             path.startsWith("/api/iam/auth/refresh-token") ||

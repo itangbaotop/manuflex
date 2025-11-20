@@ -26,6 +26,12 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String username = request.getHeader("X-Auth-User");
         String rolesHeader = request.getHeader("X-Auth-Roles");
         String originalJwt = request.getHeader("X-Original-JWT");
