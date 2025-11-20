@@ -1,5 +1,6 @@
 package top.itangbao.platform.iam.service.impl;
 
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,6 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @GlobalTransactional
     public UserDTO registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new UserAlreadyExistsException("User with username " + request.getUsername() + " already exists.");

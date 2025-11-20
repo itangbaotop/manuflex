@@ -110,12 +110,59 @@ services:
       timeout: 5s
       retries: 5
 
+  seata-server:
+    image: seataio/seata-server:1.8.0.1
+    container_name: manuflex-seata-server
+    environment:
+      # -------------------------------------------
+      # 1. 基础配置
+      # -------------------------------------------
+      SERVER_PORT: 8091
+      # 存储模式 (file/db/redis) - 注意：这是指 Seata 自身的 Session 存储
+      STORE_MODE: file
+
+      # -------------------------------------------
+      # 2. 配置中心 (Config) - 读取 Seata 运行规则
+      # -------------------------------------------
+      SEATA_CONFIG_NAME: file:/root/seata-config/registry
+      SEATA_CONFIG_TYPE: nacos
+      # ⚠️ 关键修正：变量名必须是 SEATA_CONFIG_NACOS_...
+      SEATA_CONFIG_NACOS_SERVER_ADDR: nacos:8848
+      SEATA_CONFIG_NACOS_GROUP: SEATA_GROUP
+      SEATA_CONFIG_NACOS_NAMESPACE: "" # 默认为空（即 public），不要填 "public" 字符串
+      # 如果 Nacos 有账号密码
+      SEATA_CONFIG_NACOS_USERNAME: nacos
+      SEATA_CONFIG_NACOS_PASSWORD: nacos
+
+      # -------------------------------------------
+      # 3. 注册中心 (Registry) - 告诉别人我在哪
+      # -------------------------------------------
+      SEATA_REGISTRY_TYPE: nacos
+      # ⚠️ 关键修正：变量名必须是 SEATA_REGISTRY_NACOS_...
+      SEATA_REGISTRY_NACOS_SERVER_ADDR: nacos:8848
+      SEATA_REGISTRY_NACOS_GROUP: SEATA_GROUP
+      SEATA_REGISTRY_NACOS_NAMESPACE: ""
+      SEATA_REGISTRY_NACOS_USERNAME: nacos
+      SEATA_REGISTRY_NACOS_PASSWORD: nacos
+
+    ports:
+      - "8091:8091"
+    networks:
+      - manuflex-network
+    depends_on:
+      - nacos
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8091/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mysql_data:
   redis_data:
   nacos_data:
   sentinel_dashboard_data:
+  seata_server_data:
 
 networks:
   manuflex-network:

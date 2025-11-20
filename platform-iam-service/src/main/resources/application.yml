@@ -1,6 +1,6 @@
 spring:
   application:
-    name: platform-iam-service # ⬅️ 应用名称，与 application.yml 中的一致
+    name: platform-iam-service # 应用名称，与 application.yml 中的一致
   cloud:
     nacos:
       discovery:
@@ -12,11 +12,11 @@ spring:
         group: DEFAULT_GROUP # 配置组
         namespace: # 命名空间ID (可选)
         refresh-enabled: true # 启用动态刷新配置
-    sentinel: # ⬅️ 新增 Sentinel 配置
+    sentinel: #  Sentinel 配置
       transport:
         dashboard: localhost:8858 # Sentinel 控制台地址 (通常是独立部署的 Sentinel Dashboard)
         port: 8719 # Sentinel 客户端暴露的端口，用于和 Dashboard 通信
-      datasource: # ⬅️ 配置 Sentinel 规则持久化到 Nacos (可选，但推荐)
+      datasource: # 配置 Sentinel 规则持久化到 Nacos (可选，但推荐)
         flow:
           nacos:
             server-addr: localhost:8848
@@ -30,3 +30,39 @@ spring:
       # ⚠️ 关键修正：显式指定 DataId。默认 DataId 为 ${应用名}.yml
       # 格式为: nacos:[dataId]?[group]&[refresh]
       - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
+
+seata:
+  # 客户端行为配置
+  client:
+    rm:
+      async-commit-buffer-limit: 10000
+      lock:
+        retry-interval: 10
+        retry-times: 30
+      report:
+        success: false
+        fail: true
+      rpc-request-timeout: 30000
+    tm:
+      commit-retry-count: 5
+      rollback-retry-count: 5
+      rpc-request-timeout: 30000
+
+  # 配置中心：读取 seata-client.properties
+  config:
+    type: nacos
+    nacos:
+      server-addr: localhost:8848 # ⬅️ 【修正点3】统一使用 localhost，不要用 nacos
+      group: SEATA_GROUP
+      namespace: "" # ⬅️ 【修正点4】必须留空，不要写 public
+      data-id: seata-client.properties
+
+  # 👇 【重要遗漏】：您必须配置注册中心，否则 Client 找不到 Server
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server # Seata Server 的服务名
+      server-addr: localhost:8848
+      group: SEATA_GROUP # 必须与 Seata Server 端的 Group 一致
+      namespace: ""
+  tx-service-group: manuflex_tx_group
