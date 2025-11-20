@@ -140,6 +140,18 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
             <version>${spring-cloud-alibaba.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+            <version>${spring-cloud-alibaba.version}</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>sentinel-datasource-nacos</artifactId>
+            <groupId>com.alibaba.csp</groupId>
+            <version>${sentinel.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

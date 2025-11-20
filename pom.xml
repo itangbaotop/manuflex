@@ -40,6 +40,7 @@
 
 
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
+        <sentinel.version>1.8.7</sentinel.version>
     </properties>
 
     <modules>

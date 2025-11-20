@@ -1,5 +1,5 @@
-细化权限
-集成nacos  sentinel  seata
+细化权限 
+seata
 
 
 当前进度概览
