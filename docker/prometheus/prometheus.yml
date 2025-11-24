@@ -1,0 +1,44 @@
+global:
+  scrape_interval: 15s # 默认抓取间隔
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090'] # Prometheus 自身
+
+  - job_name: 'nacos'
+    static_configs:
+      - targets: ['nacos:8848'] # Nacos Server
+
+  - job_name: 'sentinel-dashboard'
+    static_configs:
+      - targets: ['sentinel-dashboard:8080'] # Sentinel Dashboard
+
+  - job_name: 'seata-server'
+    static_configs:
+      - targets: ['seata-server:8091'] # Seata Server
+
+  - job_name: 'zipkin'
+    static_configs:
+      - targets: ['zipkin:9411'] # Zipkin Server
+
+#  # ⬅️ 抓取所有微服务的指标
+#  - job_name: 'manuflex-services'
+#    metrics_path: '/actuator/prometheus' # Spring Boot Actuator 暴露 Prometheus 指标的路径
+#    static_configs:
+#      - targets: ['platform-iam-service:8081']
+#      - targets: ['platform-metadata-service:8082']
+#      - targets: ['platform-data-service:8083']
+#      - targets: ['platform-lims-service:8084']
+#      - targets: ['platform-workflow-service:8085']
+#      - targets: ['platform-api-gateway:8080'] # Gateway 的端口是 8080
+
+  - job_name: 'manuflex-java-services'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'host.docker.internal:8081' ] # IAM Service
+      - targets: [ 'host.docker.internal:8082' ] # Metadata Service
+      - targets: [ 'host.docker.internal:8083' ] # Data Service
+      - targets: [ 'host.docker.internal:8084' ] # LIMS Service
+      - targets: [ 'host.docker.internal:8085' ] # Workflow Service
+      - targets: [ 'host.docker.internal:8080' ] # API Gateway

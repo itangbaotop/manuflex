@@ -173,6 +173,52 @@ services:
       timeout: 5s
       retries: 5
 
+  prometheus:
+    image: prom/prometheus:v3.7.0
+    container_name: manuflex-prometheus
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml # ⬅️ Prometheus 配置
+      - prometheus_data:/prometheus # Prometheus 数据持久化
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090" # Prometheus UI 端口
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - manuflex-network
+    depends_on:
+      - nacos # Prometheus 可以从 Nacos 发现微服务，但这里我们通过静态配置
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9090/-/ready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana:12.1 # ⬅️ 使用 Grafana 镜像，请选择一个稳定版本
+    container_name: manuflex-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana # Grafana 数据持久化
+      - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources # ⬅️ Grafana 配置
+    environment:
+      GF_SECURITY_ADMIN_USER: admin # Grafana 默认管理员用户名
+      GF_SECURITY_ADMIN_PASSWORD: admin # Grafana 默认管理员密码
+    ports:
+      - "3001:3000" # ⬅️ Grafana UI 端口，注意不要与前端应用端口冲突
+    networks:
+      - manuflex-network
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   mysql_data:
   redis_data:
@@ -180,6 +226,8 @@ volumes:
   sentinel_dashboard_data:
   seata_server_data:
   zipkin_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   manuflex-network:
