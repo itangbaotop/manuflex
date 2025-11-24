@@ -71,7 +71,9 @@ services:
     container_name: manuflex-nacos
     environment:
       # 单机模式启动
-      MODE: standalone
+      - MODE=standalone
+        # 👇 新增：强制暴露 Prometheus 和 Health 端点
+      - "JAVA_TOOL_OPTIONS=-Dmanagement.endpoints.web.exposure.include=*"
       # 数据库配置 (Nacos 默认使用嵌入式 Derby，生产环境推荐外部 MySQL)
       # 如果希望使用外部 MySQL，需要配置 NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_EXPIRE_SECONDS, NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_HEADER, NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_SECRET_KEY, NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_VALIDATE_INTERVAL_SECONDS
       # 并添加 MYSQL_MASTER_SERVICE_DB_URL, MYSQL_MASTER_SERVICE_DB_USER, MYSQL_MASTER_SERVICE_DB_PASSWORD
@@ -144,6 +146,7 @@ services:
       SEATA_REGISTRY_NACOS_NAMESPACE: ""
       SEATA_REGISTRY_NACOS_USERNAME: nacos
       SEATA_REGISTRY_NACOS_PASSWORD: nacos
+      SEATA_METRICS_ENABLED: "true"
 
     ports:
       - "8091:8091"
@@ -186,8 +189,6 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     ports:
       - "9090:9090" # Prometheus UI 端口
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       - manuflex-network
     depends_on:

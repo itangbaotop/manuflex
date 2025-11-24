@@ -7,20 +7,23 @@ scrape_configs:
       - targets: ['localhost:9090'] # Prometheus 自身
 
   - job_name: 'nacos'
+    metrics_path: '/nacos/actuator/prometheus'
     static_configs:
-      - targets: ['nacos:8848'] # Nacos Server
+      - targets: [ 'nacos:8848' ]
 
   - job_name: 'sentinel-dashboard'
     static_configs:
-      - targets: ['sentinel-dashboard:8080'] # Sentinel Dashboard
+      - targets: [ 'sentinel-dashboard:8858' ]
 
   - job_name: 'seata-server'
+    metrics_path: '/prometheus'
     static_configs:
-      - targets: ['seata-server:8091'] # Seata Server
+      - targets: [ 'seata-server:8091' ]
 
   - job_name: 'zipkin'
+    metrics_path: '/actuator/prometheus' # Zipkin 也是 Spring Boot 应用
     static_configs:
-      - targets: ['zipkin:9411'] # Zipkin Server
+      - targets: [ 'zipkin:9411' ]
 
 #  # ⬅️ 抓取所有微服务的指标
 #  - job_name: 'manuflex-services'
@@ -36,9 +39,9 @@ scrape_configs:
   - job_name: 'manuflex-java-services'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'host.docker.internal:8081' ] # IAM Service
-      - targets: [ 'host.docker.internal:8082' ] # Metadata Service
-      - targets: [ 'host.docker.internal:8083' ] # Data Service
-      - targets: [ 'host.docker.internal:8084' ] # LIMS Service
-      - targets: [ 'host.docker.internal:8085' ] # Workflow Service
-      - targets: [ 'host.docker.internal:8080' ] # API Gateway
+      - targets: [ '192.168.1.52:8081' ] # IAM Service
+      - targets: [ '192.168.1.52:8082' ] # Metadata Service
+      - targets: [ '192.168.1.52:8083' ] # Data Service
+      - targets: [ '192.168.1.52:8084' ] # LIMS Service
+      - targets: [ '192.168.1.52:8085' ] # Workflow Service
+      - targets: [ '192.168.1.52:8080' ] # API Gateway
