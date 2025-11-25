@@ -79,7 +79,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
                 .claim("roles", String.join(",", roles)) // 角色仍然以逗号分隔字符串存储
-                .claim("permissions", permissions) // ⬅️ 权限以 List<String> 存储
+                .claim("permissions", permissions) //  权限以 List<String> 存储
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS512)

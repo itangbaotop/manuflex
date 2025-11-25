@@ -54,7 +54,7 @@ public class SecurityConfig {
         authenticationWebFilter.setRequiresAuthenticationMatcher(
                 exchange -> {
                     String path = exchange.getRequest().getPath().value();
-                    HttpMethod method = exchange.getRequest().getMethod(); // ⬅️ 获取请求方法
+                    HttpMethod method = exchange.getRequest().getMethod(); //  获取请求方法
 
                     // 允许 OPTIONS 请求通过，不需要 JWT 验证
                     if (HttpMethod.OPTIONS.equals(method)) {

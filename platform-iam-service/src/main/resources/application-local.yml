@@ -94,7 +94,7 @@ seata:
   config:
     type: nacos
     nacos:
-      server-addr: localhost:8848 # ⬅️ 【修正点3】统一使用 localhost，不要用 nacos
+      server-addr: localhost:8848 #  【修正点3】统一使用 localhost，不要用 nacos
       group: SEATA_GROUP
       namespace:
       data-id: seata-client.properties

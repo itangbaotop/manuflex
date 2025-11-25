@@ -53,8 +53,8 @@ logging:
     top.itangbao.platform.metadata: DEBUG # 调整为您服务的包名，方便调试
     org.hibernate.SQL: DEBUG # 打印 Hibernate 生成的 SQL 语句
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE # 打印 SQL 参数
-    org.springframework.security: DEBUG # ⬅️ 新增或修改
-    org.springframework.security.web: DEBUG # ⬅️ 新增或修改
+    org.springframework.security: DEBUG #  新增或修改
+    org.springframework.security.web: DEBUG #  新增或修改
     org.springframework.security.authentication: DEBUG
 
 management:

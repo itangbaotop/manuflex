@@ -33,7 +33,7 @@ public class PlatformIamServiceApplication {
         return dataSource;
     }
 
-    // ⬅️ 定义事务管理器
+    //  定义事务管理器
     @Bean
     public PlatformTransactionManager transactionManager(DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);

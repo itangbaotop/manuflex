@@ -16,6 +16,14 @@ spring:
     properties:
       hibernate:
         format_sql: false
+  kafka: #  新增 Kafka 配置
+    bootstrap-servers: kafka:9093 #  Kafka Broker 地址 (Docker Compose 服务名)
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # 使用 JsonSerializer
+      properties:
+        spring.json.add.type.headers: false # 禁用类型头，让消费者更灵活
+        spring.json.trusted.packages: "*"
 
 
 ## Camunda BPM 配置
@@ -98,3 +106,7 @@ management:
   observations:
     key-values:
       application: ${spring.application.name}
+
+workflow.events:
+  process-topic: workflow-process-events # 流程事件 Topic
+  task-topic: workflow-task-events # 任务事件 Topic

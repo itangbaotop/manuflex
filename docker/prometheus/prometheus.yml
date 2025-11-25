@@ -25,7 +25,7 @@ scrape_configs:
     static_configs:
       - targets: [ 'zipkin:9411' ]
 
-#  # ⬅️ 抓取所有微服务的指标
+#  #  抓取所有微服务的指标
 #  - job_name: 'manuflex-services'
 #    metrics_path: '/actuator/prometheus' # Spring Boot Actuator 暴露 Prometheus 指标的路径
 #    static_configs:

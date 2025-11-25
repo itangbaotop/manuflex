@@ -67,7 +67,7 @@ services:
       - manuflex-network
 
   nacos:
-    image: nacos/nacos-server:v2.5.2 # ⬅️ 使用 Nacos Server 镜像，请选择一个稳定版本
+    image: nacos/nacos-server:v2.5.2 #  使用 Nacos Server 镜像，请选择一个稳定版本
     container_name: manuflex-nacos
     environment:
       # 单机模式启动
@@ -93,7 +93,7 @@ services:
       retries: 5
 
   sentinel-dashboard:
-    image: bladex/sentinel-dashboard:1.8.7 # ⬅️ 使用 Sentinel Dashboard 镜像，请选择一个稳定版本
+    image: bladex/sentinel-dashboard:1.8.7 #  使用 Sentinel Dashboard 镜像，请选择一个稳定版本
     container_name: manuflex-sentinel-dashboard
     environment:
       # Sentinel Dashboard 端口
@@ -101,7 +101,7 @@ services:
       # JVM 启动参数 (可选)
       # JAVA_OPTS: -Dserver.port=8080 -Dcsp.sentinel.dashboard.server=localhost:8080 -Dproject.name=sentinel-dashboard
     ports:
-      - "8858:8858" # ⬅️ 映射 Sentinel Dashboard 端口，注意不要与 Gateway 端口冲突
+      - "8858:8858" #  映射 Sentinel Dashboard 端口，注意不要与 Gateway 端口冲突
     networks:
       - manuflex-network
     depends_on:
@@ -113,7 +113,7 @@ services:
       retries: 5
 
   seata-server:
-    image: seataio/seata-server:2.0.0.jre17 # ⬅️ 指定您要求的 JRE 17 版本镜像
+    image: seataio/seata-server:2.0.0.jre17 #  指定您要求的 JRE 17 版本镜像
     container_name: manuflex-seata-server
     hostname: seata-server
     environment:
@@ -191,7 +191,7 @@ services:
     image: prom/prometheus:v3.7.0
     container_name: manuflex-prometheus
     volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml # ⬅️ Prometheus 配置
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml #  Prometheus 配置
       - prometheus_data:/prometheus # Prometheus 数据持久化
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -211,16 +211,16 @@ services:
       retries: 5
 
   grafana:
-    image: grafana/grafana:12.1 # ⬅️ 使用 Grafana 镜像，请选择一个稳定版本
+    image: grafana/grafana:12.1 #  使用 Grafana 镜像，请选择一个稳定版本
     container_name: manuflex-grafana
     volumes:
       - grafana_data:/var/lib/grafana # Grafana 数据持久化
-      - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources # ⬅️ Grafana 配置
+      - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources #  Grafana 配置
     environment:
       GF_SECURITY_ADMIN_USER: admin # Grafana 默认管理员用户名
       GF_SECURITY_ADMIN_PASSWORD: admin # Grafana 默认管理员密码
     ports:
-      - "3001:3000" # ⬅️ Grafana UI 端口，注意不要与前端应用端口冲突
+      - "3001:3000" #  Grafana UI 端口，注意不要与前端应用端口冲突
     networks:
       - manuflex-network
     depends_on:
@@ -232,13 +232,13 @@ services:
       retries: 5
 
   loki:
-    image: grafana/loki:2.9.2 # ⬅️ 使用 Loki 镜像，请选择一个稳定版本
+    image: grafana/loki:2.9.2 #  使用 Loki 镜像，请选择一个稳定版本
     container_name: manuflex-loki
     ports:
       - "3100:3100" # Loki API 端口
-    command: -config.file=/etc/loki/local-config.yaml # ⬅️ 指定 Loki 配置文件
+    command: -config.file=/etc/loki/local-config.yaml #  指定 Loki 配置文件
     volumes:
-      - ./docker/loki/local-config.yaml:/etc/loki/local-config.yaml # ⬅️ Loki 配置文件
+      - ./docker/loki/local-config.yaml:/etc/loki/local-config.yaml #  Loki 配置文件
       - loki_data:/loki # Loki 数据持久化
     networks:
       - manuflex-network
@@ -250,12 +250,12 @@ services:
 
     # Promtail Log Collector (新增)
   promtail:
-    image: grafana/promtail:2.9.2 # ⬅️ 使用 Promtail 镜像，与 Loki 版本一致
+    image: grafana/promtail:2.9.2 #  使用 Promtail 镜像，与 Loki 版本一致
     container_name: manuflex-promtail
     volumes:
-      - ./docker/promtail/config.yaml:/etc/promtail/config.yaml # ⬅️ Promtail 配置文件
-      - /var/log:/var/log # ⬅️ 映射主机的 /var/log 目录 (或您微服务日志所在的目录)
-      # ⬅️ 关键：映射 Java 微服务日志所在的目录
+      - ./docker/promtail/config.yaml:/etc/promtail/config.yaml #  Promtail 配置文件
+      - /var/log:/var/log #  映射主机的 /var/log 目录 (或您微服务日志所在的目录)
+      #  关键：映射 Java 微服务日志所在的目录
       - ./logs/iam:/app/logs/iam:ro # 假设 IAM 服务日志在 ./logs/iam
       - ./logs/metadata:/app/logs/metadata:ro
       - ./logs/data:/app/logs/data:ro

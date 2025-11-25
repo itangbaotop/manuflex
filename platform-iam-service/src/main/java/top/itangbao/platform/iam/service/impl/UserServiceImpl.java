@@ -216,7 +216,7 @@ public class UserServiceImpl implements UserService {
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
-                .permissions(allPermissions) // ⬅️ 填充权限列表
+                .permissions(allPermissions) //  填充权限列表
                 .build();
     }
 }

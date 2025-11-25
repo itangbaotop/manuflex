@@ -1,6 +1,6 @@
 spring:
   application:
-    name: platform-lims-service # ⬅️ 应用名称，与 application.yml 中的一致
+    name: platform-lims-service #  应用名称，与 application.yml 中的一致
   cloud:
     nacos:
       discovery:
@@ -13,11 +13,11 @@ spring:
         namespace: # 命名空间ID (可选)
         refresh-enabled: true # 启用动态刷新配置
 
-    sentinel: # ⬅️ 新增 Sentinel 配置
+    sentinel: #  新增 Sentinel 配置
       transport:
         dashboard: localhost:8858 # Sentinel 控制台地址 (通常是独立部署的 Sentinel Dashboard)
         port: 8719 # Sentinel 客户端暴露的端口，用于和 Dashboard 通信
-      datasource: # ⬅️ 配置 Sentinel 规则持久化到 Nacos (可选，但推荐)
+      datasource: #  配置 Sentinel 规则持久化到 Nacos (可选，但推荐)
         flow:
           nacos:
             server-addr: localhost:8848

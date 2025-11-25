@@ -17,7 +17,7 @@ public class CorsConfig {
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.setAllowedOrigins(List.of("http://localhost:3000"));
         // 确保允许 OPTIONS 方法
-        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")); // ⬅️ 确保 OPTIONS 也在其中
+        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")); //  确保 OPTIONS 也在其中
         // 确保允许所有可能由前端发送的请求头
         corsConfig.setAllowedHeaders(Arrays.asList(
                 "Authorization",
@@ -30,7 +30,7 @@ public class CorsConfig {
                 "Origin",
                 "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"
-        )); // ⬅️ 完善允许的请求头
+        )); //  完善允许的请求头
         corsConfig.setAllowCredentials(true);
         corsConfig.setMaxAge(3600L);
 
