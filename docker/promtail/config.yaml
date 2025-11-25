@@ -1,0 +1,29 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # 1. 抓取 Docker 容器日志
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker-logs
+          __path__: /var/log/containers/*log
+
+  # 2. 抓取 Java 微服务日志 (根据您之前的映射)
+  - job_name: manuflex-services
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: manuflex-services
+          # 这里可以使用通配符匹配所有服务的日志
+          __path__: /app/logs/**/*.log

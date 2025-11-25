@@ -55,6 +55,9 @@ management:
       application: ${spring.application.name}
 
 logging:
+  file:
+    # ⬅️ 确保这是 Promtail 映射的主机路径
+    name: ./logs/gateway/application.log
   level:
     root: INFO
     org.springframework.cloud.gateway: DEBUG # 开启 Gateway 的调试日志

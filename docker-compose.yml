@@ -231,6 +231,49 @@ services:
       timeout: 5s
       retries: 5
 
+  loki:
+    image: grafana/loki:2.9.2 # ⬅️ 使用 Loki 镜像，请选择一个稳定版本
+    container_name: manuflex-loki
+    ports:
+      - "3100:3100" # Loki API 端口
+    command: -config.file=/etc/loki/local-config.yaml # ⬅️ 指定 Loki 配置文件
+    volumes:
+      - ./docker/loki/local-config.yaml:/etc/loki/local-config.yaml # ⬅️ Loki 配置文件
+      - loki_data:/loki # Loki 数据持久化
+    networks:
+      - manuflex-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3100/ready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    # Promtail Log Collector (新增)
+  promtail:
+    image: grafana/promtail:2.9.2 # ⬅️ 使用 Promtail 镜像，与 Loki 版本一致
+    container_name: manuflex-promtail
+    volumes:
+      - ./docker/promtail/config.yaml:/etc/promtail/config.yaml # ⬅️ Promtail 配置文件
+      - /var/log:/var/log # ⬅️ 映射主机的 /var/log 目录 (或您微服务日志所在的目录)
+      # ⬅️ 关键：映射 Java 微服务日志所在的目录
+      - ./logs/iam:/app/logs/iam:ro # 假设 IAM 服务日志在 ./logs/iam
+      - ./logs/metadata:/app/logs/metadata:ro
+      - ./logs/data:/app/logs/data:ro
+      - ./logs/lims:/app/logs/lims:ro
+      - ./logs/workflow:/app/logs/workflow:ro
+      - ./logs/gateway:/app/logs/gateway:ro
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - manuflex-network
+    depends_on:
+      - loki
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9080/ready" ] # Promtail 默认监听 9080 端口
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
 volumes:
   mysql_data:
   redis_data:
@@ -240,6 +283,7 @@ volumes:
   zipkin_data:
   prometheus_data:
   grafana_data:
+  loki_data:
 
 networks:
   manuflex-network:

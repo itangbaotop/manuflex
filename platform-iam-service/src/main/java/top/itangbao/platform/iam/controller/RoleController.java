@@ -30,7 +30,7 @@ public class RoleController {
      * @return 角色列表
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('role:read') or hasRole('ADMIN')") // TODO: 细化权限
+    @PreAuthorize("hasAuthority('role:read') or hasRole('ADMIN')")
     public ResponseEntity<List<Role>> getAllRoles() {
         List<Role> roles = roleService.getAllRoles();
         return ResponseEntity.ok(roles);
@@ -43,7 +43,7 @@ public class RoleController {
      * @return 更新后的角色信息
      */
     @PutMapping("/{roleId}/permissions")
-    @PreAuthorize("hasAuthority('role:assign_permission') or hasRole('ADMIN')") // TODO: 细化权限
+    @PreAuthorize("hasAuthority('role:assign_permission') or hasRole('ADMIN')")
     public ResponseEntity<Role> assignPermissionsToRole(@PathVariable Long roleId, @Valid @RequestBody RolePermissionUpdateRequest request) {
         // 确保请求中的 roleId 与路径变量一致
         if (!roleId.equals(request.getRoleId())) {
