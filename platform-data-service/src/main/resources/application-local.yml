@@ -28,6 +28,9 @@ app:
 
 
 logging:
+  file:
+    # 确保这是 Promtail 映射的主机路径
+    name: ./logs/iam/application.log
   level:
     root: INFO
     org.springframework.web: INFO
