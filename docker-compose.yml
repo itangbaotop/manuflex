@@ -113,50 +113,61 @@ services:
       retries: 5
 
   seata-server:
-    image: seataio/seata-server:1.8.0.1
+    image: seataio/seata-server:2.0.0.jre17 # ⬅️ 指定您要求的 JRE 17 版本镜像
     container_name: manuflex-seata-server
+    hostname: seata-server
     environment:
-      # -------------------------------------------
-      # 1. 基础配置
-      # -------------------------------------------
-      SERVER_PORT: 8091
-      # 存储模式 (file/db/redis) - 注意：这是指 Seata 自身的 Session 存储
-      STORE_MODE: file
+      # ---------------------------------------------------------
+      # 1. 网络核心配置 (解决 Windows + WSL 2 连接问题)
+      # ---------------------------------------------------------
+      - SEATA_IP=192.168.1.52 # 强制注册 IP 为 127.0.0.1 (利用 WSL 自动转发)
+      - SEATA_PORT=8091           # 强制注册 RPC 端口
 
-      # -------------------------------------------
-      # 2. 配置中心 (Config) - 读取 Seata 运行规则
-      # -------------------------------------------
-      SEATA_CONFIG_NAME: file:/root/seata-config/registry
-      SEATA_CONFIG_TYPE: nacos
-      # ⚠️ 关键修正：变量名必须是 SEATA_CONFIG_NACOS_...
-      SEATA_CONFIG_NACOS_SERVER_ADDR: nacos:8848
-      SEATA_CONFIG_NACOS_GROUP: SEATA_GROUP
-      SEATA_CONFIG_NACOS_NAMESPACE: "" # 默认为空（即 public），不要填 "public" 字符串
-      # 如果 Nacos 有账号密码
-      SEATA_CONFIG_NACOS_USERNAME: nacos
-      SEATA_CONFIG_NACOS_PASSWORD: nacos
+      # ---------------------------------------------------------
+      # 2. 端口分离 (解决 "Address already in use" 报错)
+      # ---------------------------------------------------------
+      - SERVER_PORT=7091          # 将 Web 控制台移到 7091，把 8091 让给 RPC
 
-      # -------------------------------------------
-      # 3. 注册中心 (Registry) - 告诉别人我在哪
-      # -------------------------------------------
-      SEATA_REGISTRY_TYPE: nacos
-      # ⚠️ 关键修正：变量名必须是 SEATA_REGISTRY_NACOS_...
-      SEATA_REGISTRY_NACOS_SERVER_ADDR: nacos:8848
-      SEATA_REGISTRY_NACOS_GROUP: SEATA_GROUP
-      SEATA_REGISTRY_NACOS_NAMESPACE: ""
-      SEATA_REGISTRY_NACOS_USERNAME: nacos
-      SEATA_REGISTRY_NACOS_PASSWORD: nacos
-      SEATA_METRICS_ENABLED: "true"
+      # ---------------------------------------------------------
+      # 3. 基础模式配置
+      # ---------------------------------------------------------
+      - STORE_MODE=file           # 存储模式
+      - SEATA_CONSOLE_SECURITY_ENABLED=false # 关闭登录，避免 Prometheus 监控报错
+
+      # ---------------------------------------------------------
+      # 4. Nacos 注册中心 & 配置中心
+      # ---------------------------------------------------------
+      - SEATA_CONFIG_NAME=file:/root/seata-config/registry # ⚠️ 如果没挂载文件，请删除此行，否则会忽略环境变量
+      # 建议直接使用环境变量配置 Nacos，更稳定：
+      - SEATA_CONFIG_TYPE=nacos
+      - SEATA_CONFIG_NACOS_SERVER_ADDR=nacos:8848
+      - SEATA_CONFIG_NACOS_GROUP=SEATA_GROUP
+      - SEATA_CONFIG_NACOS_NAMESPACE=
+
+      - SEATA_REGISTRY_TYPE=nacos
+      - SEATA_REGISTRY_NACOS_SERVER_ADDR=nacos:8848
+      - SEATA_REGISTRY_NACOS_GROUP=SEATA_GROUP
+      - SEATA_REGISTRY_NACOS_NAMESPACE=
+
+      # ---------------------------------------------------------
+      # 5. JVM 参数 (双重保险，防止启动脚本忽略 SEATA_IP)
+      # ---------------------------------------------------------
+      # 注意：seataio 镜像通常支持 JVM_OPTS
+      - JVM_OPTS=-Dseata.ip=192.168.1.52 -Dseata.service.vgroupMapping.manuflex_tx_group=default
 
     ports:
-      - "8091:8091"
+      - "8091:8091" # 映射 RPC 端口 (Java 代码连接用)
+      - "7091:7091" # 映射 Web 端口 (浏览器控制台用)
     networks:
       - manuflex-network
+    volumes:
+      - ./seata-logs:/root/logs/seata
     depends_on:
       nacos:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8091/actuator/health" ]
+      # 注意：健康检查要访问 Web 端口 7091
+      test: [ "CMD", "curl", "-f", "http://localhost:7091/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 5

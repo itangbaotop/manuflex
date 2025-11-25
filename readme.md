@@ -1,5 +1,4 @@
-细化权限 
-继续集成 zipkin， plumusus grafna
+细化权限
 
 哪些配置放到nacos，那些配置必须在application
 

@@ -82,7 +82,7 @@ public class AuthController {
         UserDetails userDetails = userService.loadUserByUsername(user.getUsername()); // 假设 UserService 也能加载 UserDetails
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-        String newAccessToken = jwtTokenProvider.generateAccessToken(authentication);
+        String newAccessToken = jwtTokenProvider.generateAccessTokenWithPermissions(authentication);
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(); // 生成新的 Refresh Token
 
         // 更新数据库中的 Refresh Token

@@ -79,3 +79,19 @@ app: # JWT 配置 (LIMS 也需要 JwtTokenProvider)
   jwtSecret: xi5G429vyD9/rLxktYqsZU723o3V5OB65KWoU76ORtFqihOS3gSQSqEWfDzDdc1ThsPv9D2v0AdqvcdXg+2vqg==
   jwtExpirationMs: 3600000
   jwtRefreshExpirationMs: 604800000
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'health,info,prometheus,metrics'
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  observations:
+    key-values:
+      application: ${spring.application.name}

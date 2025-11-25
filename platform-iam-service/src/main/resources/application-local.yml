@@ -25,7 +25,8 @@ spring:
 
 metadata:
   service:
-    url: http://localhost:8082 # Metadata Service 的实际地址
+#    url: http://localhost:8082 # Metadata Service 的实际地址
+    url: http://platform-metadata-service
 
 springdoc:
   swagger-ui:
@@ -67,3 +68,55 @@ logging:
     top.itangbao.platform.iam: DEBUG # 调整为您服务的包名，方便调试
     org.hibernate.SQL: DEBUG # 打印 Hibernate 生成的 SQL 语句
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE # 打印 SQL 参数
+
+# Seata 基础引导配置
+seata:
+  # 客户端行为配置
+  client:
+    rm:
+      async-commit-buffer-limit: 10000
+      lock:
+        retry-interval: 10
+        retry-times: 30
+      report:
+        success: false
+        fail: true
+      rpc-request-timeout: 30000
+    tm:
+      commit-retry-count: 5
+      rollback-retry-count: 5
+      rpc-request-timeout: 30000
+
+  # 配置中心：读取 seata-client.properties
+  config:
+    type: nacos
+    nacos:
+      server-addr: localhost:8848 # ⬅️ 【修正点3】统一使用 localhost，不要用 nacos
+      group: SEATA_GROUP
+      namespace:
+      data-id: seata-client.properties
+
+  # 👇 【重要遗漏】：您必须配置注册中心，否则 Client 找不到 Server
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server # Seata Server 的服务名
+      server-addr: localhost:8848
+      group: SEATA_GROUP # 必须与 Seata Server 端的 Group 一致
+      namespace:
+  tx-service-group: manuflex_tx_group
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'health,info,prometheus,metrics' # 暴露给 Prometheus
+  tracing:
+    sampling:
+      probability: 1.0 # 采样率 100%
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans # 发送给 Zipkin
+  observations:
+    key-values:
+      application: ${spring.application.name}

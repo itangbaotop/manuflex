@@ -13,7 +13,9 @@ import top.itangbao.platform.iam.repository.UserRepository;
 import top.itangbao.platform.iam.security.CustomUserDetails;
 
 import java.util.Collections; // 暂时用空的权限集合
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -32,21 +34,24 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseGet(() -> userRepository.findByEmail(identifier)
                         .orElseThrow(() -> new UsernameNotFoundException("User not found with identifier: " + identifier)));
 
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
-                .collect(Collectors.toList());
+        Set<GrantedAuthority> authorities = new HashSet<>();
 
+        // 添加角色权限
+        user.getRoles().forEach(role -> {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+            role.getPermissions().stream()
+                    .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                    .forEach(authorities::add);
+        });
+
+        // 添加直接分配给用户的权限
         user.getPermissions().stream()
                 .map(permission -> new SimpleGrantedAuthority(permission.getName()))
                 .forEach(authorities::add);
 
-        user.getRoles().stream()
-                .flatMap(role -> role.getPermissions().stream())
-                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
-                .forEach(authorities::add);
 
-        return new CustomUserDetails( // 返回 CustomUserDetails
-                user.getId(), // 传入用户ID
+        return new CustomUserDetails(
+                user.getId(),
                 user.getUsername(),
                 user.getPassword(),
                 authorities

@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import top.itangbao.platform.iam.domain.Permission;
 import top.itangbao.platform.iam.domain.Role;
 import top.itangbao.platform.iam.domain.User;
 import top.itangbao.platform.iam.dto.LoginRequest;
@@ -25,9 +26,7 @@ import top.itangbao.platform.iam.repository.UserRepository;
 import top.itangbao.platform.iam.service.UserService;
 import top.itangbao.platform.common.util.JwtTokenProvider;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +53,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @GlobalTransactional
+//    @GlobalTransactional
     public UserDTO registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new UserAlreadyExistsException("User with username " + request.getUsername() + " already exists.");
@@ -90,7 +89,7 @@ public class UserServiceImpl implements UserService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = jwtTokenProvider.generateAccessToken(authentication);
+        String accessToken = jwtTokenProvider.generateAccessTokenWithPermissions(authentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(); // 生成 Refresh Token
 
         User user = userRepository.findByUsername(request.getIdentifier())
@@ -198,6 +197,17 @@ public class UserServiceImpl implements UserService {
     // 辅助方法：将 User 实体转换为 UserDTO
     @Override
     public UserDTO convertToDTO(User user) {
+        Set<String> allPermissions = new HashSet<>();
+        user.getRoles().forEach(role ->
+                role.getPermissions().stream()
+                        .map(Permission::getName)
+                        .forEach(allPermissions::add)
+        );
+        user.getPermissions().stream() // 直接分配给用户的权限
+                .map(Permission::getName)
+                .forEach(allPermissions::add);
+
+
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -206,7 +216,7 @@ public class UserServiceImpl implements UserService {
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
-                .permissions(user.getPermissions().stream().map(p -> p.getName()).collect(Collectors.toSet()))
+                .permissions(allPermissions) // ⬅️ 填充权限列表
                 .build();
     }
 }

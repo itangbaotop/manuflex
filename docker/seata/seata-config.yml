@@ -1,0 +1,28 @@
+seata:
+  ip: 127.0.0.1 # 📍 核心：写死注册 IP
+  port: 8091
+
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: nacos:8848
+      group: SEATA_GROUP
+      namespace: "" # 留空
+
+  config:
+    type: nacos
+    nacos:
+      server-addr: nacos:8848
+      group: SEATA_GROUP
+      namespace: "" # 留空
+
+  store:
+    mode: file
+
+server:
+  port: 7091 # Web 端口
+
+logging:
+  file:
+    path: /root/logs/seata

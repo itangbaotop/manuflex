@@ -18,7 +18,7 @@ scrape_configs:
   - job_name: 'seata-server'
     metrics_path: '/prometheus'
     static_configs:
-      - targets: [ 'seata-server:8091' ]
+      - targets: [ 'seata-server:7091' ]
 
   - job_name: 'zipkin'
     metrics_path: '/actuator/prometheus' # Zipkin 也是 Spring Boot 应用
