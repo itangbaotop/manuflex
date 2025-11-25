@@ -1,4 +1,4 @@
-package top.itangbao.platform.workflow.worker;
+package top.itangbao.platform.lims.worker;
 
 import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription; // 导入
 import org.camunda.bpm.client.task.ExternalTask; // 导入

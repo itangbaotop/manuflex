@@ -61,10 +61,6 @@
                     <groupId>com.h2database</groupId>
                     <artifactId>h2</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.camunda.bpm</groupId>
-                    <artifactId>camunda-engine-rest-core</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
 
@@ -90,12 +86,6 @@
             <groupId>top.itangbao.platform</groupId>
             <artifactId>platform-workflow-api</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.camunda.bpm.springboot</groupId>
-            <artifactId>camunda-bpm-spring-boot-starter-external-task-client</artifactId>
-            <version>${camunda.bpm.version}</version>
         </dependency>
 
         <dependency>
