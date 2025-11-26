@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import top.itangbao.platform.metadata.api.enums.FieldType;
+import top.itangbao.platform.common.enums.FieldType;
 
 import java.time.LocalDateTime;
 

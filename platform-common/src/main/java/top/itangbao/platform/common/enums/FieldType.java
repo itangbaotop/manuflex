@@ -1,4 +1,4 @@
-package top.itangbao.platform.metadata.api.enums;
+package top.itangbao.platform.common.enums;
 
 public enum FieldType {
     STRING,

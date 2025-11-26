@@ -20,7 +20,7 @@ import top.itangbao.platform.data.manager.DynamicTableManager;
 import top.itangbao.platform.data.service.DynamicDataService;
 import top.itangbao.platform.metadata.api.dto.MetadataFieldDTO;
 import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
-import top.itangbao.platform.metadata.api.enums.FieldType;
+import top.itangbao.platform.common.enums.FieldType;
 
 import java.io.*;
 import java.math.BigInteger; // 用于处理插入后返回的ID

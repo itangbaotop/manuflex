@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.Map;
 
-@Component
-@ExternalTaskSubscription("sample-topic") // 订阅名为 "sample-topic" 的外部任务
+//@Component
+//@ExternalTaskSubscription("sample-topic") // 订阅名为 "sample-topic" 的外部任务
 public class SampleExternalTaskWorker implements ExternalTaskHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SampleExternalTaskWorker.class);

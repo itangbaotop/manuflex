@@ -32,6 +32,10 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
+        <dependency>
+            <groupId>top.itangbao.platform</groupId>
+            <artifactId>platform-common</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

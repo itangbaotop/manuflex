@@ -13,7 +13,7 @@ import top.itangbao.platform.metadata.api.dto.MetadataFieldCreateRequest;
 import top.itangbao.platform.metadata.api.dto.MetadataSchemaCreateRequest;
 import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
 import feign.FeignException; // 引入 FeignException
-import top.itangbao.platform.metadata.api.enums.FieldType;
+import top.itangbao.platform.common.enums.FieldType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
