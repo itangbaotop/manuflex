@@ -1,8 +1,7 @@
 package top.itangbao.platform.data.service;
 
 
-import top.itangbao.platform.data.api.dto.DynamicDataRequest;
-import top.itangbao.platform.data.api.dto.DynamicDataResponse;
+import top.itangbao.platform.data.api.dto.*;
 
 import java.util.List;
 import java.util.Map;
@@ -37,12 +36,14 @@ public interface DynamicDataService {
     DynamicDataResponse getDynamicDataById(String tenantId, String schemaName, Long id);
 
     /**
-     * 查询所有动态数据 (分页和过滤将在后续添加)
+     * 查询所有动态数据 (分页和过滤)
      * @param tenantId 租户ID
      * @param schemaName 模式名称
-     * @return 动态数据列表
+     * @param pageRequest 分页请求参数
+     * @param filterRequest 过滤请求参数
+     * @return 动态数据列表 (分页响应)
      */
-    List<DynamicDataResponse> getAllDynamicData(String tenantId, String schemaName);
+    PageResponseDTO<DynamicDataResponse> getAllDynamicData(String tenantId, String schemaName, PageRequestDTO pageRequest, FilterRequestDTO filterRequest);
 
     /**
      * 更新动态数据

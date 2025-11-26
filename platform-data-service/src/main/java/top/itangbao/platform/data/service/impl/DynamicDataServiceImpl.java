@@ -9,9 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
+import top.itangbao.platform.data.api.dto.*;
 import top.itangbao.platform.data.client.MetadataServiceClient;
-import top.itangbao.platform.data.api.dto.DynamicDataRequest;
-import top.itangbao.platform.data.api.dto.DynamicDataResponse;
 import top.itangbao.platform.data.manager.DynamicTableManager;
 import top.itangbao.platform.data.service.DynamicDataService;
 import top.itangbao.platform.metadata.api.dto.MetadataFieldDTO;
@@ -189,22 +188,132 @@ public class DynamicDataServiceImpl implements DynamicDataService {
 
 
     @Override
-    public List<DynamicDataResponse> getAllDynamicData(String tenantId, String schemaName) {
+    public PageResponseDTO<DynamicDataResponse> getAllDynamicData(String tenantId, String schemaName, PageRequestDTO pageRequest, FilterRequestDTO filterRequest) {
         MetadataSchemaDTO schemaDTO = metadataServiceClient.getSchemaByNameAndTenantId(schemaName, tenantId)
                 .blockOptional()
                 .orElseThrow(() -> new ResourceNotFoundException("Metadata schema not found with name '" + schemaName + "' for tenant '" + tenantId + "'"));
 
         String tableName = dynamicTableManager.buildTableName(tenantId, schemaName);
-
-        // TODO: 这里需要添加分页和过滤
-        String selectSql = "SELECT * FROM `" + tableName + "` WHERE tenant_id = ?1";
-        List<Object[]> resultList = entityManager.createNativeQuery(selectSql)
-                .setParameter(1, tenantId)
-                .getResultList();
-
         List<String> columnNames = getColumnNames(tableName);
 
-        return resultList.stream().map(row -> {
+        StringBuilder whereClause = new StringBuilder(" WHERE tenant_id = ? ");
+        List<Object> queryParams = new ArrayList<>();
+        queryParams.add(tenantId); // 第一个参数是 tenant_id
+
+        if (filterRequest != null && filterRequest.getFilters() != null && !filterRequest.getFilters().isEmpty()) {
+            // 遍历所有过滤器
+            for (Map.Entry<String, String> entry : filterRequest.getFilters().entrySet()) {
+                String filterKeyWithOperator = entry.getKey(); // 例如 "fieldName.gt"
+                String filterValue = entry.getValue();
+
+                String[] parts = filterKeyWithOperator.split("\\.");
+                String fieldName = parts[0];
+                String operator = parts.length > 1 ? parts[1].toLowerCase() : "eq"; // 默认等于 "eq"
+
+                if (!columnNames.contains(fieldName)) {
+                    logger.warn("Filter field '{}' does not exist in table '{}'. Skipping.", fieldName, tableName);
+                    continue; // 字段不存在，跳过
+                }
+
+                whereClause.append(" AND `").append(fieldName).append("` ");
+                switch (operator) {
+                    case "eq": // 等于
+                        whereClause.append("= ?");
+                        queryParams.add(filterValue);
+                        break;
+                    case "ne": // 不等于
+                        whereClause.append("!= ?");
+                        queryParams.add(filterValue);
+                        break;
+                    case "gt": // 大于
+                        whereClause.append("> ?");
+                        queryParams.add(filterValue);
+                        break;
+                    case "lt": // 小于
+                        whereClause.append("< ?");
+                        queryParams.add(filterValue);
+                        break;
+                    case "ge": // 大于等于
+                        whereClause.append(">= ?");
+                        queryParams.add(filterValue);
+                        break;
+                    case "le": // 小于等于
+                        whereClause.append("<= ?");
+                        queryParams.add(filterValue);
+                        break;
+                    case "like": // 模糊匹配
+                        whereClause.append("LIKE ?");
+                        queryParams.add("%" + filterValue + "%"); // 添加 % 进行模糊匹配
+                        break;
+                    case "in": // 包含 (逗号分隔的值)
+                        // 假设 filterValue 是逗号分隔的字符串，例如 "val1,val2,val3"
+                        String[] inValues = filterValue.split(",");
+                        whereClause.append("IN (");
+                        for (int i = 0; i < inValues.length; i++) {
+                            whereClause.append("?");
+                            if (i < inValues.length - 1) {
+                                whereClause.append(",");
+                            }
+                            queryParams.add(inValues[i]);
+                        }
+                        whereClause.append(")");
+                        break;
+                    default:
+                        logger.warn("Unsupported filter operator '{}' for field '{}'. Skipping.", operator, fieldName);
+                        // 默认等于
+                        whereClause.append("= ?");
+                        queryParams.add(filterValue);
+                        break;
+                }
+            }
+        }
+
+        // 2. 构建排序子句
+        StringBuilder orderByClause = new StringBuilder();
+        if (pageRequest != null && pageRequest.getSortBy() != null && !pageRequest.getSortBy().isEmpty()) {
+            if (columnNames.contains(pageRequest.getSortBy())) { // 确保排序字段存在
+                orderByClause.append(" ORDER BY `").append(pageRequest.getSortBy()).append("` ");
+                if ("desc".equalsIgnoreCase(pageRequest.getSortOrder())) {
+                    orderByClause.append("DESC");
+                } else {
+                    orderByClause.append("ASC");
+                }
+            }
+        } else {
+            orderByClause.append(" ORDER BY `id` ASC"); // 默认按 ID 排序
+        }
+
+        // 3. 查询总记录数
+        String countSql = "SELECT COUNT(*) FROM `" + tableName + "`" + whereClause.toString();
+        Query countQuery = entityManager.createNativeQuery(countSql);
+        for (int i = 0; i < queryParams.size(); i++) {
+            countQuery.setParameter(i + 1, queryParams.get(i));
+        }
+        long totalElements = ((Number) countQuery.getSingleResult()).longValue();
+
+        // 4. 构建分页查询
+        StringBuilder selectSql = new StringBuilder("SELECT * FROM `").append(tableName).append("`")
+                .append(whereClause)
+                .append(orderByClause);
+
+        if (pageRequest != null) {
+            selectSql.append(" LIMIT ? OFFSET ?"); // LIMIT size OFFSET (page * size)
+        }
+
+        Query dataQuery = entityManager.createNativeQuery(selectSql.toString());
+        int paramIndex = 1;
+        for (Object param : queryParams) {
+            dataQuery.setParameter(paramIndex++, param);
+        }
+
+        if (pageRequest != null) {
+            dataQuery.setParameter(paramIndex++, pageRequest.getSize());
+            dataQuery.setParameter(paramIndex++, (long) pageRequest.getPage() * pageRequest.getSize());
+        }
+
+        List<Object[]> resultList = dataQuery.getResultList();
+
+        List<DynamicDataResponse> content = resultList.stream().map(row -> {
             Map<String, Object> dataMap = new HashMap<>();
             Long id = null;
             LocalDateTime createdAt = null;
@@ -235,6 +344,18 @@ public class DynamicDataServiceImpl implements DynamicDataService {
                     .updatedAt(updatedAt)
                     .build();
         }).collect(Collectors.toList());
+
+        int totalPages = (int) Math.ceil((double) totalElements / (pageRequest != null ? pageRequest.getSize() : 1));
+
+        return PageResponseDTO.<DynamicDataResponse>builder()
+                .content(content)
+                .page(pageRequest != null ? pageRequest.getPage() : 0)
+                .size(pageRequest != null ? pageRequest.getSize() : content.size())
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .first(pageRequest != null && pageRequest.getPage() == 0)
+                .last(pageRequest != null && pageRequest.getPage() == totalPages - 1)
+                .build();
     }
 
     @Override

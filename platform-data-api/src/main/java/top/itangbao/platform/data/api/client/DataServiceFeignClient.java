@@ -1,9 +1,9 @@
 package top.itangbao.platform.data.api.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.*;
-import top.itangbao.platform.data.api.dto.DynamicDataRequest;
-import top.itangbao.platform.data.api.dto.DynamicDataResponse;
+import top.itangbao.platform.data.api.dto.*;
 
 import java.util.List;
 import java.util.Map;
@@ -41,9 +41,11 @@ public interface DataServiceFeignClient {
             @PathVariable("id") Long id);
 
     @GetMapping("/api/data/{tenantId}/{schemaName}")
-    List<DynamicDataResponse> getAllDynamicData(
+    PageResponseDTO<DynamicDataResponse> getAllDynamicData(
             @PathVariable("tenantId") String tenantId,
-            @PathVariable("schemaName") String schemaName);
+            @PathVariable("schemaName") String schemaName,
+            @SpringQueryMap PageRequestDTO pageRequest,
+            @SpringQueryMap FilterRequestDTO filterRequest);
 
     @PutMapping("/api/data/{tenantId}/{schemaName}/{id}")
     DynamicDataResponse updateDynamicData(

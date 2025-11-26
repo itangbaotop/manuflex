@@ -6,8 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize; // 引入 @PreAuthorize
 import org.springframework.web.bind.annotation.*;
-import top.itangbao.platform.data.api.dto.DynamicDataRequest;
-import top.itangbao.platform.data.api.dto.DynamicDataResponse;
+import top.itangbao.platform.data.api.dto.*;
 import top.itangbao.platform.data.service.DynamicDataService;
 
 import java.util.List;
@@ -98,11 +97,37 @@ public class DynamicDataController {
      * @return 动态数据列表
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'data:read_all'
-    public ResponseEntity<List<DynamicDataResponse>> getAllDynamicData(
+    @PreAuthorize("hasAnyAuthority('data:read_all', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<PageResponseDTO<DynamicDataResponse>> getAllDynamicData(
             @PathVariable String tenantId,
-            @PathVariable String schemaName) {
-        List<DynamicDataResponse> responses = dynamicDataService.getAllDynamicData(tenantId, schemaName);
+            @PathVariable String schemaName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "asc") String sortOrder,
+            @RequestParam Map<String, String> filters) {
+
+        // 构建 PageRequestDTO
+        PageRequestDTO pageRequest = PageRequestDTO.builder()
+                .page(page)
+                .size(size)
+                .sortBy(sortBy)
+                .sortOrder(sortOrder)
+                .build();
+
+        // 构建 FilterRequestDTO (移除分页和排序相关的参数)
+        FilterRequestDTO filterRequest = FilterRequestDTO.builder()
+                .filters(new java.util.HashMap<>(filters))
+                .build();
+
+        // 移除 filters 中与分页和排序相关的参数，避免传递给 SQL 过滤
+        filterRequest.getFilters().remove("page");
+        filterRequest.getFilters().remove("size");
+        filterRequest.getFilters().remove("sortBy");
+        filterRequest.getFilters().remove("sortOrder");
+
+
+        PageResponseDTO<DynamicDataResponse> responses = dynamicDataService.getAllDynamicData(tenantId, schemaName, pageRequest, filterRequest);
         return ResponseEntity.ok(responses);
     }
 
