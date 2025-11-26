@@ -1,8 +1,10 @@
 package top.itangbao.platform.data.service;
 
 
+import org.springframework.web.multipart.MultipartFile;
 import top.itangbao.platform.data.api.dto.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -62,4 +64,26 @@ public interface DynamicDataService {
      * @param id 数据ID
      */
     void deleteDynamicData(String tenantId, String schemaName, Long id);
+
+    /**
+     * 导入数据 (支持 CSV)
+     * @param tenantId 租户ID
+     * @param schemaName 模式名称
+     * @param file 导入文件
+     * @return 导入结果
+     * @throws IOException
+     */
+    DataImportResponse importData(String tenantId, String schemaName, MultipartFile file) throws IOException;
+
+    /**
+     * 导出数据 (支持 CSV)
+     * @param tenantId 租户ID
+     * @param schemaName 模式名称
+     * @param filterRequest 过滤请求参数
+     * @param format 导出格式 (csv, excel)
+     * @return 导出文件的字节数组
+     * @throws IOException
+     */
+    byte[] exportData(String tenantId, String schemaName, FilterRequestDTO filterRequest, String format) throws IOException;
+
 }

@@ -2,7 +2,9 @@ package top.itangbao.platform.data.api.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import top.itangbao.platform.data.api.dto.*;
 
 import java.util.List;
@@ -59,4 +61,18 @@ public interface DataServiceFeignClient {
             @PathVariable("tenantId") String tenantId,
             @PathVariable("schemaName") String schemaName,
             @PathVariable("id") Long id);
+
+    @PostMapping(value = "/api/data/{tenantId}/{schemaName}/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    DataImportResponse importData(
+            @PathVariable("tenantId") String tenantId,
+            @PathVariable("schemaName") String schemaName,
+            @RequestPart("file") MultipartFile file);
+
+    @GetMapping(value = "/api/data/{tenantId}/{schemaName}/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    byte[] exportData(
+            @PathVariable("tenantId") String tenantId,
+            @PathVariable("schemaName") String schemaName,
+            @SpringQueryMap FilterRequestDTO filterRequest, // 导出也支持过滤
+            @RequestParam(value = "format", defaultValue = "csv") String format); // 导出格式 (csv, excel)
+
 }

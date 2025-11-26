@@ -4,8 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
 import top.itangbao.platform.data.api.client.DataServiceFeignClient;
-import top.itangbao.platform.data.api.dto.DynamicDataRequest;
-import top.itangbao.platform.data.api.dto.DynamicDataResponse;
+import top.itangbao.platform.data.api.dto.*;
 import top.itangbao.platform.lims.dto.SampleRequest;
 import top.itangbao.platform.lims.dto.SampleResponse;
 import top.itangbao.platform.lims.service.SampleService;
@@ -16,10 +15,7 @@ import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
 import feign.FeignException; // 引入 FeignException
 import top.itangbao.platform.metadata.api.enums.FieldType;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -120,8 +116,16 @@ public class SampleServiceImpl implements SampleService {
         // 确保模式和表已注册
         registerLimsMetadataSchema(tenantId);
 
-        List<DynamicDataResponse> dynamicResponses = dataServiceFeignClient.getAllDynamicData(tenantId, LIMS_SAMPLE_SCHEMA_NAME);
-        return dynamicResponses.stream()
+        PageRequestDTO pageRequest = PageRequestDTO.builder().page(0).size(Integer.MAX_VALUE).build(); // 默认获取所有
+        FilterRequestDTO filterRequest = FilterRequestDTO.builder().filters(Collections.emptyMap()).build(); // 默认无过滤
+
+        PageResponseDTO<DynamicDataResponse> dynamicResponsesPage = dataServiceFeignClient.getAllDynamicData(
+                tenantId,
+                LIMS_SAMPLE_SCHEMA_NAME,
+                pageRequest,
+                filterRequest
+        );
+        return dynamicResponsesPage.getContent().stream()
                 .map(this::convertToSampleResponse)
                 .collect(Collectors.toList());
     }

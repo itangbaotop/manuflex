@@ -2,13 +2,17 @@ package top.itangbao.platform.data.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize; // 引入 @PreAuthorize
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import top.itangbao.platform.data.api.dto.*;
 import top.itangbao.platform.data.service.DynamicDataService;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +62,7 @@ public class DynamicDataController {
      * @return 插入后的数据响应
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'data:create'
+    @PreAuthorize("hasAnyAuthority('data:create', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<DynamicDataResponse> insertDynamicData(
             @PathVariable String tenantId,
             @PathVariable String schemaName,
@@ -80,7 +84,7 @@ public class DynamicDataController {
      * @return 动态数据响应
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'data:read'
+    @PreAuthorize("hasAnyAuthority('data:read', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')")
     public ResponseEntity<DynamicDataResponse> getDynamicDataById(
             @PathVariable String tenantId,
             @PathVariable String schemaName,
@@ -141,7 +145,7 @@ public class DynamicDataController {
      * @return 更新后的数据响应
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'data:update'
+    @PreAuthorize("hasAnyAuthority('data:update', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<DynamicDataResponse> updateDynamicData(
             @PathVariable String tenantId,
             @PathVariable String schemaName,
@@ -160,12 +164,72 @@ public class DynamicDataController {
      * @return 无内容响应
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'data:delete'
+    @PreAuthorize("hasAnyAuthority('data:delete', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<Void> deleteDynamicData(
             @PathVariable String tenantId,
             @PathVariable String schemaName,
             @PathVariable Long id) {
         dynamicDataService.deleteDynamicData(tenantId, schemaName, id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    /**
+     * 导入数据 (支持 CSV)
+     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * @param tenantId 租户ID
+     * @param schemaName 模式名称
+     * @param file 导入文件
+     * @return 导入结果
+     * @throws IOException
+     */
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyAuthority('data:import', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
+    public ResponseEntity<DataImportResponse> importData(
+            @PathVariable String tenantId,
+            @PathVariable String schemaName,
+            @RequestPart("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        DataImportResponse response = dynamicDataService.importData(tenantId, schemaName, file);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 导出数据 (支持 CSV)
+     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色或特定权限的用户才能访问
+     * @param tenantId 租户ID
+     * @param schemaName 模式名称
+     * @param filters 过滤条件
+     * @param format 导出格式 (csv, excel)
+     * @return 导出文件的字节数组
+     * @throws IOException
+     */
+    @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PreAuthorize("hasAnyAuthority('data:export', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
+    public ResponseEntity<byte[]> exportData(
+            @PathVariable String tenantId,
+            @PathVariable String schemaName,
+            @RequestParam Map<String, String> filters,
+            @RequestParam(defaultValue = "csv") String format) throws IOException {
+
+        FilterRequestDTO filterRequest = FilterRequestDTO.builder()
+                .filters(new java.util.HashMap<>(filters))
+                .build();
+
+        // 移除 filters 中与分页和排序相关的参数
+        filterRequest.getFilters().remove("page");
+        filterRequest.getFilters().remove("size");
+        filterRequest.getFilters().remove("sortBy");
+        filterRequest.getFilters().remove("sortOrder");
+
+        byte[] fileBytes = dynamicDataService.exportData(tenantId, schemaName, filterRequest, format);
+
+        HttpHeaders headers = new HttpHeaders();
+        String fileName = schemaName + "_data." + format;
+        headers.setContentDispositionFormData("attachment", fileName);
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
     }
 }
