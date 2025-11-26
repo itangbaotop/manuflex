@@ -1,9 +1,6 @@
 package top.itangbao.platform.workflow.service;
 
-import top.itangbao.platform.workflow.api.dto.DeployProcessRequest;
-import top.itangbao.platform.workflow.api.dto.DeployProcessResponse;
-import top.itangbao.platform.workflow.api.dto.ProcessInstanceResponse;
-import top.itangbao.platform.workflow.api.dto.StartProcessRequest;
+import top.itangbao.platform.workflow.api.dto.*;
 
 import java.util.List;
 import java.util.Map;
@@ -69,4 +66,19 @@ public interface ProcessService {
      * @return 流程变量
      */
     Map<String, Object> getProcessVariables(String processInstanceId);
+
+    /**
+     * 查询流程定义
+     * @param key 流程定义 Key (可选)
+     * @param tenantId 租户ID (可选)
+     * @param latestVersion 是否只查询最新版本
+     * @return 流程定义列表
+     */
+    List<ProcessDefinitionResponse> getProcessDefinitions(String key, String tenantId, boolean latestVersion);
+
+    /**
+     * 迁移流程实例
+     * @param request 流程实例迁移请求
+     */
+    void migrateProcessInstances(ProcessInstanceMigrationRequest request);
 }

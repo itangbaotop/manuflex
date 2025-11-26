@@ -4,16 +4,16 @@ import org.camunda.bpm.engine.HistoryService;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
+import org.camunda.bpm.engine.migration.MigrationPlan;
+import org.camunda.bpm.engine.migration.MigrationPlanExecutionBuilder;
 import org.camunda.bpm.engine.repository.Deployment;
+import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
-import top.itangbao.platform.workflow.api.dto.DeployProcessRequest;
-import top.itangbao.platform.workflow.api.dto.DeployProcessResponse;
-import top.itangbao.platform.workflow.api.dto.ProcessInstanceResponse;
-import top.itangbao.platform.workflow.api.dto.StartProcessRequest;
+import top.itangbao.platform.workflow.api.dto.*;
 import top.itangbao.platform.workflow.service.ProcessService;
 
 import java.io.ByteArrayInputStream;
@@ -194,4 +194,84 @@ public class ProcessServiceImpl implements ProcessService {
     public Map<String, Object> getProcessVariables(String processInstanceId) {
         return runtimeService.getVariables(processInstanceId);
     }
+
+    @Override
+    public List<ProcessDefinitionResponse> getProcessDefinitions(String key, String tenantId, boolean latestVersion) {
+        var query = repositoryService.createProcessDefinitionQuery();
+        if (key != null && !key.isEmpty()) {
+            query.processDefinitionKey(key);
+        }
+        if (tenantId != null && !tenantId.isEmpty()) {
+            query.tenantIdIn(tenantId);
+        }
+        if (latestVersion) {
+            query.latestVersion();
+        }
+
+        return query.list().stream()
+                .map(this::convertToProcessDefinitionResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void migrateProcessInstances(ProcessInstanceMigrationRequest request) {
+        // 1. 创建迁移计划
+        MigrationPlan migrationPlan = runtimeService.createMigrationPlan(request.getSourceProcessDefinitionId(), request.getTargetProcessDefinitionId())
+                // 默认情况下，Camunda 会尝试自动映射相同 ID 的活动
+                // 如果活动 ID 发生变化，需要手动指定映射规则
+                // .mapEqualActivities()
+                // .mapActivities("oldActivityId", "newActivityId")
+                .build();
+
+        // 2. 执行迁移
+        MigrationPlanExecutionBuilder migrationExecution = runtimeService.newMigration(migrationPlan);
+
+        if (request.getProcessInstanceIds() != null && !request.getProcessInstanceIds().isEmpty()) {
+            migrationExecution.processInstanceIds(request.getProcessInstanceIds());
+        } else {
+            // 如果没有指定实例ID，则默认迁移所有活跃实例
+            migrationExecution.processInstanceQuery(
+                    runtimeService.createProcessInstanceQuery()
+                            .processDefinitionId(request.getSourceProcessDefinitionId())
+            );
+        }
+        migrationExecution.execute();
+    }
+
+    // 辅助方法：将 ProcessDefinition 实体转换为 ProcessDefinitionResponse DTO
+    private ProcessDefinitionResponse convertToProcessDefinitionResponse(ProcessDefinition processDefinition) {
+        return ProcessDefinitionResponse.builder()
+                .id(processDefinition.getId())
+                .key(processDefinition.getKey())
+                .name(processDefinition.getName())
+                .version(processDefinition.getVersion())
+                .deploymentId(processDefinition.getDeploymentId())
+                .resource(processDefinition.getResourceName())
+                .tenantId(processDefinition.getTenantId())
+                .suspended(processDefinition.isSuspended())
+                // 部署时间需要从历史服务获取部署信息
+                .deploymentTime(getDeploymentTime(processDefinition.getDeploymentId()))
+                .build();
+    }
+
+    // 辅助方法：获取部署时间
+    private LocalDateTime getDeploymentTime(String deploymentId) {
+        if (deploymentId == null) {
+            return null;
+        }
+        try {
+            Deployment deployment = repositoryService.createDeploymentQuery()
+                    .deploymentId(deploymentId)
+                    .singleResult();
+            if (deployment != null && deployment.getDeploymentTime() != null) {
+                return deployment.getDeploymentTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            }
+        } catch (Exception e) {
+            // 部署可能已删除或发生其他错误
+            // logger.warn("Failed to get deployment time for deployment ID {}: {}", deploymentId, e.getMessage());
+        }
+        return null;
+    }
+
 }

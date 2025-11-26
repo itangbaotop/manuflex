@@ -1,5 +1,6 @@
 package top.itangbao.platform.workflow.listener;
 
+import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.RepositoryService; // 导入 RepositoryService
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
@@ -19,6 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class GlobalProcessEventListener implements ExecutionListener, TaskListener {
 
@@ -34,6 +36,7 @@ public class GlobalProcessEventListener implements ExecutionListener, TaskListen
     // 流程事件监听器
     @Override
     public void notify(DelegateExecution execution) throws Exception {
+        log.info("GlobalProcessEventListener: Execution event: {}", execution.getEventName());
         String eventType = execution.getEventName();
         String initiator = getCurrentUsername();
 
@@ -68,6 +71,7 @@ public class GlobalProcessEventListener implements ExecutionListener, TaskListen
     // 任务事件监听器
     @Override
     public void notify(DelegateTask delegateTask) { //  修正参数类型为 DelegateTask
+        log.info("GlobalProcessEventListener: Task event: {}", delegateTask.getEventName());
         String eventType = delegateTask.getEventName();
         String initiator = getCurrentUsername();
 

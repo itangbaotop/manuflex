@@ -4,14 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType; // 导入 MediaType
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile; // 导入 MultipartFile
-import top.itangbao.platform.workflow.api.dto.ClaimTaskRequest; // 导入 DTOs
-import top.itangbao.platform.workflow.api.dto.CompleteTaskRequest;
-import top.itangbao.platform.workflow.api.dto.DeployProcessRequest;
-import top.itangbao.platform.workflow.api.dto.DeployProcessResponse;
-import top.itangbao.platform.workflow.api.dto.ExternalTaskResponse;
-import top.itangbao.platform.workflow.api.dto.ProcessInstanceResponse;
-import top.itangbao.platform.workflow.api.dto.StartProcessRequest;
-import top.itangbao.platform.workflow.api.dto.TaskResponse;
+import top.itangbao.platform.workflow.api.dto.*;
 
 import java.util.List;
 import java.util.Map;
@@ -53,6 +46,16 @@ public interface WorkflowServiceFeignClient {
     @GetMapping("/api/workflow/process-instances/{processInstanceId}/variables")
     Map<String, Object> getProcessVariables(@PathVariable("processInstanceId") String processInstanceId);
 
+    //流程定义查询 API
+    @GetMapping("/api/workflow/process-definitions")
+    List<ProcessDefinitionResponse> getProcessDefinitions(
+            @RequestParam(value = "key", required = false) String key,
+            @RequestParam(value = "tenantId", required = false) String tenantId,
+            @RequestParam(value = "latestVersion", defaultValue = "false") boolean latestVersion);
+
+    //流程实例迁移 API
+    @PostMapping("/api/workflow/process-instances/migrate")
+    void migrateProcessInstances(@RequestBody ProcessInstanceMigrationRequest request);
 
     // --- 任务管理 API ---
     @GetMapping("/api/workflow/tasks/{taskId}")
@@ -84,4 +87,25 @@ public interface WorkflowServiceFeignClient {
     List<ExternalTaskResponse> getExternalTasks(
             @RequestParam(value = "topic", required = false) String topic,
             @RequestParam(value = "tenantId", required = false) String tenantId);
+
+    // --- 决策管理 API ---
+    @PostMapping(value = "/api/workflow/decision/deployments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    DeployDecisionResponse deployDecisionByFile(
+            @RequestPart("deploymentName") String deploymentName,
+            @RequestPart("tenantId") String tenantId,
+            @RequestPart("dmnFile") MultipartFile dmnFile);
+
+    @PostMapping("/api/workflow/decision/evaluate")
+    EvaluateDecisionResponse evaluateDecision(@RequestBody EvaluateDecisionRequest request);
+
+    @GetMapping("/api/workflow/decision/definitions/{decisionDefinitionKey}")
+    List<Map<String, Object>> getDecisionDefinitions(
+            @PathVariable("decisionDefinitionKey") String decisionDefinitionKey,
+            @RequestParam(value = "tenantId", required = false) String tenantId);
+
+    @DeleteMapping("/api/workflow/decision/deployments/{deploymentId}")
+    void deleteDecisionDeployment(
+            @PathVariable("deploymentId") String deploymentId,
+            @RequestParam(value = "cascade", defaultValue = "false") boolean cascade);
+
 }

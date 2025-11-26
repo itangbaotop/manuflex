@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import top.itangbao.platform.workflow.api.dto.DeployProcessRequest;
 import top.itangbao.platform.workflow.api.dto.DeployProcessResponse;
+import top.itangbao.platform.workflow.api.dto.ProcessDefinitionResponse; // 导入
+import top.itangbao.platform.workflow.api.dto.ProcessInstanceMigrationRequest; // 导入
 import top.itangbao.platform.workflow.api.dto.ProcessInstanceResponse;
 import top.itangbao.platform.workflow.api.dto.StartProcessRequest;
 import top.itangbao.platform.workflow.service.ProcessService;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/workflow") // 定义基础路径
+@RequestMapping("/api/workflow")
 public class ProcessController {
 
     private final ProcessService processService;
@@ -30,33 +32,19 @@ public class ProcessController {
     }
 
     /**
-     * 部署 BPMN 流程定义
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
-     * @param request 部署请求体
-     * @return 部署响应
-     */
-    @PostMapping("/deployments")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'workflow:deploy'
-    public ResponseEntity<DeployProcessResponse> deployProcess(@Valid @RequestBody DeployProcessRequest request) {
-        DeployProcessResponse response = processService.deployProcess(request);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
-
-    /**
-     * 通过文件部署 BPMN 流程定义
+     * 部署 BPMN 流程定义 (通过文件上传)
      * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
      * @param deploymentName 部署名称
      * @param tenantId 租户ID
-     * @param bpmnFile BPMN 文件
+     * @param bpmnFile BPMN XML 文件
      * @return 部署响应
-     * @throws IOException 如果读取文件失败
      */
-    @PostMapping(value = "/deployments/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // 修改路径和 consumes
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PostMapping(value = "/deployments/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyAuthority('workflow:process:deploy', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") 
     public ResponseEntity<DeployProcessResponse> deployProcessByFile(
             @RequestParam String deploymentName,
             @RequestParam String tenantId,
-            @RequestPart("bpmnFile") MultipartFile bpmnFile) throws IOException { // 接收 MultipartFile
+            @RequestPart("bpmnFile") MultipartFile bpmnFile) throws IOException {
         if (bpmnFile.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -76,7 +64,7 @@ public class ProcessController {
      * @return 流程实例响应
      */
     @PostMapping("/process-instances")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'workflow:start_instance'
+    @PreAuthorize("hasAnyAuthority('workflow:process:start', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") 
     public ResponseEntity<ProcessInstanceResponse> startProcessInstance(@Valid @RequestBody StartProcessRequest request) {
         ProcessInstanceResponse response = processService.startProcessInstance(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -89,7 +77,7 @@ public class ProcessController {
      * @return 流程实例响应
      */
     @GetMapping("/process-instances/{processInstanceId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'workflow:read_instance'
+    @PreAuthorize("hasAnyAuthority('workflow:process:read_instance', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')") 
     public ResponseEntity<ProcessInstanceResponse> getProcessInstanceById(@PathVariable String processInstanceId) {
         ProcessInstanceResponse response = processService.getProcessInstanceById(processInstanceId);
         return ResponseEntity.ok(response);
@@ -103,7 +91,7 @@ public class ProcessController {
      * @return 流程实例列表
      */
     @GetMapping("/process-instances/active")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'workflow:read_active_instances'
+    @PreAuthorize("hasAnyAuthority('workflow:process:read_active_instances', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") 
     public ResponseEntity<List<ProcessInstanceResponse>> getActiveProcessInstances(
             @RequestParam String processDefinitionKey,
             @RequestParam(required = false) String tenantId) {
@@ -119,7 +107,7 @@ public class ProcessController {
      * @return 无内容响应
      */
     @DeleteMapping("/process-instances/{processInstanceId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'workflow:delete_instance'
+    @PreAuthorize("hasAnyAuthority('workflow:process:delete_instance', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") 
     public ResponseEntity<Void> deleteProcessInstance(
             @PathVariable String processInstanceId,
             @RequestParam(required = false, defaultValue = "Deleted by API") String deleteReason) {
@@ -135,7 +123,7 @@ public class ProcessController {
      * @return 成功响应
      */
     @PutMapping("/process-instances/{processInstanceId}/variables")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'workflow:set_variables'
+    @PreAuthorize("hasAnyAuthority('workflow:process:set_variables', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") 
     public ResponseEntity<Void> setProcessVariables(
             @PathVariable String processInstanceId,
             @RequestBody Map<String, Object> variables) {
@@ -150,9 +138,40 @@ public class ProcessController {
      * @return 流程变量
      */
     @GetMapping("/process-instances/{processInstanceId}/variables")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化为更具体的权限，例如 'workflow:read_variables'
+    @PreAuthorize("hasAnyAuthority('workflow:process:read_variables', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')") 
     public ResponseEntity<Map<String, Object>> getProcessVariables(@PathVariable String processInstanceId) {
         Map<String, Object> variables = processService.getProcessVariables(processInstanceId);
         return ResponseEntity.ok(variables);
+    }
+
+    /**
+     * 查询流程定义
+     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色或特定权限的用户才能访问
+     * @param key 流程定义 Key (可选)
+     * @param tenantId 租户ID (可选)
+     * @param latestVersion 是否只查询最新版本
+     * @return 流程定义列表
+     */
+    @GetMapping("/process-definitions")
+    @PreAuthorize("hasAnyAuthority('workflow:process:read_definition', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')") // ⬅️ 新增并细化权限
+    public ResponseEntity<List<ProcessDefinitionResponse>> getProcessDefinitions(
+            @RequestParam(required = false) String key,
+            @RequestParam(required = false) String tenantId,
+            @RequestParam(defaultValue = "false") boolean latestVersion) {
+        List<ProcessDefinitionResponse> definitions = processService.getProcessDefinitions(key, tenantId, latestVersion);
+        return ResponseEntity.ok(definitions);
+    }
+
+    /**
+     * 迁移流程实例
+     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * @param request 流程实例迁移请求
+     * @return 无内容响应
+     */
+    @PostMapping("/process-instances/migrate")
+    @PreAuthorize("hasAnyAuthority('workflow:process:migrate_instance', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") // ⬅️ 新增并细化权限
+    public ResponseEntity<Void> migrateProcessInstances(@Valid @RequestBody ProcessInstanceMigrationRequest request) {
+        processService.migrateProcessInstances(request);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
