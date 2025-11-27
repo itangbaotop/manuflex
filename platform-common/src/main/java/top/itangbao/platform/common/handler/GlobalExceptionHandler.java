@@ -66,13 +66,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleDataValidationException(DataValidationException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        ErrorResponse.ErrorResponseBuilder builder = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message(ex.getMessage())
-                .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+                .message(ex.getMessage());
+
+        if (ex.getErrors() != null && !ex.getErrors().isEmpty()) {
+            builder.details(ex.getErrors());
+        }
+
+        return new ResponseEntity<>(builder.build(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)

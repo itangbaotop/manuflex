@@ -587,156 +587,142 @@ public class DynamicDataServiceImpl implements DynamicDataService {
     }
 
     /**
-     * 动态数据校验方法
-     * 根据 MetadataSchemaDTO 中的字段定义对数据进行校验
-     * @param data 要校验的数据
-     * @param schemaDTO 模式定义
-     * @throws DataValidationException 如果校验失败
+     * 生产级动态数据校验
+     * 收集所有字段的错误，而不是遇到第一个就抛出
      */
     private void validateDynamicData(Map<String, Object> data, MetadataSchemaDTO schemaDTO) {
+        // 1. 错误收集容器：FieldName -> ErrorMessage
+        Map<String, String> errors = new HashMap<>();
+
         for (MetadataFieldDTO field : schemaDTO.getFields()) {
             String fieldName = field.getFieldName();
             Object fieldValue = data.get(fieldName);
 
-            // 1. 必填字段校验
-            if (field.getRequired() != null && field.getRequired()) {
-                if (fieldValue == null || String.valueOf(fieldValue).trim().isEmpty()) {
-                    throw new DataValidationException("Field '" + fieldName + "' is required.");
+            // --- A. 必填性校验 ---
+            // 无论值是什么类型，先转为字符串判空（注意：Boolean false 不算空，0 不算空）
+            boolean isProvided = fieldValue != null && !String.valueOf(fieldValue).trim().isEmpty();
+
+            if (Boolean.TRUE.equals(field.getRequired())) {
+                if (!isProvided) {
+                    errors.put(fieldName, "此字段为必填项");
+                    continue; // 必填缺失，后续校验无意义，跳过当前字段
                 }
             }
 
-            // 如果字段值为空且不是必填，则跳过后续校验
-            if (fieldValue == null || String.valueOf(fieldValue).trim().isEmpty()) {
+            // 如果非必填且未提供值，直接跳过后续校验
+            if (!isProvided) {
                 continue;
             }
 
-            // 2. 类型校验和转换
+            // --- B. 类型格式校验 ---
             try {
-                switch (field.getFieldType()) {
-                    case INTEGER:
-                        if (!(fieldValue instanceof Integer || fieldValue instanceof Long)) {
-                            // 尝试从 String 转换
-                            try {
-                                Long.parseLong(String.valueOf(fieldValue));
-                            } catch (NumberFormatException e) {
-                                throw new DataValidationException("Field '" + fieldName + "' must be an integer.");
-                            }
-                        }
-                        break;
-                    case NUMBER:
-                        if (!(fieldValue instanceof Double || fieldValue instanceof Float || fieldValue instanceof Integer || fieldValue instanceof Long)) {
-                            // 尝试从 String 转换
-                            try {
-                                Double.parseDouble(String.valueOf(fieldValue));
-                            } catch (NumberFormatException e) {
-                                throw new DataValidationException("Field '" + fieldName + "' must be a number.");
-                            }
-                        }
-                        break;
-                    case BOOLEAN:
-                        if (!(fieldValue instanceof Boolean)) {
-                            // 尝试从 String 转换
-                            String strValue = String.valueOf(fieldValue).toLowerCase();
-                            if (!("true".equals(strValue) || "false".equals(strValue))) {
-                                throw new DataValidationException("Field '" + fieldName + "' must be a boolean (true/false).");
-                            }
-                        }
-                        break;
-                    case DATE:
-                        // 假设日期格式为 "YYYY-MM-DD"
-                        try {
-                            LocalDate.parse(String.valueOf(fieldValue));
-                        } catch (DateTimeParseException e) {
-                            throw new DataValidationException("Field '" + fieldName + "' must be a valid date (YYYY-MM-DD).");
-                        }
-                        break;
-                    case DATETIME:
-                        // 假设日期时间格式为 "YYYY-MM-DDTHH:MM:SS"
-                        try {
-                            LocalDateTime.parse(String.valueOf(fieldValue));
-                        } catch (DateTimeParseException e) {
-                            throw new DataValidationException("Field '" + fieldName + "' must be a valid datetime (YYYY-MM-DDTHH:MM:SS).");
-                        }
-                        break;
-                    case ENUM:
-                        if (field.getOptions() != null && !field.getOptions().isEmpty()) {
-                            try {
-                                // 使用 ObjectMapper 解析 JSON 数组字符串
-                                List<String> options = objectMapper.readValue(field.getOptions(), new TypeReference<List<String>>() {});
-                                if (!options.contains(String.valueOf(fieldValue))) {
-                                    throw new DataValidationException("Field '" + fieldName + "' must be one of " + field.getOptions() + ".");
-                                }
-                            } catch (JsonProcessingException e) {
-                                logger.warn("Error parsing enum options JSON for field '{}': {}", fieldName, e.getMessage());
-                                throw new DataValidationException("Field '" + fieldName + "' has invalid enum options format or is not a valid JSON array string.");
-                            } catch (Exception e) {
-                                logger.warn("Error processing enum options for field '{}': {}", fieldName, e.getMessage());
-                                throw new DataValidationException("Field '" + fieldName + "' has an issue with enum options processing.");
-                            }
-                        }
-                        break;
-                    case STRING:
-                    case TEXT:
-                    case FILE:
-                    case REFERENCE:
-                        // 对于这些类型，主要进行格式或长度校验，这里先不做复杂校验
-                        break;
-                }
-            } catch (DataValidationException e) {
-                throw e; // 重新抛出自定义校验异常
-            } catch (Exception e) {
-                // 捕获其他类型转换异常
-                throw new DataValidationException("Field '" + fieldName + "' has an invalid value or format: " + e.getMessage());
+                // 尝试转换，如果转换失败会抛出 IllegalArgumentException
+                // 我们复用 convertValueToFieldType 的逻辑来做校验
+                convertValueToFieldType(fieldValue, field.getFieldType());
+            } catch (IllegalArgumentException e) {
+                errors.put(fieldName, e.getMessage()); // 使用转换方法返回的具体错误信息
             }
 
-            // 3. 正则表达式校验 (如果定义了 validationRule)
+            // --- C. 枚举值校验 (ENUM) ---
+            if (FieldType.ENUM.equals(field.getFieldType())) {
+                validateEnum(field, fieldValue, errors);
+            }
+
+            // --- D. 正则表达式校验 ---
             if (field.getValidationRule() != null && !field.getValidationRule().isEmpty()) {
                 try {
                     if (!Pattern.matches(field.getValidationRule(), String.valueOf(fieldValue))) {
-                        throw new DataValidationException("Field '" + fieldName + "' does not match validation rule: " + field.getValidationRule());
+                        // 如果有描述，优先提示描述，否则提示不符合规则
+                        String msg = (field.getDescription() != null && !field.getDescription().isEmpty())
+                                ? "格式不正确: " + field.getDescription()
+                                : "数据格式不符合校验规则";
+                        errors.put(fieldName, msg);
                     }
                 } catch (PatternSyntaxException e) {
-                    logger.error("Invalid regex pattern for field '{}': {}", fieldName, field.getValidationRule());
-                    // 即使正则表达式本身有问题，也不应该阻止流程，但应该记录
+                    logger.error("Schema 定义中字段 '{}' 的正则表达式无效: {}", fieldName, field.getValidationRule());
+                    // 正则配置错误是开发者的锅，不应阻断用户，或者可以提示系统错误
                 }
             }
+        }
+
+        // 如果收集到了错误，统一抛出
+        if (!errors.isEmpty()) {
+            throw new DataValidationException("数据校验失败，请检查输入项", errors);
         }
     }
 
     /**
-     * 将值转换为目标字段类型 (用于插入/更新 SQL 参数)
-     * @param value 原始值
-     * @param fieldType 目标字段类型
-     * @return 转换后的值
+     * 独立的枚举校验逻辑，抽取出来保持代码整洁
+     */
+    private void validateEnum(MetadataFieldDTO field, Object value, Map<String, String> errors) {
+        if (field.getOptions() == null || field.getOptions().isEmpty()) {
+            return;
+        }
+        try {
+            List<String> options = objectMapper.readValue(field.getOptions(), new TypeReference<List<String>>() {});
+            String strValue = String.valueOf(value);
+            if (!options.contains(strValue)) {
+                errors.put(field.getFieldName(), "值无效，必须是以下选项之一: " + String.join(", ", options));
+            }
+        } catch (JsonProcessingException e) {
+            logger.error("解析字段 '{}' 的枚举选项 JSON 失败: {}", field.getFieldName(), e.getMessage());
+            // 配置错误，记录日志，暂不阻断用户（或根据策略阻断）
+        }
+    }
+
+    /**
+     * 将值转换为目标字段类型
+     * 既用于 insert/update 的参数准备，也用于 validate 的格式检查
+     * * @throws IllegalArgumentException 如果转换失败
      */
     private Object convertValueToFieldType(Object value, FieldType fieldType) {
         if (value == null) {
             return null;
         }
-        String strValue = String.valueOf(value);
+        String strValue = String.valueOf(value).trim(); // 去除首尾空格
+
+        // 空字符串对于非 String 类型视为空值
+        if (strValue.isEmpty() && fieldType != FieldType.STRING && fieldType != FieldType.TEXT) {
+            return null;
+        }
+
         try {
             switch (fieldType) {
                 case INTEGER:
+                    // 允许 "123" 或 123
                     return Long.parseLong(strValue);
                 case NUMBER:
+                    // 允许 "123.45" 或 123.45
                     return Double.parseDouble(strValue);
                 case BOOLEAN:
-                    return Boolean.parseBoolean(strValue);
+                    // 严格校验：只允许 "true"/"false" (不区分大小写)
+                    if ("true".equalsIgnoreCase(strValue)) return true;
+                    if ("false".equalsIgnoreCase(strValue)) return false;
+                    throw new IllegalArgumentException("必须是布尔值 (true/false)");
                 case DATE:
+                    // 格式：YYYY-MM-DD
                     return LocalDate.parse(strValue);
                 case DATETIME:
+                    // 格式：YYYY-MM-DDTHH:MM:SS (ISO_LOCAL_DATE_TIME)
+                    // 前端传递时需要注意格式，或者后端这里做更宽容的解析
                     return LocalDateTime.parse(strValue);
                 case STRING:
                 case TEXT:
-                case ENUM:
-                case FILE:
+                case ENUM: // ENUM 存储为字符串
+                case FILE: // 文件路径/ID 存储为字符串
+                    return strValue;
                 case REFERENCE:
+                    // 引用 ID 通常是 Long
+                    return Long.parseLong(strValue);
                 default:
-                    return value; // 其他类型直接返回原始值
+                    return strValue;
             }
-        } catch (NumberFormatException | DateTimeParseException e) {
-            logger.warn("Value '{}' cannot be converted to type {}. Keeping original type.", strValue, fieldType);
-            return value; // 转换失败时返回原始值，后续可能在数据库层面报错
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("必须是有效的数字格式");
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("日期时间格式无效");
+        } catch (Exception e) {
+            throw new IllegalArgumentException("数据格式无效: " + e.getMessage());
         }
     }
 }

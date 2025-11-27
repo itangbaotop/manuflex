@@ -32,6 +32,20 @@ public class ProcessController {
     }
 
     /**
+     * 部署 BPMN 流程定义 (通过 XML 字符串)
+     * 支持前端在线绘图器直接部署
+     * * @param request 部署请求体 (包含 bpmnXml)
+     * @return 部署响应
+     */
+    @PostMapping("/deployments/string")
+    @PreAuthorize("hasAnyAuthority('workflow:process:deploy', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
+    public ResponseEntity<DeployProcessResponse> deployProcessByString(@Valid @RequestBody DeployProcessRequest request) {
+        // 直接调用 Service 层已有的方法
+        DeployProcessResponse response = processService.deployProcess(request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
      * 部署 BPMN 流程定义 (通过文件上传)
      * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
      * @param deploymentName 部署名称
