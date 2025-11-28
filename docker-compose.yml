@@ -95,6 +95,7 @@ services:
   sentinel-dashboard:
     image: bladex/sentinel-dashboard:1.8.7 #  使用 Sentinel Dashboard 镜像，请选择一个稳定版本
     container_name: manuflex-sentinel-dashboard
+    profiles: [monitoring]
     environment:
       # Sentinel Dashboard 端口
       SERVER_PORT: 8858 # Sentinel Dashboard 默认端口
@@ -116,6 +117,7 @@ services:
     image: seataio/seata-server:2.0.0.jre17 #  指定您要求的 JRE 17 版本镜像
     container_name: manuflex-seata-server
     hostname: seata-server
+    profiles: [monitoring]
     environment:
       # ---------------------------------------------------------
       # 1. 网络核心配置 (解决 Windows + WSL 2 连接问题)
@@ -175,6 +177,7 @@ services:
   zipkin:
     image: openzipkin/zipkin:3
     container_name: manuflex-zipkin
+    profiles: [monitoring]
     environment:
       - STORAGE_TYPE=mem # 开发环境存内存，重启丢失。生产建议用 elasticsearch
     ports:
@@ -190,6 +193,7 @@ services:
   prometheus:
     image: prom/prometheus:v3.7.0
     container_name: manuflex-prometheus
+    profiles: [monitoring]
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml #  Prometheus 配置
       - prometheus_data:/prometheus # Prometheus 数据持久化
@@ -213,6 +217,7 @@ services:
   grafana:
     image: grafana/grafana:12.1 #  使用 Grafana 镜像，请选择一个稳定版本
     container_name: manuflex-grafana
+    profiles: [monitoring]
     volumes:
       - grafana_data:/var/lib/grafana # Grafana 数据持久化
       - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources #  Grafana 配置
@@ -234,6 +239,7 @@ services:
   loki:
     image: grafana/loki:2.9.2 #  使用 Loki 镜像，请选择一个稳定版本
     container_name: manuflex-loki
+    profiles: [monitoring]
     ports:
       - "3100:3100" # Loki API 端口
     command: -config.file=/etc/loki/local-config.yaml #  指定 Loki 配置文件
@@ -252,6 +258,7 @@ services:
   promtail:
     image: grafana/promtail:2.9.2 #  使用 Promtail 镜像，与 Loki 版本一致
     container_name: manuflex-promtail
+    profiles: [monitoring]
     volumes:
       - ./docker/promtail/config.yaml:/etc/promtail/config.yaml #  Promtail 配置文件
       - /var/log:/var/log #  映射主机的 /var/log 目录 (或您微服务日志所在的目录)
@@ -281,6 +288,8 @@ services:
       - "8080:8080" # 只暴露网关端口给宿主机
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_HOST=nacos
+      - NACOS_NAMESPACE=b6c61ff5-0ec0-4a3b-8529-4f110619308c
       # 强制指定 Nacos 地址为容器名
       - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
       - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
@@ -302,10 +311,8 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
-      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-      - SPRING_REDIS_HOST=redis
+      - NACOS_HOST=nacos
+      - NACOS_NAMESPACE=b6c61ff5-0ec0-4a3b-8529-4f110619308c
     depends_on:
       - nacos
       - mysql
@@ -325,9 +332,8 @@ services:
       - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
-      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      - NACOS_HOST=nacos
+      - NACOS_NAMESPACE=b6c61ff5-0ec0-4a3b-8529-4f110619308c
     depends_on:
       - nacos
       - mysql
@@ -346,9 +352,8 @@ services:
       - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
-      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      - NACOS_HOST=nacos
+      - NACOS_NAMESPACE=b6c61ff5-0ec0-4a3b-8529-4f110619308c
     depends_on:
       - nacos
       - mysql
@@ -368,10 +373,8 @@ services:
       - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
-      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - NACOS_HOST=nacos
+      - NACOS_NAMESPACE=b6c61ff5-0ec0-4a3b-8529-4f110619308c
     depends_on:
       - nacos
       - mysql
@@ -391,8 +394,8 @@ services:
       - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
-      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
+      - NACOS_HOST=nacos
+      - NACOS_NAMESPACE=b6c61ff5-0ec0-4a3b-8529-4f110619308c
     depends_on:
       - nacos
       - platform-data-service

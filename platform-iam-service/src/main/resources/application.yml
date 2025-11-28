@@ -4,13 +4,13 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848 # Nacos Server 地址 (Docker Compose 中 nacos 服务名)
-        namespace: # 命名空间ID (可选，如果使用默认命名空间可以留空)
+        server-addr: ${NACOS_HOST:localhost}:8848 # Nacos Server 地址 (Docker Compose 中 nacos 服务名)
+        namespace: ${NACOS_NAMESPACE:}
       config:
-        server-addr: localhost:8848 # Nacos Server 地址
+        server-addr: ${NACOS_HOST:localhost}:8848 # Nacos Server 地址
         file-extension: yml # 配置文件的扩展名
         group: DEFAULT_GROUP # 配置组
-        namespace: # 命名空间ID (可选)
+        namespace: ${NACOS_NAMESPACE:}
         refresh-enabled: true # 启用动态刷新配置
     sentinel: #  Sentinel 配置
       transport:
@@ -19,7 +19,7 @@ spring:
       datasource: # 配置 Sentinel 规则持久化到 Nacos (可选，但推荐)
         flow:
           nacos:
-            server-addr: localhost:8848
+            server-addr: ${NACOS_HOST:localhost}:8848
             group-id: DEFAULT_GROUP
             data-id: ${spring.application.name}-flow-rules
             data-type: json
