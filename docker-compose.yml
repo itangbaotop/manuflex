@@ -16,7 +16,7 @@ services:
       - mysql_data:/var/lib/mysql # 数据持久化
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql # 初始化 SQL 脚本 (可选，但推荐)
     healthcheck: # 健康检查
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -72,7 +72,7 @@ services:
     environment:
       # 单机模式启动
       - MODE=standalone
-        # 👇 新增：强制暴露 Prometheus 和 Health 端点
+      # 👇 新增：强制暴露 Prometheus 和 Health 端点
       - "JAVA_TOOL_OPTIONS=-Dmanagement.endpoints.web.exposure.include=*"
       # 数据库配置 (Nacos 默认使用嵌入式 Derby，生产环境推荐外部 MySQL)
       # 如果希望使用外部 MySQL，需要配置 NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_EXPIRE_SECONDS, NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_HEADER, NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_SECRET_KEY, NACOS_AUTH_PLUGIN_Nacos_AUTH_TOKEN_VALIDATE_INTERVAL_SECONDS
@@ -95,7 +95,7 @@ services:
   sentinel-dashboard:
     image: bladex/sentinel-dashboard:1.8.7 #  使用 Sentinel Dashboard 镜像，请选择一个稳定版本
     container_name: manuflex-sentinel-dashboard
-    profiles: [monitoring]
+    profiles: [ monitoring ]
     environment:
       # Sentinel Dashboard 端口
       SERVER_PORT: 8858 # Sentinel Dashboard 默认端口
@@ -117,7 +117,7 @@ services:
     image: seataio/seata-server:2.0.0.jre17 #  指定您要求的 JRE 17 版本镜像
     container_name: manuflex-seata-server
     hostname: seata-server
-    profiles: [monitoring]
+    profiles: [ monitoring ]
     environment:
       # ---------------------------------------------------------
       # 1. 网络核心配置 (解决 Windows + WSL 2 连接问题)
@@ -177,7 +177,7 @@ services:
   zipkin:
     image: openzipkin/zipkin:3
     container_name: manuflex-zipkin
-    profiles: [monitoring]
+    profiles: [ monitoring ]
     environment:
       - STORAGE_TYPE=mem # 开发环境存内存，重启丢失。生产建议用 elasticsearch
     ports:
@@ -193,7 +193,7 @@ services:
   prometheus:
     image: prom/prometheus:v3.7.0
     container_name: manuflex-prometheus
-    profiles: [monitoring]
+    profiles: [ monitoring ]
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml #  Prometheus 配置
       - prometheus_data:/prometheus # Prometheus 数据持久化
@@ -217,7 +217,7 @@ services:
   grafana:
     image: grafana/grafana:12.1 #  使用 Grafana 镜像，请选择一个稳定版本
     container_name: manuflex-grafana
-    profiles: [monitoring]
+    profiles: [ monitoring ]
     volumes:
       - grafana_data:/var/lib/grafana # Grafana 数据持久化
       - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources #  Grafana 配置
@@ -239,7 +239,7 @@ services:
   loki:
     image: grafana/loki:2.9.2 #  使用 Loki 镜像，请选择一个稳定版本
     container_name: manuflex-loki
-    profiles: [monitoring]
+    profiles: [ monitoring ]
     ports:
       - "3100:3100" # Loki API 端口
     command: -config.file=/etc/loki/local-config.yaml #  指定 Loki 配置文件
@@ -258,7 +258,7 @@ services:
   promtail:
     image: grafana/promtail:2.9.2 #  使用 Promtail 镜像，与 Loki 版本一致
     container_name: manuflex-promtail
-    profiles: [monitoring]
+    profiles: [ monitoring ]
     volumes:
       - ./docker/promtail/config.yaml:/etc/promtail/config.yaml #  Promtail 配置文件
       - /var/log:/var/log #  映射主机的 /var/log 目录 (或您微服务日志所在的目录)
@@ -290,12 +290,12 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - NACOS_HOST=nacos
       - NACOS_NAMESPACE=b6c61ff5-0ec0-4a3b-8529-4f110619308c
-      # 强制指定 Nacos 地址为容器名
-      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
-      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
+#      # 强制指定 Nacos 地址为容器名
+#      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+#      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
     depends_on:
       - nacos
-#      - redis
+    #      - redis
     networks:
       - manuflex-network
     deploy:
@@ -316,7 +316,7 @@ services:
     depends_on:
       - nacos
       - mysql
-#      - redis
+    #      - redis
     networks:
       - manuflex-network
     deploy:

@@ -30,3 +30,8 @@ spring:
       # ⚠️ 关键修正：显式指定 DataId。默认 DataId 为 ${应用名}.yml
       # 格式为: nacos:[dataId]?[group]&[refresh]
       - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
+
+logging:
+  level:
+    com.alibaba.cloud.nacos.client.config: DEBUG
+    org.springframework.cloud.bootstrap: DEBUG

@@ -22,17 +22,6 @@ public class PlatformIamServiceApplication {
         SpringApplication.run(PlatformIamServiceApplication.class, args);
     }
 
-    @Bean
-    public DataSource dataSource() {
-        DruidDataSource dataSource = new DruidDataSource();
-        // 从 Nacos 配置中获取数据库连接信息
-        dataSource.setUrl("jdbc:mysql://localhost:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai");
-        dataSource.setUsername("manuflex_user");
-        dataSource.setPassword("manuflex_password");
-        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        return dataSource;
-    }
-
     //  定义事务管理器
     @Bean
     public PlatformTransactionManager transactionManager(DataSource dataSource) {
