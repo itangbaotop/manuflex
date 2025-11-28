@@ -288,7 +288,7 @@ services:
       - nacos
 #      - redis
     networks:
-      - manuflex-net
+      - manuflex-network
     deploy:
       resources:
         limits:
@@ -309,7 +309,7 @@ services:
       - mysql
 #      - redis
     networks:
-      - manuflex-net
+      - manuflex-network
     deploy:
       resources:
         limits:
@@ -328,7 +328,7 @@ services:
       - nacos
       - mysql
     networks:
-      - manuflex-net
+      - manuflex-network
     deploy:
       resources:
         limits:
@@ -348,7 +348,7 @@ services:
       - mysql
       - platform-metadata-service # 依赖 Metadata
     networks:
-      - manuflex-net
+      - manuflex-network
     deploy:
       resources:
         limits:
@@ -369,7 +369,7 @@ services:
       - mysql
       - kafka
     networks:
-      - manuflex-net
+      - manuflex-network
     deploy:
       resources:
         limits:
@@ -388,7 +388,7 @@ services:
       - platform-data-service
       - platform-workflow-service
     networks:
-      - manuflex-net
+      - manuflex-network
     deploy:
       resources:
         limits:
