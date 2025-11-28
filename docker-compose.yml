@@ -273,6 +273,127 @@ services:
       timeout: 5s
       retries: 5
 
+  # 1. API 网关 (入口)
+  platform-api-gateway:
+    build: ./platform-api-gateway
+    container_name: manuflex-gateway
+    ports:
+      - "8080:8080" # 只暴露网关端口给宿主机
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      # 强制指定 Nacos 地址为容器名
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
+    depends_on:
+      - nacos
+#      - redis
+    networks:
+      - manuflex-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # 2. IAM 服务
+  platform-iam-service:
+    build: ./platform-iam-service
+    container_name: manuflex-iam
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      - SPRING_REDIS_HOST=redis
+    depends_on:
+      - nacos
+      - mysql
+#      - redis
+    networks:
+      - manuflex-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # 3. Metadata 服务
+  platform-metadata-service:
+    build: ./platform-metadata-service
+    container_name: manuflex-metadata
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    depends_on:
+      - nacos
+      - mysql
+    networks:
+      - manuflex-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # 4. Data 服务
+  platform-data-service:
+    build: ./platform-data-service
+    container_name: manuflex-data
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    depends_on:
+      - nacos
+      - mysql
+      - platform-metadata-service # 依赖 Metadata
+    networks:
+      - manuflex-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # 5. Workflow 服务
+  platform-workflow-service:
+    build: ./platform-workflow-service
+    container_name: manuflex-workflow
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - nacos
+      - mysql
+      - kafka
+    networks:
+      - manuflex-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # 6. LIMS 服务 (可选，如果不想跑可以注释掉)
+  platform-lims-service:
+    build: ./platform-lims-service
+    container_name: manuflex-lims
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
+    depends_on:
+      - nacos
+      - platform-data-service
+      - platform-workflow-service
+    networks:
+      - manuflex-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
 
 volumes:
   mysql_data:

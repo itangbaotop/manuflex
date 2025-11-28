@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    # 注意这里用的是 mysql 服务名，而不是 localhost
+    url: jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos:8848
+      config:
+        server-addr: nacos:8848
