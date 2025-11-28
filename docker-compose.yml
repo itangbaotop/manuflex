@@ -298,6 +298,8 @@ services:
   platform-iam-service:
     build: ./platform-iam-service
     container_name: manuflex-iam
+    ports:
+      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
@@ -319,6 +321,8 @@ services:
   platform-metadata-service:
     build: ./platform-metadata-service
     container_name: manuflex-metadata
+    ports:
+      - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
@@ -338,6 +342,8 @@ services:
   platform-data-service:
     build: ./platform-data-service
     container_name: manuflex-data
+    ports:
+      - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
@@ -358,6 +364,8 @@ services:
   platform-workflow-service:
     build: ./platform-workflow-service
     container_name: manuflex-workflow
+    ports:
+      - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
@@ -379,6 +387,8 @@ services:
   platform-lims-service:
     build: ./platform-lims-service
     container_name: manuflex-lims
+    ports:
+      - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
@@ -409,3 +419,6 @@ volumes:
 networks:
   manuflex-network:
     driver: bridge
+
+
+#  docker-compose up -d mysql nacos kafka platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-workflow-service platform-lims-service

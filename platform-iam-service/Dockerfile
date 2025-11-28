@@ -10,7 +10,7 @@ COPY target/*.jar app.jar
 
 # 暴露端口 (虽然 docker-compose 会映射，但写上是个好习惯)
 # 具体端口可以在 docker-compose 中覆盖，这里只是声明
-EXPOSE 8080
+EXPOSE 8081
 
 # 启动命令
 # 增加 -Djava.security.egd=file:/dev/./urandom 加快启动时的随机数生成
