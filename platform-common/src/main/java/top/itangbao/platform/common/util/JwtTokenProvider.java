@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import top.itangbao.platform.common.security.CustomUserDetails;
 
 import java.security.Key;
 import java.util.Date;
@@ -62,7 +63,7 @@ public class JwtTokenProvider {
      * @return JWT Access Token 字符串
      */
     public String generateAccessTokenWithPermissions(Authentication authentication) {
-        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        CustomUserDetails userPrincipal = (CustomUserDetails) authentication.getPrincipal();
 
         // 提取角色
         List<String> roles = userPrincipal.getAuthorities().stream()
@@ -80,6 +81,7 @@ public class JwtTokenProvider {
                 .setSubject((userPrincipal.getUsername()))
                 .claim("roles", String.join(",", roles)) // 角色仍然以逗号分隔字符串存储
                 .claim("permissions", permissions) //  权限以 List<String> 存储
+                .claim("tenantId", userPrincipal.getTenantId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS512)

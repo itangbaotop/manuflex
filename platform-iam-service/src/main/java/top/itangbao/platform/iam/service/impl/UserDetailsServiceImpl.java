@@ -10,13 +10,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import top.itangbao.platform.iam.domain.User;
 import top.itangbao.platform.iam.repository.UserRepository;
-import top.itangbao.platform.iam.security.CustomUserDetails;
+import top.itangbao.platform.common.security.CustomUserDetails;
 
-import java.util.Collections; // 暂时用空的权限集合
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 实现 Spring Security 的 UserDetailsService 接口，用于从数据库加载用户详情
@@ -52,6 +49,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         return new CustomUserDetails(
                 user.getId(),
+                user.getTenantId(),
                 user.getUsername(),
                 user.getPassword(),
                 authorities
