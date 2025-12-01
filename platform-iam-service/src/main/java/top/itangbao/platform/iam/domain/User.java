@@ -37,6 +37,9 @@ public class User {
     @Column(name = "refresh_token", length = 500) // Refresh Token 字段
     private String refreshToken;
 
+    @Column(nullable = false) // <--- 新增：用户启用状态，默认 true
+    private Boolean enabled = true;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

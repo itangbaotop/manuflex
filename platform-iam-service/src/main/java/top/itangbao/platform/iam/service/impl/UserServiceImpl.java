@@ -16,9 +16,11 @@ import top.itangbao.platform.iam.domain.Role;
 import top.itangbao.platform.iam.domain.User;
 import top.itangbao.platform.iam.dto.LoginRequest;
 import top.itangbao.platform.iam.dto.LoginResponse;
+import top.itangbao.platform.iam.dto.PermissionDTO; // 引入 PermissionDTO
 import top.itangbao.platform.iam.dto.RegisterRequest;
+import top.itangbao.platform.iam.dto.RoleDTO; // 引入 RoleDTO
 import top.itangbao.platform.iam.dto.UserDTO;
-import top.itangbao.platform.iam.dto.UserUpdateRequest; // 引入
+import top.itangbao.platform.iam.dto.UserUpdateRequest;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
 import top.itangbao.platform.common.exception.UserAlreadyExistsException;
 import top.itangbao.platform.iam.repository.RoleRepository;
@@ -48,7 +50,7 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.userDetailsService = userDetailsService; // 注入
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -67,13 +69,13 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
         user.setTenantId(request.getTenantId());
+        user.setEnabled(true); // 注册时默认启用
 
         // 默认赋予新用户 'USER' 角色
         Optional<Role> defaultRole = roleRepository.findByName("USER");
         if (defaultRole.isPresent()) {
             user.setRoles(Collections.singleton(defaultRole.get()));
         } else {
-            // 如果 'USER' 角色不存在，可以抛出异常或创建它
             throw new ResourceNotFoundException("Default role 'USER' not found. Please ensure it exists.");
         }
 
@@ -90,18 +92,18 @@ public class UserServiceImpl implements UserService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String accessToken = jwtTokenProvider.generateAccessTokenWithPermissions(authentication);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(); // 生成 Refresh Token
+        String refreshToken = jwtTokenProvider.generateRefreshToken();
 
         User user = userRepository.findByUsername(request.getIdentifier())
                 .orElseGet(() -> userRepository.findByEmail(request.getIdentifier())
                         .orElseThrow(() -> new ResourceNotFoundException("User not found with identifier: " + request.getIdentifier())));
 
-        user.setRefreshToken(refreshToken); // 保存 Refresh Token 到数据库
-        userRepository.save(user); // 更新用户
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken) // 返回 Refresh Token
+                .refreshToken(refreshToken)
                 .user(convertToDTO(user))
                 .build();
     }
@@ -133,7 +135,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
 
-        // 检查更新后的用户名或邮箱是否已存在 (排除当前用户自身)
         if (request.getUsername() != null && !request.getUsername().equals(user.getUsername()) && userRepository.existsByUsername(request.getUsername())) {
             throw new UserAlreadyExistsException("User with username " + request.getUsername() + " already exists.");
         }
@@ -141,8 +142,6 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("User with email " + request.getEmail() + " already exists.");
         }
 
-        // 使用 BeanUtils.copyProperties 复制非空属性，避免覆盖 null 值
-        // 注意：这里需要手动处理密码加密和 tenantId 逻辑
         if (request.getUsername() != null) {
             user.setUsername(request.getUsername());
         }
@@ -154,6 +153,18 @@ public class UserServiceImpl implements UserService {
         }
         if (request.getTenantId() != null) {
             user.setTenantId(request.getTenantId());
+        }
+        if (request.getEnabled() != null) { // 处理 enabled 字段更新
+            user.setEnabled(request.getEnabled());
+        }
+
+        // 处理角色更新
+        if (request.getRoleIds() != null) {
+            Set<Role> newRoles = request.getRoleIds().stream()
+                    .map(roleId -> roleRepository.findById(Long.valueOf(roleId)) // 将 String roleId 转换为 Long
+                            .orElseThrow(() -> new ResourceNotFoundException("Role not found with ID: " + roleId)))
+                    .collect(Collectors.toSet());
+            user.setRoles(newRoles);
         }
 
         User updatedUser = userRepository.save(user);
@@ -185,7 +196,7 @@ public class UserServiceImpl implements UserService {
     public void clearRefreshToken(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
-        user.setRefreshToken(null); // 清除 Refresh Token
+        user.setRefreshToken(null);
         userRepository.save(user);
     }
 
@@ -197,26 +208,53 @@ public class UserServiceImpl implements UserService {
     // 辅助方法：将 User 实体转换为 UserDTO
     @Override
     public UserDTO convertToDTO(User user) {
-        Set<String> allPermissions = new HashSet<>();
-        user.getRoles().forEach(role ->
-                role.getPermissions().stream()
-                        .map(Permission::getName)
-                        .forEach(allPermissions::add)
-        );
-        user.getPermissions().stream() // 直接分配给用户的权限
-                .map(Permission::getName)
-                .forEach(allPermissions::add);
+        if (user == null) {
+            return null;
+        }
+
+        // 转换 roles 为 Set<RoleDTO>
+        Set<RoleDTO> roleDTOs = user.getRoles().stream()
+                .map(role -> {
+                    // 转换 permissions 为 Set<PermissionDTO>
+                    Set<PermissionDTO> permissionDTOs = role.getPermissions().stream()
+                            .map(perm -> PermissionDTO.builder()
+                                    .id(String.valueOf(perm.getId())) // Long to String
+                                    .name(perm.getName()) // 对应 Permission 实体中的 name (显示名称)
+                                    .code(perm.getCode()) // 对应 Permission 实体中的 code (权限编码)
+                                    .description(perm.getDescription())
+                                    .build())
+                            .collect(Collectors.toSet());
+
+                    return RoleDTO.builder()
+                            .id(String.valueOf(role.getId())) // Long to String
+                            .name(role.getName())
+                            .description(role.getDescription())
+                            .permissions(permissionDTOs)
+                            .build();
+                })
+                .collect(Collectors.toSet());
+
+        // 获取所有权限编码
+        Set<String> allPermissionCodes = user.getRoles().stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .map(Permission::getCode)
+                .collect(Collectors.toSet());
+        // 加上直接分配给用户的权限（如果存在且需要）
+        user.getPermissions().stream()
+                .map(Permission::getCode)
+                .forEach(allPermissionCodes::add);
 
 
         return UserDTO.builder()
-                .id(user.getId())
+                .id(String.valueOf(user.getId())) // Long to String
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .tenantId(user.getTenantId())
+                .enabled(user.getEnabled()) // 映射 enabled 字段
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
-                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
-                .permissions(allPermissions) //  填充权限列表
+                .roles(roleDTOs) // 使用转换后的 Set<RoleDTO>
+                .permissions(allPermissionCodes) // 填充权限编码列表
                 .build();
     }
 }

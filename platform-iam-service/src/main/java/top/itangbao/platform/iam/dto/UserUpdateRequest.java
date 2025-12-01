@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,4 +26,8 @@ public class UserUpdateRequest {
 
     @Size(max = 50, message = "Tenant ID cannot exceed 50 characters")
     private String tenantId; // 允许更新租户ID，但在实际业务中可能受限
+
+    private Boolean enabled = true;
+
+    private List<String> roleIds;
 }
