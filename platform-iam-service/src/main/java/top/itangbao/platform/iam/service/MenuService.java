@@ -1,6 +1,8 @@
 package top.itangbao.platform.iam.service;
 
 import top.itangbao.platform.iam.domain.Menu;
+import top.itangbao.platform.iam.dto.MenuDTO;
+
 import java.util.List;
 import java.util.Set;
 
