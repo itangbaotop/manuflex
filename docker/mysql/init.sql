@@ -75,6 +75,27 @@ INSERT IGNORE INTO `mf_role_permissions` (`role_id`, `permission_id`) VALUES
 INSERT IGNORE INTO `mf_role_permissions` (`role_id`, `permission_id`) VALUES
                                                                           (3, 1), (3, 5), (3, 14), (3, 15), (3, 16), (3, 18);
 
+-- 1. 系统管理 (目录)
+INSERT INTO iam_menus (parent_id, name, path, icon, permission, sort_order, type, created_at, updated_at)
+VALUES (0, '系统管理', 'system', 'SettingOutlined', 'ROLE_ADMIN', 1, 0, NOW(), NOW());
+
+-- 获取刚才插入的ID，假设是 1
+-- 1.1 用户管理
+INSERT INTO iam_menus (parent_id, name, path, icon, permission, sort_order, type, created_at, updated_at)
+VALUES (1, '用户管理', '/system/users', 'UserOutlined', 'user:read', 1, 1, NOW(), NOW());
+
+-- 1.2 角色权限
+INSERT INTO iam_menus (parent_id, name, path, icon, permission, sort_order, type, created_at, updated_at)
+VALUES (1, '角色权限', '/system/roles', 'SafetyCertificateOutlined', 'role:read', 2, 1, NOW(), NOW());
+
+-- 1.3 菜单管理 (新功能)
+INSERT INTO iam_menus (parent_id, name, path, icon, permission, sort_order, type, created_at, updated_at)
+VALUES (1, '菜单管理', '/system/menus', 'MenuOutlined', 'role:read', 3, 1, NOW(), NOW());
+
+-- 1.4 模型设计
+INSERT INTO iam_menus (parent_id, name, path, icon, permission, sort_order, type, created_at, updated_at)
+VALUES (1, '模型设计', '/system/metadata', 'DatabaseOutlined', 'schema:read', 4, 1, NOW(), NOW());
+
 -- 创建 Camunda 数据库
 CREATE DATABASE IF NOT EXISTS camunda_bpm CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 GRANT ALL PRIVILEGES ON camunda_bpm.* TO 'manuflex_user'@'%';

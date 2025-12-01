@@ -1,0 +1,84 @@
+server:
+  port: 8084 # LIMS 服务的端口
+
+spring:
+  application:
+    name: platform-lims-service
+  datasource:
+    url: jdbc:mysql://mysql:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: manuflex_user
+    password: manuflex_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # LIMS 可能有自己的实体，所以这里设置为 update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# 元数据服务的地址 (Feign 客户端使用)
+metadata:
+  service:
+    url: http://platform-metadata-service
+
+# 数据服务的地址 (Feign 客户端使用)
+data:
+  service:
+    url: http://platform-data-service
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    top.itangbao.platform.lims: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
+  info:
+    title: ManuFlex PaaS - LIMS Service API
+    description: Laboratory Information Management System (LIMS) Service APIs for ManuFlex PaaS.
+    version: 1.0.0
+    contact:
+      name: itangbao
+      email: itangbao@example.com
+    license:
+      name: Apache 2.0
+      url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+app: # JWT 配置 (LIMS 也需要 JwtTokenProvider)
+  jwtSecret: xi5G429vyD9/rLxktYqsZU723o3V5OB65KWoU76ORtFqihOS3gSQSqEWfDzDdc1ThsPv9D2v0AdqvcdXg+2vqg==
+  jwtExpirationMs: 3600000
+  jwtRefreshExpirationMs: 604800000
+
+# Camunda 外部任务客户端配置 (新增)
+camunda.bpm.client:
+  base-url: http://localhost:8085/engine-rest # 外部任务客户端连接 Camunda 引擎 REST API 的地址
+  subscriptions:
+    sample-topic: # 对应 SampleExternalTaskWorker 中的 @ExternalTaskSubscription("sample-topic")
+      lock-duration: 10000 # 任务锁定时间 (毫秒)
+      auto-fetch-and-lock: true # 自动拉取和锁定任务
+      async-response-timeout: 5000 # 异步响应超时时间
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'health,info,prometheus,metrics'
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  observations:
+    key-values:
+      application: ${spring.application.name}
