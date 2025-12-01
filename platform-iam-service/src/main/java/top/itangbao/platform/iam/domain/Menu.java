@@ -3,6 +3,8 @@ package top.itangbao.platform.iam.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -12,28 +14,20 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 父菜单ID，顶级菜单为 0 或 null
     @Column(name = "parent_id")
-    private Long parentId;
+    private Long parentId; // 父菜单ID，0表示顶级
 
-    // 菜单显示名称
     @Column(nullable = false)
     private String name;
 
-    // 前端路由路径 (如 /system/users)
-    private String path;
+    private String path; // 前端路由
+    private String icon; // 图标名称
+    private String permission; // 权限标识
 
-    // 菜单图标 (如 UserOutlined)
-    private String icon;
-
-    // 需要的权限标识 (如 user:read)，为空则代表所有人可见(或仅登录可见)
-    private String permission;
-
-    // 排序号
     @Column(name = "sort_order")
     private Integer sortOrder;
 
-    // 菜单类型 (0: 目录, 1: 菜单, 2: 按钮) - 这里主要关注目录和菜单
+    // 类型: 0=目录, 1=菜单, 2=按钮
     private Integer type;
 
     @Column(name = "created_at", updatable = false)
@@ -42,14 +36,12 @@ public class Menu {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
+    // 瞬态字段，不映射到数据库，用于返回树形结构
+    @Transient
+    private List<Menu> children = new ArrayList<>();
 
+    @PrePersist
+    protected void onCreate() { createdAt = LocalDateTime.now(); updatedAt = LocalDateTime.now(); }
     @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
 }

@@ -1,11 +1,9 @@
 package top.itangbao.platform.iam.service.impl;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
 import top.itangbao.platform.iam.domain.Menu;
-import top.itangbao.platform.iam.dto.MenuDTO;
 import top.itangbao.platform.iam.repository.MenuRepository;
 import top.itangbao.platform.iam.service.MenuService;
 
@@ -14,14 +12,48 @@ import java.util.stream.Collectors;
 
 @Service
 public class MenuServiceImpl implements MenuService {
-
     @Autowired
     private MenuRepository menuRepository;
 
     @Override
-    public List<Menu> getAllMenus() {
-        return menuRepository.findAllByOrderBySortOrderAsc();
+    public List<Menu> getMenuTree(boolean isAdmin, Set<String> permissions) {
+        List<Menu> allMenus = menuRepository.findAllByOrderBySortOrderAsc();
+
+        // 1. 过滤权限
+        List<Menu> visibleMenus = allMenus.stream()
+                .filter(m -> isAdmin || m.getPermission() == null || m.getPermission().isEmpty() || permissions.contains(m.getPermission()))
+                .collect(Collectors.toList());
+
+        // 2. 构建树形结构 (Map映射法)
+        return buildTree(visibleMenus);
     }
+
+    private List<Menu> buildTree(List<Menu> menus) {
+        Map<Long, Menu> menuMap = new HashMap<>();
+        List<Menu> roots = new ArrayList<>();
+
+        // 先把所有节点放入 Map，并清空 children (防止Hibernate缓存干扰)
+        for (Menu m : menus) {
+            m.setChildren(new ArrayList<>());
+            menuMap.put(m.getId(), m);
+        }
+
+        // 组装父子关系
+        for (Menu m : menus) {
+            if (m.getParentId() == null || m.getParentId() == 0) {
+                roots.add(m);
+            } else {
+                Menu parent = menuMap.get(m.getParentId());
+                if (parent != null) {
+                    parent.getChildren().add(m);
+                }
+            }
+        }
+        return roots;
+    }
+
+    @Override
+    public List<Menu> getAllMenus() { return menuRepository.findAllByOrderBySortOrderAsc(); }
 
     @Override
     public Menu createMenu(Menu menu) {
@@ -30,64 +62,17 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public Menu updateMenu(Long id, Menu menuDetails) {
-        Menu menu = menuRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Menu not found"));
-        
-        menu.setName(menuDetails.getName());
-        menu.setPath(menuDetails.getPath());
-        menu.setIcon(menuDetails.getIcon());
-        menu.setPermission(menuDetails.getPermission());
-        menu.setSortOrder(menuDetails.getSortOrder());
-        menu.setParentId(menuDetails.getParentId());
-        
+    public Menu updateMenu(Long id, Menu dto) {
+        Menu menu = menuRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Menu not found"));
+        menu.setName(dto.getName());
+        menu.setPath(dto.getPath());
+        menu.setIcon(dto.getIcon());
+        menu.setPermission(dto.getPermission());
+        menu.setSortOrder(dto.getSortOrder());
+        menu.setParentId(dto.getParentId());
         return menuRepository.save(menu);
     }
 
     @Override
-    public void deleteMenu(Long id) {
-        // 实际生产中应检查是否有子菜单，如果有则禁止删除或级联删除
-        menuRepository.deleteById(id);
-    }
-
-    @Override
-    public List<MenuDTO> getCurrentUserMenuTree(Set<String> userPermissions, boolean isAdmin) {
-        List<Menu> allMenus = menuRepository.findAllByOrderBySortOrderAsc();
-        
-        // 1. 过滤权限
-        List<Menu> visibleMenus = allMenus.stream()
-                .filter(menu -> {
-                    if (isAdmin) return true; // 管理员看所有
-                    if (menu.getPermission() == null || menu.getPermission().isEmpty()) return true; // 无需权限的菜单
-                    return userPermissions.contains(menu.getPermission()); // 必须拥有对应权限
-                })
-                .collect(Collectors.toList());
-
-        // 2. 构建树形结构
-        return buildMenuTree(visibleMenus);
-    }
-
-    private List<MenuDTO> buildMenuTree(List<Menu> menus) {
-        List<MenuDTO> dtoList = menus.stream().map(m -> {
-            MenuDTO dto = new MenuDTO();
-            BeanUtils.copyProperties(m, dto);
-            return dto;
-        }).collect(Collectors.toList());
-
-        Map<Long, MenuDTO> dtoMap = dtoList.stream().collect(Collectors.toMap(MenuDTO::getId, m -> m));
-        List<MenuDTO> tree = new ArrayList<>();
-
-        for (MenuDTO node : dtoList) {
-            if (node.getParentId() == null || node.getParentId() == 0) {
-                tree.add(node);
-            } else {
-                MenuDTO parent = dtoMap.get(node.getParentId());
-                if (parent != null) {
-                    if (parent.getChildren() == null) parent.setChildren(new ArrayList<>());
-                    parent.getChildren().add(node);
-                }
-            }
-        }
-        return tree;
-    }
+    public void deleteMenu(Long id) { menuRepository.deleteById(id); }
 }
