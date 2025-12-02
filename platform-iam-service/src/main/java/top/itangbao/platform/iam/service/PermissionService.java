@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PermissionService {
-    Permission createPermission(String permissionName, String description);
-    Optional<Permission> getPermissionByName(String permissionName);
+    // 参数变为 code, name, description
+    Permission createPermission(String code, String name, String description);
+
     List<Permission> getAllPermissions();
-    // 更多方法如更新权限、删除权限等
+
+    // 可选
+     Optional<Permission> getPermissionByCode(String code);
 }
