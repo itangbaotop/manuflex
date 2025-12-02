@@ -31,4 +31,6 @@ public class UserUpdateRequest {
     private Boolean enabled = true;
 
     private Set<String> roles;
+
+    private Long deptId;
 }

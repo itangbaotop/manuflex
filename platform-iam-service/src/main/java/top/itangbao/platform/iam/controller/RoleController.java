@@ -45,7 +45,7 @@ public class RoleController {
     @Log(module = "角色管理", action = "创建角色")
     public ResponseEntity<Role> createRole(@RequestBody Role role) {
         // 这里简单复用 Role 实体接收参数，也可以定义 CreateRoleRequest DTO
-        Role createdRole = roleService.createRole(role.getName(), role.getDescription());
+        Role createdRole = roleService.createRole(role.getName(), role.getDescription(), role.getDataScope());
         return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
     }
 
@@ -59,7 +59,7 @@ public class RoleController {
     @PreAuthorize("hasAuthority('role:write') or hasRole('ADMIN')")
     @Log(module = "角色管理", action = "更新角色")
     public ResponseEntity<Role> updateRole(@PathVariable Long id, @RequestBody Role role) {
-        Role updatedRole = roleService.updateRole(id, role.getName(), role.getDescription());
+        Role updatedRole = roleService.updateRole(id, role.getName(), role.getDescription(), role.getDataScope());
         return ResponseEntity.ok(updatedRole);
     }
 

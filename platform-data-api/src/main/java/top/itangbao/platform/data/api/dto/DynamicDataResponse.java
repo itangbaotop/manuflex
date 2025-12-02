@@ -19,4 +19,7 @@ public class DynamicDataResponse {
     private Map<String, Object> data; // 动态数据
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private String createdBy;  // 创建人
+    private Long deptId;
 }

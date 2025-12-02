@@ -82,6 +82,8 @@ public class JwtTokenProvider {
                 .claim("roles", String.join(",", roles)) // 角色仍然以逗号分隔字符串存储
                 .claim("permissions", permissions) //  权限以 List<String> 存储
                 .claim("tenantId", userPrincipal.getTenantId())
+                .claim("deptId", userPrincipal.getDeptId())
+                .claim("dataScopes", userPrincipal.getDataScopes())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS512)

@@ -9,6 +9,8 @@ import jakarta.persistence.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,7 @@ import top.itangbao.platform.common.exception.DataValidationException;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
 import top.itangbao.platform.data.api.dto.*;
 import top.itangbao.platform.data.client.MetadataServiceClient;
+import top.itangbao.platform.data.context.UserContext;
 import top.itangbao.platform.data.manager.DynamicTableManager;
 import top.itangbao.platform.data.service.DynamicDataService;
 import top.itangbao.platform.metadata.api.dto.MetadataFieldDTO;
@@ -96,6 +99,15 @@ public class DynamicDataServiceImpl implements DynamicDataService {
         columnNames.add("updated_at");
         columnValues.add(LocalDateTime.now());
 
+        String currentUser = UserContext.getUsername();
+        Long currentDept = UserContext.getDeptId();
+
+        columnNames.add("created_by");
+        columnValues.add(currentUser != null ? currentUser : "system");
+
+        columnNames.add("dept_id");
+        columnValues.add(currentDept != null ? currentDept : 0L);
+
 
         for (MetadataFieldDTO field : schemaDTO.getFields()) {
             if (data.containsKey(field.getFieldName())) {
@@ -136,6 +148,8 @@ public class DynamicDataServiceImpl implements DynamicDataService {
                 .tenantId(request.getTenantId())
                 .schemaName(request.getSchemaName())
                 .data(data)
+                .createdBy(currentUser)
+                .deptId(currentDept)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -145,9 +159,10 @@ public class DynamicDataServiceImpl implements DynamicDataService {
     public DynamicDataResponse getDynamicDataById(String tenantId, String schemaName, Long id) {
         MetadataSchemaDTO schemaDTO = metadataServiceClient.getSchemaByNameAndTenantId(schemaName, tenantId)
                 .blockOptional()
-                .orElseThrow(() -> new ResourceNotFoundException("Metadata schema not found with name '" + schemaName + "' for tenant '" + tenantId + "'"));
+                .orElseThrow(() -> new ResourceNotFoundException("Metadata schema not found"));
 
         String tableName = dynamicTableManager.buildTableName(tenantId, schemaName);
+        List<String> columnNames = getColumnNames(tableName);
 
         String selectSql = "SELECT * FROM `" + tableName + "` WHERE id = ?1 AND tenant_id = ?2";
         List<Object[]> resultList = entityManager.createNativeQuery(selectSql)
@@ -156,41 +171,10 @@ public class DynamicDataServiceImpl implements DynamicDataService {
                 .getResultList();
 
         if (resultList.isEmpty()) {
-            throw new ResourceNotFoundException("Dynamic data not found with ID: " + id + " in schema '" + schemaName + "' for tenant '" + tenantId + "'");
+            throw new ResourceNotFoundException("Dynamic data not found with ID: " + id);
         }
 
-        Object[] row = resultList.get(0);
-        Map<String, Object> dataMap = new HashMap<>();
-        LocalDateTime createdAt = null;
-        LocalDateTime updatedAt = null;
-
-        List<String> columnNames = getColumnNames(tableName);
-
-        for (int i = 0; i < columnNames.size(); i++) {
-            String colName = columnNames.get(i);
-            Object colValue = row[i];
-
-            if ("id".equals(colName) && colValue instanceof Number) {
-                id = ((Number) colValue).longValue();
-            } else if ("tenant_id".equals(colName)) {
-                // 忽略这些内部字段，或在DTO中单独处理
-            } else if ("created_at".equals(colName) && colValue instanceof java.sql.Timestamp) {
-                createdAt = ((java.sql.Timestamp) colValue).toLocalDateTime();
-            } else if ("updated_at".equals(colName) && colValue instanceof java.sql.Timestamp) {
-                updatedAt = ((java.sql.Timestamp) colValue).toLocalDateTime();
-            } else {
-                dataMap.put(colName, colValue);
-            }
-        }
-
-        return DynamicDataResponse.builder()
-                .id(id)
-                .tenantId(tenantId)
-                .schemaName(schemaName)
-                .data(dataMap)
-                .createdAt(createdAt)
-                .updatedAt(updatedAt)
-                .build();
+        return mapRowToResponse(resultList.get(0), columnNames, tenantId, schemaName);
     }
 
 
@@ -206,6 +190,8 @@ public class DynamicDataServiceImpl implements DynamicDataService {
         StringBuilder whereClause = new StringBuilder(" WHERE tenant_id = ? ");
         List<Object> queryParams = new ArrayList<>();
         queryParams.add(tenantId);
+
+        applyDataPermissionFilter(whereClause, queryParams);
 
         if (filterRequest != null && filterRequest.getFilters() != null && !filterRequest.getFilters().isEmpty()) {
             for (Map.Entry<String, String> entry : filterRequest.getFilters().entrySet()) {
@@ -314,37 +300,9 @@ public class DynamicDataServiceImpl implements DynamicDataService {
 
         List<Object[]> resultList = dataQuery.getResultList();
 
-        List<DynamicDataResponse> content = resultList.stream().map(row -> {
-            Map<String, Object> dataMap = new HashMap<>();
-            Long id = null;
-            LocalDateTime createdAt = null;
-            LocalDateTime updatedAt = null;
-
-            for (int i = 0; i < columnNames.size(); i++) {
-                String colName = columnNames.get(i);
-                Object colValue = row[i];
-
-                if ("id".equals(colName) && colValue instanceof Number) {
-                    id = ((Number) colValue).longValue();
-                } else if ("tenant_id".equals(colName)) {
-                    // 忽略
-                } else if ("created_at".equals(colName) && colValue instanceof java.sql.Timestamp) {
-                    createdAt = ((java.sql.Timestamp) colValue).toLocalDateTime();
-                } else if ("updated_at".equals(colName) && colValue instanceof java.sql.Timestamp) {
-                    updatedAt = ((java.sql.Timestamp) colValue).toLocalDateTime();
-                } else {
-                    dataMap.put(colName, colValue);
-                }
-            }
-            return DynamicDataResponse.builder()
-                    .id(id)
-                    .tenantId(tenantId)
-                    .schemaName(schemaName)
-                    .data(dataMap)
-                    .createdAt(createdAt)
-                    .updatedAt(updatedAt)
-                    .build();
-        }).collect(Collectors.toList());
+        List<DynamicDataResponse> content = resultList.stream()
+                .map(row -> mapRowToResponse(row, columnNames, tenantId, schemaName))
+                .collect(Collectors.toList());
 
         int totalPages = (int) Math.ceil((double) totalElements / (pageRequest != null ? pageRequest.getSize() : 1));
 
@@ -723,6 +681,81 @@ public class DynamicDataServiceImpl implements DynamicDataService {
             throw new IllegalArgumentException("日期时间格式无效");
         } catch (Exception e) {
             throw new IllegalArgumentException("数据格式无效: " + e.getMessage());
+        }
+    }
+
+
+    private DynamicDataResponse mapRowToResponse(Object[] row, List<String> columnNames, String tenantId, String schemaName) {
+        Map<String, Object> dataMap = new HashMap<>();
+        Long id = null;
+        LocalDateTime createdAt = null;
+        LocalDateTime updatedAt = null;
+        String createdBy = null;
+        Long deptId = null;
+
+        for (int i = 0; i < columnNames.size(); i++) {
+            String colName = columnNames.get(i);
+            Object colValue = row[i];
+
+            if ("id".equals(colName)) id = ((Number) colValue).longValue();
+            else if ("tenant_id".equals(colName)) { /* skip */ }
+            else if ("created_at".equals(colName)) createdAt = colValue instanceof java.sql.Timestamp ? ((java.sql.Timestamp) colValue).toLocalDateTime() : null;
+            else if ("updated_at".equals(colName)) updatedAt = colValue instanceof java.sql.Timestamp ? ((java.sql.Timestamp) colValue).toLocalDateTime() : null;
+            else if ("created_by".equals(colName)) createdBy = (String) colValue;
+            else if ("dept_id".equals(colName)) deptId = colValue != null ? ((Number) colValue).longValue() : null;
+            else dataMap.put(colName, colValue);
+        }
+        return DynamicDataResponse.builder()
+                .id(id)
+                .tenantId(tenantId)
+                .schemaName(schemaName)
+                .data(dataMap)
+                .createdBy(createdBy)
+                .deptId(deptId)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .build();
+    }
+
+    private void applyDataPermissionFilter(StringBuilder sql, List<Object> params) {
+        Set<String> scopes = UserContext.getDataScopes();
+        String username = UserContext.getUsername();
+        Long deptId = UserContext.getDeptId();
+
+        // 1. 如果是超级管理员，或者拥有 "ALL" 权限，直接放行 (什么都不加 = 看全部)
+        if (scopes.contains("ALL") || "admin".equals(username)) { // 简单判断 admin
+            return;
+        }
+
+        // 2. 拼接权限 SQL
+        List<String> conditions = new ArrayList<>();
+
+        // 策略 A: 本部门及以下 (DEPT_AND_CHILD) -> 暂简化为本部门
+        if (scopes.contains("DEPT_AND_CHILD") || scopes.contains("DEPT")) {
+            if (deptId != null) {
+                conditions.add("dept_id = ?");
+                params.add(deptId);
+            }
+        }
+
+        // 策略 B: 仅本人 (SELF)
+        // 如果同时有 DEPT 和 SELF，通常取并集 (OR) 或者取最大范围。
+        // 这里假设：如果有 DEPT 权限，就不用管 SELF 了；如果没有 DEPT，才限制 SELF。
+        if (conditions.isEmpty()) {
+            // 默认策略：如果没有更高级的权限，就被限制在“仅本人”
+            // (scopes.contains("SELF") 或者是空)
+            if (username != null) {
+                conditions.add("created_by = ?");
+                params.add(username);
+            } else {
+                // 极端情况：没登录也没权限 -> 查不到任何数据
+                conditions.add("1 = 0");
+            }
+        }
+
+        // 将条件拼接到 SQL
+        if (!conditions.isEmpty()) {
+            sql.append(" AND (").append(String.join(" OR ", conditions)).append(") ");
         }
     }
 }

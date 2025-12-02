@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import top.itangbao.platform.iam.domain.Department;
 import top.itangbao.platform.iam.domain.Permission;
 import top.itangbao.platform.iam.domain.Role;
 import top.itangbao.platform.iam.domain.User;
@@ -23,6 +24,7 @@ import top.itangbao.platform.iam.dto.UserDTO;
 import top.itangbao.platform.iam.dto.UserUpdateRequest;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
 import top.itangbao.platform.common.exception.UserAlreadyExistsException;
+import top.itangbao.platform.iam.repository.DepartmentRepository;
 import top.itangbao.platform.iam.repository.RoleRepository;
 import top.itangbao.platform.iam.repository.UserRepository;
 import top.itangbao.platform.iam.service.UserService;
@@ -40,17 +42,20 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
+    private final DepartmentRepository departmentRepository;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
-                           JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
+                           JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService,
+                           DepartmentRepository departmentRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
+        this.departmentRepository = departmentRepository;
     }
 
     @Override
@@ -73,6 +78,8 @@ public class UserServiceImpl implements UserService {
 
         // 传递前端发来的 roles (如果前端没传，resolveRoles 会自动设为默认)
         user.setRoles(resolveRoles(request.getRoles()));
+
+        user.setDeptId(request.getDeptId());
 
         User savedUser = userRepository.save(user);
         return convertToDTO(savedUser);
@@ -156,6 +163,10 @@ public class UserServiceImpl implements UserService {
         // 处理角色更新
         if (request.getRoles() != null) {
             user.setRoles(resolveRoles(request.getRoles()));
+        }
+
+        if (request.getDeptId() != null) {
+            user.setDeptId(request.getDeptId());
         }
 
         User updatedUser = userRepository.save(user);
@@ -251,6 +262,12 @@ public class UserServiceImpl implements UserService {
                 .map(Permission::getCode)
                 .forEach(allPermissionCodes::add);
 
+        String deptName = null;
+        if (user.getDeptId() != null) {
+            deptName = departmentRepository.findById(user.getDeptId())
+                    .map(Department::getName)
+                    .orElse("未知部门");
+        }
 
         return UserDTO.builder()
                 .id(String.valueOf(user.getId())) // Long to String
@@ -261,6 +278,8 @@ public class UserServiceImpl implements UserService {
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .roles(roleDTOs) // 使用转换后的 Set<RoleDTO>
+                .deptId(user.getDeptId())
+                .deptName(deptName)
                 .permissions(allPermissionCodes) // 填充权限编码列表
                 .build();
     }

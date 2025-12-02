@@ -31,29 +31,32 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public Role createRole(String roleName, String description) {
+    public Role createRole(String roleName, String description, String dataScope) {
         if (roleRepository.existsByName(roleName)) {
-            throw new ResourceAlreadyExistsException("Role with name " + roleName + " already exists.");
+            throw new ResourceAlreadyExistsException("Role exists: " + roleName);
         }
         Role role = new Role();
         role.setName(roleName);
         role.setDescription(description);
+        role.setDataScope(dataScope != null ? dataScope : "SELF");
         return roleRepository.save(role);
     }
 
     @Override
     @Transactional
-    public Role updateRole(Long id, String roleName, String description) {
+    public Role updateRole(Long id, String roleName, String description, String dataScope) {
         Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + id));
 
-        // 如果修改了名称，且新名称已存在(排除自己)，则抛错
         if (!role.getName().equals(roleName) && roleRepository.existsByName(roleName)) {
-            throw new ResourceAlreadyExistsException("Role with name " + roleName + " already exists.");
+            throw new ResourceAlreadyExistsException("Role name exists");
         }
 
         role.setName(roleName);
         role.setDescription(description);
+        if (dataScope != null) {
+            role.setDataScope(dataScope);
+        }
         return roleRepository.save(role);
     }
 

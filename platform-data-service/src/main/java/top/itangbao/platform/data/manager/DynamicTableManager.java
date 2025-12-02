@@ -48,6 +48,9 @@ public class DynamicTableManager {
         ddl.append("    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n");
         ddl.append("    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n");
 
+        ddl.append("    `created_by` VARCHAR(100) DEFAULT NULL COMMENT '创建人', ");
+        ddl.append("    `dept_id` BIGINT DEFAULT NULL COMMENT '部门ID', ");
+
 
         // 根据字段定义添加列
         String columns = schemaDTO.getFields().stream()

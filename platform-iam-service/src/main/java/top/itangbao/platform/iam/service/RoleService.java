@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RoleService {
-    // 创建角色
-    Role createRole(String roleName, String description);
+    Role createRole(String roleName, String description, String dataScope);
 
-    // 更新角色 (新增)
-    Role updateRole(Long id, String roleName, String description);
+    Role updateRole(Long id, String roleName, String description, String dataScope);
 
     // 删除角色 (新增)
     void deleteRole(Long id);

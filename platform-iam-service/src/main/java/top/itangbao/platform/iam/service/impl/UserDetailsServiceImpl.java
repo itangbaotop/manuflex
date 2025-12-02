@@ -32,6 +32,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                         .orElseThrow(() -> new UsernameNotFoundException("User not found with identifier: " + identifier)));
 
         Set<GrantedAuthority> authorities = new HashSet<>();
+        Set<String> dataScopes = new HashSet<>();
 
         // 添加角色权限
         user.getRoles().forEach(role -> {
@@ -39,6 +40,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             role.getPermissions().stream()
                     .map(permission -> new SimpleGrantedAuthority(permission.getCode()))
                     .forEach(authorities::add);
+            dataScopes.add(role.getDataScope());
         });
 
         // 添加直接分配给用户的权限
@@ -50,6 +52,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return new CustomUserDetails(
                 user.getId(),
                 user.getTenantId(),
+                user.getDeptId(),
+                dataScopes,
                 user.getUsername(),
                 user.getPassword(),
                 user.getEnabled(),

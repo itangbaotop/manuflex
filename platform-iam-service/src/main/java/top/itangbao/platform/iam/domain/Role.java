@@ -33,4 +33,7 @@ public class Role {
             inverseJoinColumns = @JoinColumn(name = "permission_id") // Permission 表在关联表中的外键
     )
     private Set<Permission> permissions = new HashSet<>();
+
+    @Column(name = "data_scope", nullable = false)
+    private String dataScope = "SELF";
 }

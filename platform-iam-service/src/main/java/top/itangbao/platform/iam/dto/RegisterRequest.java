@@ -33,4 +33,6 @@ public class RegisterRequest {
     private String tenantId;
 
     private Set<String> roles;
+
+    private Long deptId;
 }

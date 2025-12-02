@@ -25,6 +25,8 @@ public class UserDTO {
     private LocalDateTime updatedAt;
     private Set<RoleDTO> roles;
     private Set<String> permissions; // 保持只返回权限编码
+    private Long deptId;
+    private String deptName;
 
     public static UserDTO fromEntity(top.itangbao.platform.iam.domain.User user) {
         if (user == null) {
