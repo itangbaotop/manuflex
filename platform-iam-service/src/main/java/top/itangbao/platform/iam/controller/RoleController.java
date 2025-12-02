@@ -11,8 +11,6 @@ import top.itangbao.platform.iam.dto.RolePermissionUpdateRequest;
 import top.itangbao.platform.iam.service.RoleService;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/iam/roles")
@@ -37,8 +35,47 @@ public class RoleController {
     }
 
     /**
+     * 创建角色
+     * @param role 角色信息
+     * @return 创建后的角色
+     */
+    @PostMapping
+    @PreAuthorize("hasAuthority('role:write') or hasRole('ADMIN')")
+    public ResponseEntity<Role> createRole(@RequestBody Role role) {
+        // 这里简单复用 Role 实体接收参数，也可以定义 CreateRoleRequest DTO
+        Role createdRole = roleService.createRole(role.getName(), role.getDescription());
+        return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
+    }
+
+    /**
+     * 更新角色
+     * @param id 角色ID
+     * @param role 更新信息
+     * @return 更新后的角色
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('role:write') or hasRole('ADMIN')")
+    public ResponseEntity<Role> updateRole(@PathVariable Long id, @RequestBody Role role) {
+        Role updatedRole = roleService.updateRole(id, role.getName(), role.getDescription());
+        return ResponseEntity.ok(updatedRole);
+    }
+
+    /**
+     * 删除角色
+     * @param id 角色ID
+     * @return 无内容响应
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('role:delete') or hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteRole(@PathVariable Long id) {
+        roleService.deleteRole(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    /**
      * 为角色分配权限
-     * 只有拥有 'ADMIN' 权限的用户才能访问
+     * 只有拥有 'role:assign_permission' 权限或 'ADMIN' 角色的用户才能访问
+     * @param roleId 角色ID
      * @param request 角色权限更新请求
      * @return 更新后的角色信息
      */
@@ -52,6 +89,4 @@ public class RoleController {
         Role updatedRole = roleService.assignPermissionsToRole(request);
         return ResponseEntity.ok(updatedRole);
     }
-
-    // 可以在这里添加创建角色、更新角色、删除角色的 API
 }

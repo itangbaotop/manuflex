@@ -42,6 +42,32 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
+    public Role updateRole(Long id, String roleName, String description) {
+        Role role = roleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with ID: " + id));
+
+        // 如果修改了名称，且新名称已存在(排除自己)，则抛错
+        if (!role.getName().equals(roleName) && roleRepository.existsByName(roleName)) {
+            throw new ResourceAlreadyExistsException("Role with name " + roleName + " already exists.");
+        }
+
+        role.setName(roleName);
+        role.setDescription(description);
+        return roleRepository.save(role);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRole(Long id) {
+        if (!roleRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Role not found with ID: " + id);
+        }
+        // TODO: 这里可能需要检查是否有用户关联了该角色，如果有，可能需要先解除关联或禁止删除
+        roleRepository.deleteById(id);
+    }
+
+    @Override
     public Optional<Role> getRoleByName(String roleName) {
         return roleRepository.findByName(roleName);
     }
@@ -61,13 +87,12 @@ public class RoleServiceImpl implements RoleService {
         if (request.getPermissionIds() != null && !request.getPermissionIds().isEmpty()) {
             List<Permission> foundPermissions = permissionRepository.findAllById(request.getPermissionIds());
             if (foundPermissions.size() != request.getPermissionIds().size()) {
-                // 如果请求的权限ID中有些找不到，可以抛出更具体的异常
                 throw new ResourceNotFoundException("One or more permissions not found.");
             }
             permissions.addAll(foundPermissions);
         }
 
-        role.setPermissions(permissions); // 设置新的权限列表
+        role.setPermissions(permissions);
         return roleRepository.save(role);
     }
 }
