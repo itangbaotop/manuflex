@@ -21,5 +21,7 @@ public interface UserService {
     void clearRefreshToken(String username); // 清除 Refresh Token
     UserDetails loadUserByUsername(String username); // 方便 AuthController 调用
     UserDTO convertToDTO(User user); // 方便 AuthController 调用
-    // 更多方法如更新用户、删除用户、分配角色等
+
+
+    void resetPassword(Long userId, String newPassword);
 }

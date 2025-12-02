@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import top.itangbao.platform.common.annotation.Log;
 import top.itangbao.platform.iam.domain.Role;
 import top.itangbao.platform.iam.dto.RolePermissionUpdateRequest;
 import top.itangbao.platform.iam.service.RoleService;
@@ -41,6 +42,7 @@ public class RoleController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('role:write') or hasRole('ADMIN')")
+    @Log(module = "角色管理", action = "创建角色")
     public ResponseEntity<Role> createRole(@RequestBody Role role) {
         // 这里简单复用 Role 实体接收参数，也可以定义 CreateRoleRequest DTO
         Role createdRole = roleService.createRole(role.getName(), role.getDescription());
@@ -55,6 +57,7 @@ public class RoleController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('role:write') or hasRole('ADMIN')")
+    @Log(module = "角色管理", action = "更新角色")
     public ResponseEntity<Role> updateRole(@PathVariable Long id, @RequestBody Role role) {
         Role updatedRole = roleService.updateRole(id, role.getName(), role.getDescription());
         return ResponseEntity.ok(updatedRole);
@@ -67,6 +70,7 @@ public class RoleController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('role:delete') or hasRole('ADMIN')")
+    @Log(module = "角色管理", action = "删除角色")
     public ResponseEntity<Void> deleteRole(@PathVariable Long id) {
         roleService.deleteRole(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -81,6 +85,7 @@ public class RoleController {
      */
     @PutMapping("/{roleId}/permissions")
     @PreAuthorize("hasAuthority('role:assign_permission') or hasRole('ADMIN')")
+    @Log(module = "角色管理", action = "分配权限")
     public ResponseEntity<Role> assignPermissionsToRole(@PathVariable Long roleId, @Valid @RequestBody RolePermissionUpdateRequest request) {
         // 确保请求中的 roleId 与路径变量一致
         if (!roleId.equals(request.getRoleId())) {

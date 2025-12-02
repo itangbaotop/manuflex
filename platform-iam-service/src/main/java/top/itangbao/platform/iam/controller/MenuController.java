@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
+import top.itangbao.platform.common.annotation.Log;
 import top.itangbao.platform.common.security.CustomUserDetails;
 import top.itangbao.platform.iam.domain.Menu;
 import top.itangbao.platform.iam.service.MenuService;
@@ -22,6 +23,7 @@ public class MenuController {
 
     // 获取当前用户的菜单树 (用于左侧导航)
     @GetMapping("/current")
+    @Log(module = "菜单管理", action = "获得菜单树")
     public ResponseEntity<List<Menu>> getCurrentUserMenus() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
@@ -36,21 +38,25 @@ public class MenuController {
 
     // 获取所有菜单 (用于管理界面)
     @GetMapping
+    @Log(module = "菜单管理", action = "获取所有菜单")
     public ResponseEntity<List<Menu>> getAllMenus() {
         return ResponseEntity.ok(menuService.getAllMenus());
     }
 
     @PostMapping
+    @Log(module = "菜单管理", action = "创建菜单")
     public ResponseEntity<Menu> createMenu(@RequestBody Menu menu) {
         return ResponseEntity.ok(menuService.createMenu(menu));
     }
 
     @PutMapping("/{id}")
+    @Log(module = "菜单管理", action = "更新菜单")
     public ResponseEntity<Menu> updateMenu(@PathVariable Long id, @RequestBody Menu menu) {
         return ResponseEntity.ok(menuService.updateMenu(id, menu));
     }
 
     @DeleteMapping("/{id}")
+    @Log(module = "菜单管理", action = "删除菜单")
     public ResponseEntity<Void> deleteMenu(@PathVariable Long id) {
         menuService.deleteMenu(id);
         return ResponseEntity.noContent().build();

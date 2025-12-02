@@ -196,6 +196,22 @@ public class UserServiceImpl implements UserService {
         return userDetailsService.loadUserByUsername(username);
     }
 
+    @Override
+    @Transactional
+    public void resetPassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        // 加密新密码
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // 可选：如果实现了"首次登录强制改密"，这里可以设置 user.setPasswordExpired(true);
+        // 可选：清除该用户所有的 Refresh Token，强制其重新登录
+        user.setRefreshToken(null);
+
+        userRepository.save(user);
+    }
+
     // 辅助方法：将 User 实体转换为 UserDTO
     @Override
     public UserDTO convertToDTO(User user) {

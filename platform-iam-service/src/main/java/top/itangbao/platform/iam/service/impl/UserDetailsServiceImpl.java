@@ -37,13 +37,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         user.getRoles().forEach(role -> {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
             role.getPermissions().stream()
-                    .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                    .map(permission -> new SimpleGrantedAuthority(permission.getCode()))
                     .forEach(authorities::add);
         });
 
         // 添加直接分配给用户的权限
         user.getPermissions().stream()
-                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                .map(permission -> new SimpleGrantedAuthority(permission.getCode()))
                 .forEach(authorities::add);
 
 
@@ -52,6 +52,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getTenantId(),
                 user.getUsername(),
                 user.getPassword(),
+                user.getEnabled(),
                 authorities
         );
     }

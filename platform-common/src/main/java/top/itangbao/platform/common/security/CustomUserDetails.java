@@ -12,8 +12,10 @@ public class CustomUserDetails extends User {
     private Long id;
     private String tenantId;
 
-    public CustomUserDetails(Long id, String tenantId, String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, authorities);
+    public CustomUserDetails(Long id, String tenantId, String username, String password, boolean enabled, Collection<? extends GrantedAuthority> authorities) {
+        // 调用 Spring Security 的全参构造函数
+        // 参数顺序: username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities
+        super(username, password, enabled, true, true, true, authorities);
         this.id = id;
         this.tenantId = tenantId;
     }

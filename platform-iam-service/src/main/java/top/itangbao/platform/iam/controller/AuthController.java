@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import top.itangbao.platform.common.annotation.Log;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
 import top.itangbao.platform.iam.domain.User;
 import top.itangbao.platform.iam.dto.*;
@@ -35,6 +36,7 @@ public class AuthController {
      * @return 注册成功的用户信息
      */
     @PostMapping("/register")
+    @Log(module = "用户管理", action = "注册用户")
     public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody RegisterRequest request) {
         UserDTO registeredUser = userService.registerUser(request);
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED); // 返回 201 Created
