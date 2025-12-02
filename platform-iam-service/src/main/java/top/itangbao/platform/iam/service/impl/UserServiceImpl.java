@@ -71,13 +71,8 @@ public class UserServiceImpl implements UserService {
         user.setTenantId(request.getTenantId());
         user.setEnabled(true); // 注册时默认启用
 
-        // 默认赋予新用户 'USER' 角色
-        Optional<Role> defaultRole = roleRepository.findByName("USER");
-        if (defaultRole.isPresent()) {
-            user.setRoles(Collections.singleton(defaultRole.get()));
-        } else {
-            throw new ResourceNotFoundException("Default role 'USER' not found. Please ensure it exists.");
-        }
+        // 传递前端发来的 roles (如果前端没传，resolveRoles 会自动设为默认)
+        user.setRoles(resolveRoles(request.getRoles()));
 
         User savedUser = userRepository.save(user);
         return convertToDTO(savedUser);
@@ -159,12 +154,8 @@ public class UserServiceImpl implements UserService {
         }
 
         // 处理角色更新
-        if (request.getRoleIds() != null) {
-            Set<Role> newRoles = request.getRoleIds().stream()
-                    .map(roleId -> roleRepository.findById(Long.valueOf(roleId)) // 将 String roleId 转换为 Long
-                            .orElseThrow(() -> new ResourceNotFoundException("Role not found with ID: " + roleId)))
-                    .collect(Collectors.toSet());
-            user.setRoles(newRoles);
+        if (request.getRoles() != null) {
+            user.setRoles(resolveRoles(request.getRoles()));
         }
 
         User updatedUser = userRepository.save(user);
@@ -256,5 +247,27 @@ public class UserServiceImpl implements UserService {
                 .roles(roleDTOs) // 使用转换后的 Set<RoleDTO>
                 .permissions(allPermissionCodes) // 填充权限编码列表
                 .build();
+    }
+
+    /**
+     * 将角色名列表转换为 Role 实体集合
+     * @param roleNames 角色名集合，如 ["ROLE_ADMIN", "ROLE_USER"]
+     * @return Role 实体集合
+     */
+    private Set<Role> resolveRoles(Set<String> roleNames) {
+        if (roleNames == null || roleNames.isEmpty()) {
+            // 如果没有传角色，返回默认 'ROLE_USER' (或者空集合，视业务而定)
+            Role defaultRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new ResourceNotFoundException("Default role 'ROLE_USER' not found."));
+            return Collections.singleton(defaultRole);
+        }
+
+        Set<Role> roles = new HashSet<>();
+        roleNames.forEach(roleName -> {
+            Role role = roleRepository.findByName(roleName)
+                    .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
+            roles.add(role);
+        });
+        return roles;
     }
 }

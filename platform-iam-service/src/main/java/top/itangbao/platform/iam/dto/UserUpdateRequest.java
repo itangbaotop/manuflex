@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -29,5 +30,5 @@ public class UserUpdateRequest {
 
     private Boolean enabled = true;
 
-    private List<String> roleIds;
+    private Set<String> roles;
 }

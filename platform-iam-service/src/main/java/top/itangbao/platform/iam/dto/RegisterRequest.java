@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,4 +31,6 @@ public class RegisterRequest {
     @NotBlank(message = "Tenant ID cannot be empty")
     @Size(max = 50, message = "Tenant ID cannot exceed 50 characters")
     private String tenantId;
+
+    private Set<String> roles;
 }
