@@ -425,3 +425,4 @@ networks:
 
 
 #  docker-compose up -d mysql nacos kafka platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-workflow-service platform-lims-service
+#  docker-compose up -d platform-api-gateway platform-iam-service platform-metadata-service platform-data-service

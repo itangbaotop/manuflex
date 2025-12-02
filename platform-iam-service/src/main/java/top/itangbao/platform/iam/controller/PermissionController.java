@@ -23,11 +23,11 @@ public class PermissionController {
     }
 
     /**
-     * 获取系统所有可用权限
-     * 通常只有管理员或有相关权限的用户可以访问
+     * 获取系统所有可用权限 (用于前端穿梭框展示)
+     * 只有管理员或拥有 'role:read' 权限的用户可访问
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('permission:read')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('role:read')")
     public ResponseEntity<List<Permission>> getAllPermissions() {
         return ResponseEntity.ok(permissionService.getAllPermissions());
     }

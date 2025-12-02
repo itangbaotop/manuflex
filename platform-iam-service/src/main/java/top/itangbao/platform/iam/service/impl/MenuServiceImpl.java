@@ -68,6 +68,7 @@ public class MenuServiceImpl implements MenuService {
         menu.setPath(dto.getPath());
         menu.setIcon(dto.getIcon());
         menu.setPermission(dto.getPermission());
+        menu.setComponent(dto.getComponent());
         menu.setSortOrder(dto.getSortOrder());
         menu.setParentId(dto.getParentId());
         return menuRepository.save(menu);

@@ -96,6 +96,46 @@ VALUES (1, '菜单管理', '/system/menus', 'MenuOutlined', 'role:read', 3, 1, N
 INSERT INTO iam_menus (parent_id, name, path, icon, permission, sort_order, type, created_at, updated_at)
 VALUES (1, '模型设计', '/system/metadata', 'DatabaseOutlined', 'schema:read', 4, 1, NOW(), NOW());
 
+
+-- ==========================================
+-- 修正版：初始化系统权限列表
+-- 表名：mf_permissions
+-- 字段：name, description (无时间字段)
+-- ==========================================
+
+-- === 用户管理 ===
+INSERT INTO mf_permissions (code, name, description) VALUES
+                                                         ('user:read', '查看用户', '允许查看用户列表'),
+                                                         ('user:create', '新建用户', '允许创建新用户'),
+                                                         ('user:write', '编辑用户', '允许编辑用户信息'),
+                                                         ('user:delete', '删除用户', '允许删除用户');
+
+-- === 角色管理 ===
+INSERT INTO mf_permissions (code, name, description) VALUES
+                                                         ('role:read', '查看角色', '允许查看角色列表'),
+                                                         ('role:write', '编辑角色', '允许创建或编辑角色'),
+                                                         ('role:delete', '删除角色', '允许删除角色'),
+                                                         ('role:assign_permission', '分配权限', '允许给角色分配权限');
+
+-- === 菜单管理 ===
+INSERT INTO mf_permissions (code, name, description) VALUES
+                                                         ('menu:read', '查看菜单', '允许查看菜单配置'),
+                                                         ('menu:write', '管理菜单', '允许增删改菜单结构');
+
+-- === 业务模型 (Metadata) ===
+INSERT INTO mf_permissions (code, name, description) VALUES
+                                                         ('schema:read', '查看模型', '允许查看业务模型定义'),
+                                                         ('schema:write', '设计模型', '允许新建或修改业务模型');
+
+-- === 业务数据 (Data) ===
+INSERT INTO mf_permissions (code, name, description) VALUES
+                                                         ('data:read_all', '查看数据', '允许查看所有业务数据'),
+                                                         ('data:create', '新增数据', '允许新增业务数据'),
+                                                         ('data:update', '修改数据', '允许修改业务数据'),
+                                                         ('data:delete', '删除数据', '允许删除业务数据'),
+                                                         ('data:import', '导入数据', '允许导入Excel/CSV数据'),
+                                                         ('data:export', '导出数据', '允许导出数据');
+
 -- 创建 Camunda 数据库
 CREATE DATABASE IF NOT EXISTS camunda_bpm CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 GRANT ALL PRIVILEGES ON camunda_bpm.* TO 'manuflex_user'@'%';

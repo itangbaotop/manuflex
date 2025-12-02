@@ -23,6 +23,8 @@ public class Menu {
     private String path; // 前端路由
     private String icon; // 图标名称
     private String permission; // 权限标识
+    // e.g. "UserPage", "RolePage", "DynamicCRUD"
+    private String component;
 
     @Column(name = "sort_order")
     private Integer sortOrder;
