@@ -31,7 +31,7 @@ public class MetadataSchemaController {
      * @return 创建成功的模式信息
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:write')")
     public ResponseEntity<MetadataSchemaDTO> createSchema(@Valid @RequestBody MetadataSchemaCreateRequest request) {
         MetadataSchemaDTO createdSchema = schemaService.createSchema(request);
         return new ResponseEntity<>(createdSchema, HttpStatus.CREATED);
@@ -45,7 +45,7 @@ public class MetadataSchemaController {
      * @return 模式信息
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // 暂时简化权限，实际需要根据 tenantId 动态判断
+    @PreAuthorize("hasAuthority('schema:read')")
     public ResponseEntity<MetadataSchemaDTO> getSchemaById(@PathVariable Long id) {
         MetadataSchemaDTO schema = schemaService.getSchemaById(id);
         // 实际这里需要添加逻辑来验证当前用户是否属于该 schema.getTenantId()
@@ -60,7 +60,7 @@ public class MetadataSchemaController {
      * @return 模式信息
      */
     @GetMapping("/by-name")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // 暂时简化权限，实际需要根据 tenantId 动态判断
+    @PreAuthorize("hasAuthority('schema:read')")
     public ResponseEntity<MetadataSchemaDTO> getSchemaByNameAndTenantId(
             @RequestParam String name,
             @RequestParam String tenantId) {
@@ -76,7 +76,7 @@ public class MetadataSchemaController {
      * @return 模式列表
      */
     @GetMapping("/by-tenant/{tenantId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // 暂时简化权限，实际需要根据 tenantId 动态判断
+    @PreAuthorize("hasAuthority('schema:read')")
     public ResponseEntity<List<MetadataSchemaDTO>> getAllSchemasByTenantId(@PathVariable String tenantId) {
         List<MetadataSchemaDTO> schemas = schemaService.getAllSchemasByTenantId(tenantId);
         // 实际这里需要添加逻辑来验证当前用户是否属于该 tenantId
@@ -91,7 +91,7 @@ public class MetadataSchemaController {
      * @return 更新后的模式信息
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:write')")
     public ResponseEntity<MetadataSchemaDTO> updateSchema(@PathVariable Long id, @Valid @RequestBody MetadataSchemaUpdateRequest request) {
         MetadataSchemaDTO updatedSchema = schemaService.updateSchema(id, request);
         return ResponseEntity.ok(updatedSchema);
@@ -104,7 +104,7 @@ public class MetadataSchemaController {
      * @return 无内容响应
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:write')")
     public ResponseEntity<Void> deleteSchema(@PathVariable Long id) {
         schemaService.deleteSchema(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
