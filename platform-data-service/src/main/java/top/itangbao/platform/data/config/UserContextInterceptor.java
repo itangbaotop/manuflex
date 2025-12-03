@@ -2,6 +2,7 @@ package top.itangbao.platform.data.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import top.itangbao.platform.data.context.UserContext;
@@ -15,9 +16,13 @@ public class UserContextInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         // 1. 从 Header 读取网关透传的数据
-        String username = request.getHeader("X-User-Name");
+        String username = request.getHeader("X-Auth-User");
         String deptIdStr = request.getHeader("X-User-Dept-Id");
         String dataScopesStr = request.getHeader("X-User-Data-Scopes");
+
+        System.out.println("====== INTERCEPTOR IS RUNNING ======");
+        System.out.println("User: " + request.getHeader("X-Auth-User"));
+        System.out.println("User: " + request.getHeader("X-User-Dept-Id"));
 
         // 2. 类型转换
         Long deptId = null;

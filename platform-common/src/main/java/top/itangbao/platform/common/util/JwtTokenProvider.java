@@ -146,4 +146,18 @@ public class JwtTokenProvider {
     public Claims getAllClaimsFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(token).getBody();
     }
+
+    public Claims validateAndParse(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(key())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            // 记录日志，Token 无效/过期
+            // log.error("Token validation failed: {}", e.getMessage());
+            return null;
+        }
+    }
 }

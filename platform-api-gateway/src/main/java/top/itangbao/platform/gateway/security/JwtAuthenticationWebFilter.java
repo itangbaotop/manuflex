@@ -20,6 +20,7 @@ import top.itangbao.platform.common.util.JwtTokenProvider;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -41,22 +42,22 @@ public class JwtAuthenticationWebFilter extends AuthenticationWebFilter {
                 return Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION))
                         .filter(authHeader -> authHeader.startsWith("Bearer "))
                         .map(authHeader -> authHeader.substring(7))
-                        .filter(jwtTokenProvider::validateToken)
-                        .map(token -> {
-                            String username = jwtTokenProvider.getUsernameFromToken(token);
-                            Claims claims = jwtTokenProvider.getAllClaimsFromToken(token);
+                        .map(jwtTokenProvider::validateAndParse)
+                        .filter(Objects::nonNull) // 如果是 null (验证失败)，直接过滤掉
+                        .map(claims -> {
+                            String username = claims.getSubject(); // 获取用户名
 
+                            // 获取角色
                             String rolesClaim = claims.get("roles", String.class);
                             List<SimpleGrantedAuthority> authorities = Arrays.stream(rolesClaim != null && !rolesClaim.isEmpty() ? rolesClaim.split(",") : new String[0])
                                     .map(SimpleGrantedAuthority::new)
                                     .collect(Collectors.toList());
 
-                            // 构建 Authentication 对象
+                            // 构建 Authentication
                             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
 
-                            // 这样在 SuccessHandler 里才能拿到这些数据
+                            // 存入 Details 供 SuccessHandler 使用
                             auth.setDetails(claims);
-
                             return auth;
                         });
             }
@@ -93,9 +94,10 @@ public class JwtAuthenticationWebFilter extends AuthenticationWebFilter {
 
     // 辅助方法：安全获取 Claim 字符串 (防止 null 报错)
     private String getClaimString(Claims claims, String key) {
-        if (claims == null || claims.get(key) == null) {
+        if (claims == null || !claims.containsKey(key)) {
             return "";
         }
-        return claims.get(key).toString();
+        Object val = claims.get(key);
+        return val == null ? "" : String.valueOf(val);
     }
 }
