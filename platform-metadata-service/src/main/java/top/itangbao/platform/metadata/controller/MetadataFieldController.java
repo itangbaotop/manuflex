@@ -32,7 +32,7 @@ public class MetadataFieldController {
      * @return 创建成功的字段信息
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('schema:write')")
+    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
     public ResponseEntity<MetadataFieldDTO> createField(
             @PathVariable Long schemaId,
             @Valid @RequestBody MetadataFieldCreateRequest request) {
@@ -48,7 +48,7 @@ public class MetadataFieldController {
      * @return 字段信息
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('schema:read')")
+    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
     public ResponseEntity<MetadataFieldDTO> getFieldById(
             @PathVariable Long schemaId, // 路径变量，但在这个方法中可能不直接使用
             @PathVariable Long id) {
@@ -63,7 +63,7 @@ public class MetadataFieldController {
      * @return 字段列表
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('schema:read')")
+    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
     public ResponseEntity<List<MetadataFieldDTO>> getAllFieldsBySchemaId(@PathVariable Long schemaId) {
         List<MetadataFieldDTO> fields = fieldService.getAllFieldsBySchemaId(schemaId);
         return ResponseEntity.ok(fields);
@@ -78,7 +78,7 @@ public class MetadataFieldController {
      * @return 更新后的字段信息
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('schema:write')")
+    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
     public ResponseEntity<MetadataFieldDTO> updateField(
             @PathVariable Long schemaId, // 路径变量，但在这个方法中可能不直接使用
             @PathVariable Long id,
@@ -95,7 +95,7 @@ public class MetadataFieldController {
      * @return 无内容响应
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('schema:write')")
+    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
     public ResponseEntity<Void> deleteField(
             @PathVariable Long schemaId, // 路径变量，但在这个方法中可能不直接使用
             @PathVariable Long id) {
