@@ -21,6 +21,7 @@ import top.itangbao.platform.data.client.MetadataServiceClient;
 import top.itangbao.platform.data.context.UserContext;
 import top.itangbao.platform.data.manager.DynamicTableManager;
 import top.itangbao.platform.data.service.DynamicDataService;
+import top.itangbao.platform.iam.api.client.IamFeignClient;
 import top.itangbao.platform.metadata.api.dto.MetadataFieldDTO;
 import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
 import top.itangbao.platform.common.enums.FieldType;
@@ -43,6 +44,9 @@ public class DynamicDataServiceImpl implements DynamicDataService {
     private final DynamicTableManager dynamicTableManager;
     private final MetadataServiceClient metadataServiceClient;
     private final ObjectMapper objectMapper;
+
+    @Autowired
+    private IamFeignClient iamFeignClient;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -730,8 +734,31 @@ public class DynamicDataServiceImpl implements DynamicDataService {
         // 2. 拼接权限 SQL
         List<String> conditions = new ArrayList<>();
 
-        // 策略 A: 本部门及以下 (DEPT_AND_CHILD) -> 暂简化为本部门
-        if (scopes.contains("DEPT_AND_CHILD") || scopes.contains("DEPT")) {
+        if (scopes.contains("DEPT_AND_CHILD")) {
+            if (deptId != null) {
+                try {
+                    List<Long> allChildIds = iamFeignClient.getChildDepartmentIds(deptId);
+
+                    if (allChildIds != null && !allChildIds.isEmpty()) {
+                        // 构建 IN 语句: dept_id IN (?, ?, ?)
+                        String placeholders = allChildIds.stream().map(id -> "?").collect(Collectors.joining(", "));
+                        conditions.add("dept_id IN (" + placeholders + ")");
+                        params.addAll(allChildIds);
+                    } else {
+                        // 兜底：如果查不到子部门，至少要把自己加进去
+                        conditions.add("dept_id = ?");
+                        params.add(deptId);
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to get child departments from IAM", e);
+                    // 降级策略：如果远程调用失败，退化为只查本部门，防止报错
+                    conditions.add("dept_id = ?");
+                    params.add(deptId);
+                }
+            }
+        }
+        // 3. 策略 B: 本部门 (DEPT) - 严格匹配
+        else if (scopes.contains("DEPT")) {
             if (deptId != null) {
                 conditions.add("dept_id = ?");
                 params.add(deptId);

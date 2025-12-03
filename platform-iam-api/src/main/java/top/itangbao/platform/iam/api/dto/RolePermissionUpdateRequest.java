@@ -1,4 +1,4 @@
-package top.itangbao.platform.iam.dto;
+package top.itangbao.platform.iam.api.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

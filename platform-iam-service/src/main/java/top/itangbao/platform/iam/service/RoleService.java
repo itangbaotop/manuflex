@@ -1,7 +1,7 @@
 package top.itangbao.platform.iam.service;
 
+import top.itangbao.platform.iam.api.dto.RolePermissionUpdateRequest;
 import top.itangbao.platform.iam.domain.Role;
-import top.itangbao.platform.iam.dto.RolePermissionUpdateRequest;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package top.itangbao.platform.iam.dto;
+package top.itangbao.platform.iam.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

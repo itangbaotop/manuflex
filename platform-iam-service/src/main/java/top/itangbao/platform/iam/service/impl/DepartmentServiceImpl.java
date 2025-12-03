@@ -82,4 +82,31 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
         departmentRepository.deleteById(id);
     }
+
+    @Override
+    public List<Long> getChildDepartmentIds(Long parentId, String tenantId) {
+        // 1. 获取该租户下所有部门 (数据量通常不大，一次查出比递归查库性能更好)
+        List<Department> allDepts = departmentRepository.findAllByTenantIdOrderBySortOrderAsc(tenantId);
+
+        // 2. 递归收集所有子孙ID
+        List<Long> resultIds = new ArrayList<>();
+        // 先把自己加进去 (因为"部门及以下"包含本部门)
+        resultIds.add(parentId);
+
+        collectChildIds(parentId, allDepts, resultIds);
+
+        return resultIds;
+    }
+
+    // 递归辅助方法
+    private void collectChildIds(Long parentId, List<Department> allDepts, List<Long> resultIds) {
+        for (Department dept : allDepts) {
+            // 如果当前部门的父亲是 parentId
+            if (dept.getParentId() != null && dept.getParentId().equals(parentId)) {
+                resultIds.add(dept.getId());
+                // 继续递归找它的孩子
+                collectChildIds(dept.getId(), allDepts, resultIds);
+            }
+        }
+    }
 }

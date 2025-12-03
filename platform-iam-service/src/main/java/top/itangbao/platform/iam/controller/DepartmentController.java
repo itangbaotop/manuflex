@@ -47,4 +47,14 @@ public class DepartmentController {
         departmentService.deleteDepartment(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * 获取指定部门及其子部门的所有ID
+     * 供微服务内部调用，或前端级联选择使用
+     */
+    @GetMapping("/{id}/children")
+//    @PreAuthorize("hasAuthority('dept:read') or hasRole('ADMIN')") // 或者允许内部调用放行
+    public ResponseEntity<List<Long>> getChildDepartmentIds(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(departmentService.getChildDepartmentIds(id, user.getTenantId()));
+    }
 }

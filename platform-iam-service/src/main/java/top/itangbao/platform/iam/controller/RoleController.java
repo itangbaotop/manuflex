@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import top.itangbao.platform.common.annotation.Log;
+import top.itangbao.platform.iam.api.dto.RolePermissionUpdateRequest;
 import top.itangbao.platform.iam.domain.Role;
-import top.itangbao.platform.iam.dto.RolePermissionUpdateRequest;
 import top.itangbao.platform.iam.service.RoleService;
 
 import java.util.List;

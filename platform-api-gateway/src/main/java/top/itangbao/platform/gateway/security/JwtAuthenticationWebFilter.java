@@ -53,6 +53,13 @@ public class JwtAuthenticationWebFilter extends AuthenticationWebFilter {
                                     .map(SimpleGrantedAuthority::new)
                                     .collect(Collectors.toList());
 
+                            List<String> permissions = claims.get("permissions", List.class);
+                            if (permissions != null) {
+                                permissions.stream()
+                                        .map(SimpleGrantedAuthority::new)
+                                        .forEach(authorities::add);
+                            }
+
                             // 构建 Authentication
                             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
 

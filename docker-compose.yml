@@ -425,14 +425,14 @@ networks:
 
 
 #  docker-compose up -d mysql nacos kafka platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-workflow-service platform-lims-service
-#  docker-compose up -d platform-api-gateway platform-iam-service platform-metadata-service platform-data-service
+#  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-metadata-service platform-data-service
 
 ## 1. 停止并删除旧的 IAM 容器
-#  docker stop manuflex-iam
+#  docker stop manuflex-data
 #
-#  docker rm manuflex-iam
+#  docker rm manuflex-data
 #  # 2. 删除旧镜像 (可选，但推荐)
-#  docker rmi manuflex_platform-iam-service
+#  docker rmi manuflex_platform-data-service
 #
 #  # 3. 再次尝试启动
-#  docker-compose up -d --build --no-deps platform-iam-service
+#  docker-compose up -d --build --no-deps platform-data-service

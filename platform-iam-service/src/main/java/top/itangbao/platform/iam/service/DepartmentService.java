@@ -8,4 +8,6 @@ public interface DepartmentService {
     Department createDepartment(Department department);
     Department updateDepartment(Long id, Department department);
     void deleteDepartment(Long id);
+
+    List<Long> getChildDepartmentIds(Long parentId, String tenantId);
 }

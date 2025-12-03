@@ -1,8 +1,8 @@
 package top.itangbao.platform.iam.service;
 
 import org.springframework.security.core.userdetails.UserDetails;
+import top.itangbao.platform.iam.api.dto.*;
 import top.itangbao.platform.iam.domain.User;
-import top.itangbao.platform.iam.dto.*;
 
 import java.util.List;
 import java.util.Optional;

@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize; // 引入 @PreAuthorize
 import org.springframework.web.bind.annotation.*;
 import top.itangbao.platform.common.annotation.Log;
-import top.itangbao.platform.iam.dto.UserDTO;
-import top.itangbao.platform.iam.dto.UserUpdateRequest;
+import top.itangbao.platform.iam.api.dto.UserDTO;
+import top.itangbao.platform.iam.api.dto.UserUpdateRequest;
 import top.itangbao.platform.iam.service.UserService;
 
 import java.util.List;

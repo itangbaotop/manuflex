@@ -54,6 +54,7 @@
         <module>platform-data-api</module>
         <module>platform-workflow-service</module>
         <module>platform-workflow-api</module>
+        <module>platform-iam-api</module>
     </modules>
 
 

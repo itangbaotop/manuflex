@@ -1,4 +1,4 @@
-package top.itangbao.platform.iam.dto;
+package top.itangbao.platform.iam.api.dto;
 import lombok.Data;
 import java.util.List;
 
@@ -11,5 +11,6 @@ public class MenuDTO {
     private String icon;
     private String permission;
     private Integer sortOrder;
+    private Integer type;
     private List<MenuDTO> children;
 }

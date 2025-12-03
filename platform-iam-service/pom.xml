@@ -65,6 +65,12 @@
         </dependency>
 
         <dependency>
+            <groupId>top.itangbao.platform</groupId>
+            <artifactId>platform-iam-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>

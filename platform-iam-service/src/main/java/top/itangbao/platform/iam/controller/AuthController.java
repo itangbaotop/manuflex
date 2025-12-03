@@ -12,8 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import top.itangbao.platform.common.annotation.Log;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
+import top.itangbao.platform.iam.api.dto.*;
 import top.itangbao.platform.iam.domain.User;
-import top.itangbao.platform.iam.dto.*;
 import top.itangbao.platform.iam.service.UserService;
 import top.itangbao.platform.common.util.JwtTokenProvider;
 

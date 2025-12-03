@@ -36,7 +36,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 添加角色权限
         user.getRoles().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+            String roleName = role.getName();
+            if (!roleName.startsWith("ROLE_")) {
+                roleName = "ROLE_" + roleName;
+            }
+            authorities.add(new SimpleGrantedAuthority(roleName));
             role.getPermissions().stream()
                     .map(permission -> new SimpleGrantedAuthority(permission.getCode()))
                     .forEach(authorities::add);

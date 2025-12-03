@@ -1,6 +1,5 @@
 package top.itangbao.platform.iam.service.impl;
 
-import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,13 +14,13 @@ import top.itangbao.platform.iam.domain.Department;
 import top.itangbao.platform.iam.domain.Permission;
 import top.itangbao.platform.iam.domain.Role;
 import top.itangbao.platform.iam.domain.User;
-import top.itangbao.platform.iam.dto.LoginRequest;
-import top.itangbao.platform.iam.dto.LoginResponse;
-import top.itangbao.platform.iam.dto.PermissionDTO; // 引入 PermissionDTO
-import top.itangbao.platform.iam.dto.RegisterRequest;
-import top.itangbao.platform.iam.dto.RoleDTO; // 引入 RoleDTO
-import top.itangbao.platform.iam.dto.UserDTO;
-import top.itangbao.platform.iam.dto.UserUpdateRequest;
+import top.itangbao.platform.iam.api.dto.LoginRequest;
+import top.itangbao.platform.iam.api.dto.LoginResponse;
+import top.itangbao.platform.iam.api.dto.PermissionDTO; // 引入 PermissionDTO
+import top.itangbao.platform.iam.api.dto.RegisterRequest;
+import top.itangbao.platform.iam.api.dto.RoleDTO; // 引入 RoleDTO
+import top.itangbao.platform.iam.api.dto.UserDTO;
+import top.itangbao.platform.iam.api.dto.UserUpdateRequest;
 import top.itangbao.platform.common.exception.ResourceNotFoundException;
 import top.itangbao.platform.common.exception.UserAlreadyExistsException;
 import top.itangbao.platform.iam.repository.DepartmentRepository;
