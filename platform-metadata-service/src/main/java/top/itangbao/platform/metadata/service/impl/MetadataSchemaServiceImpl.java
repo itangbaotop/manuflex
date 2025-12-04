@@ -134,18 +134,6 @@ public class MetadataSchemaServiceImpl implements MetadataSchemaService {
 
     // 辅助方法：将 MetadataField 实体转换为 MetadataFieldDTO
     private MetadataFieldDTO convertFieldToDTO(MetadataField field) {
-        return MetadataFieldDTO.builder()
-                .id(field.getId())
-                .fieldName(field.getFieldName())
-                .fieldType(field.getFieldType())
-                .required(field.getRequired())
-                .defaultValue(field.getDefaultValue())
-                .validationRule(field.getValidationRule())
-                .options(field.getOptions())
-                .description(field.getDescription())
-                .schemaId(field.getSchema() != null ? field.getSchema().getId() : null)
-                .createdAt(field.getCreatedAt())
-                .updatedAt(field.getUpdatedAt())
-                .build();
+        return MetadataField.getMetadataFieldDTO(field);
     }
 }

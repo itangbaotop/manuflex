@@ -21,6 +21,8 @@ public class MetadataFieldDTO {
     private String validationRule;
     private String options;
     private String description;
+    private String relatedSchemaName;
+    private String relatedFieldName;
     private Long schemaId; // 所属模式ID
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

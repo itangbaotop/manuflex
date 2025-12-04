@@ -29,4 +29,7 @@ public class MetadataFieldUpdateRequest {
 
     @Size(max = 255, message = "Description cannot exceed 255 characters")
     private String description;
+
+    private String relatedSchemaName;
+    private String relatedFieldName;
 }

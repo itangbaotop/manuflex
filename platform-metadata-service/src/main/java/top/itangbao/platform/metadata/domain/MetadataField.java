@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import top.itangbao.platform.common.enums.FieldType;
+import top.itangbao.platform.metadata.api.dto.MetadataFieldDTO;
 
 import java.time.LocalDateTime;
 
@@ -43,6 +44,12 @@ public class MetadataField {
     @Column(length = 255)
     private String description; // 字段描述
 
+    @Column(name = "related_schema_name", length = 50)
+    private String relatedSchemaName; // 关联的目标模型 (e.g. "Car")
+
+    @Column(name = "related_field_name", length = 50)
+    private String relatedFieldName;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -55,4 +62,24 @@ public class MetadataField {
     @ManyToOne(fetch = FetchType.LAZY) // 延迟加载，避免循环引用和不必要的加载
     @JoinColumn(name = "schema_id", nullable = false) // 外键列
     private MetadataSchema schema;
+
+
+
+    public static MetadataFieldDTO getMetadataFieldDTO(MetadataField field) {
+        return MetadataFieldDTO.builder()
+                .id(field.getId())
+                .fieldName(field.getFieldName())
+                .fieldType(field.getFieldType())
+                .required(field.getRequired())
+                .defaultValue(field.getDefaultValue())
+                .validationRule(field.getValidationRule())
+                .options(field.getOptions())
+                .description(field.getDescription())
+                .relatedSchemaName(field.getRelatedSchemaName())
+                .relatedFieldName(field.getRelatedFieldName())
+                .schemaId(field.getSchema() != null ? field.getSchema().getId() : null)
+                .createdAt(field.getCreatedAt())
+                .updatedAt(field.getUpdatedAt())
+                .build();
+    }
 }

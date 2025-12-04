@@ -44,6 +44,9 @@ public class MetadataFieldServiceImpl implements MetadataFieldService {
         BeanUtils.copyProperties(request, field);
         field.setSchema(schema); // 设置所属模式
 
+        field.setRelatedSchemaName(request.getRelatedSchemaName());
+        field.setRelatedFieldName(request.getRelatedFieldName());
+
         MetadataField savedField = fieldRepository.save(field);
         return convertToDTO(savedField);
     }
@@ -97,6 +100,13 @@ public class MetadataFieldServiceImpl implements MetadataFieldService {
             field.setDescription(request.getDescription());
         }
 
+        if (request.getRelatedSchemaName() != null) {
+            field.setRelatedSchemaName(request.getRelatedSchemaName());
+        }
+        if (request.getRelatedFieldName() != null) {
+            field.setRelatedFieldName(request.getRelatedFieldName());
+        }
+
         MetadataField updatedField = fieldRepository.save(field);
         return convertToDTO(updatedField);
     }
@@ -112,18 +122,6 @@ public class MetadataFieldServiceImpl implements MetadataFieldService {
 
     @Override
     public MetadataFieldDTO convertToDTO(MetadataField field) {
-        return MetadataFieldDTO.builder()
-                .id(field.getId())
-                .fieldName(field.getFieldName())
-                .fieldType(field.getFieldType())
-                .required(field.getRequired())
-                .defaultValue(field.getDefaultValue())
-                .validationRule(field.getValidationRule())
-                .options(field.getOptions())
-                .description(field.getDescription())
-                .schemaId(field.getSchema() != null ? field.getSchema().getId() : null)
-                .createdAt(field.getCreatedAt())
-                .updatedAt(field.getUpdatedAt())
-                .build();
+        return MetadataField.getMetadataFieldDTO(field);
     }
 }
