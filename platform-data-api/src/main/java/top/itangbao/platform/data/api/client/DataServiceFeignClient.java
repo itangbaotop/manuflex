@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Feign 客户端，用于调用 Data Service
  */
-@FeignClient(name = "data-service", url = "${data.service.url}")
+@FeignClient(name = "platform-data-service", contextId = "dataClient")
 public interface DataServiceFeignClient {
 
     // --- 动态表管理 API ---

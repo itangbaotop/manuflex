@@ -2,16 +2,17 @@ package top.itangbao.platform.data.config;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.stream.Collectors;
+import java.util.Enumeration;
 
 /**
- * Feign 客户端配置，用于在微服务间调用时传递认证信息
+ * Feign 客户端配置
+ * 作用：拦截所有 Feign 发出的请求，自动把当前 HTTP 请求的 Header（如 Token）透传过去
  */
 @Configuration
 public class FeignClientConfig {
@@ -21,29 +22,39 @@ public class FeignClientConfig {
         return new RequestInterceptor() {
             @Override
             public void apply(RequestTemplate template) {
-                // 从当前 SecurityContextHolder 中获取认证信息
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                if (authentication != null && authentication.isAuthenticated()) {
-                    // 1. 传递 JWT Token (如果存在于 credentials 中)
-                    if (authentication.getCredentials() instanceof String jwtToken && StringUtils.hasText(jwtToken)) {
-                        template.header("Authorization", "Bearer " + jwtToken);
-                        template.header("X-Original-JWT", jwtToken); // 转发原始 JWT
+                // 1. 获取当前进来的 HTTP 请求上下文
+                ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+                if (attributes != null) {
+                    HttpServletRequest request = attributes.getRequest();
+
+                    // 2. 透传 Authorization (Token) - 这是解决 "Access Denied" 的关键
+                    String authHeader = request.getHeader("Authorization");
+                    if (authHeader != null) {
+                        template.header("Authorization", authHeader);
                     }
 
-                    // 2. 传递用户名和角色 (从 SecurityContext 获取)
-                    template.header("X-Auth-User", authentication.getName());
-                    template.header("X-Auth-Roles", authentication.getAuthorities().stream()
-                            .map(grantedAuthority -> grantedAuthority.getAuthority())
-                            .collect(Collectors.joining(",")));
+                    // 3. 透传 Gateway 解析好的用户信息 (X-Auth-User 等)
+                    // 这样下游 Metadata 服务如果需要用户名或角色，也能直接拿到
+                    copyHeader(request, template, "X-Auth-User");
+                    copyHeader(request, template, "X-Auth-Roles");
 
-                    // TODO: 如果用户ID和租户ID也存储在 Authentication 或 CustomUserDetails 中，也可以转发
-                    // 例如：
-                    // if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
-                    //     template.header("X-Auth-UserId", String.valueOf(customUserDetails.getId()));
-                    //     // template.header("X-Auth-TenantId", customUserDetails.getTenantId());
-                    // }
+                    // 4. 透传我们自定义的数据权限 Header (P3阶段核心)
+                    copyHeader(request, template, "X-User-Dept-Id");
+                    copyHeader(request, template, "X-User-Data-Scopes");
+                    copyHeader(request, template, "X-User-Tenant-Id");
                 }
             }
         };
+    }
+
+    /**
+     * 辅助方法：复制 Header
+     */
+    private void copyHeader(HttpServletRequest request, RequestTemplate template, String headerName) {
+        String value = request.getHeader(headerName);
+        if (value != null) {
+            template.header(headerName, value);
+        }
     }
 }

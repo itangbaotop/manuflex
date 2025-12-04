@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan; // 导入 Component
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"top.itangbao.platform.data", "top.itangbao.platform.common", "top.itangbao.platform.iam.api"}) // 扫描 common 包
-@EnableFeignClients(basePackages = "top.itangbao.platform.metadata.api.client")
+@EnableFeignClients(basePackages = "top.itangbao.platform")
 @EnableDiscoveryClient
 public class PlatformDataServiceApplication {
 

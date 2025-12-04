@@ -10,7 +10,7 @@ import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
  * name: 服务的逻辑名称 (未来可以与服务注册中心集成)
  * url: Metadata Service 的实际地址 (本地开发时直接指定，生产环境通过服务注册中心获取)
  */
-@FeignClient(name = "metadata-service", url = "${metadata.service.url}") // 使用 application.yml 中的配置
+@FeignClient(name = "platform-metadata-service", contextId = "metadataClient") // 使用 application.yml 中的配置
 public interface MetadataServiceFeignClient {
 
     @GetMapping("/api/metadata/schemas/by-name")

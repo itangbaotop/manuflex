@@ -15,9 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
         "top.itangbao.platform.workflow.api.client" // 扫描 platform-workflow-api 中的 Feign 客户端
 })
 @EnableDiscoveryClient
-//@EnableFeignClients(basePackages = {
-//        "top.itangbao.platform.workflow.api.client" // 启用 Feign 客户端扫描
-//})
+@EnableFeignClients(basePackages = "top.itangbao.platform")
 public class PlatformWorkflowServiceApplication {
 
     public static void main(String[] args) {
