@@ -8,9 +8,8 @@ WORKDIR /app
 # 注意：这里假设你执行过 mvn package，target 下有 jar 包
 COPY target/*.jar app.jar
 
-
 # 具体端口可以在 docker-compose 中覆盖，这里只是声明
-EXPOSE 8081
+EXPOSE 8086
 
 # 启动命令
 # 增加 -Djava.security.egd=file:/dev/./urandom 加快启动时的随机数生成

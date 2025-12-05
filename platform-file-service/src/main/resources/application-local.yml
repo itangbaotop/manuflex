@@ -1,0 +1,35 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: platform-file-service
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: b6c61ff5-0ec0-4a3b-8529-4f110619308c
+      config:
+        server-addr: localhost:8848
+        file-extension: yml
+        group: DEFAULT_GROUP
+        namespace: b6c61ff5-0ec0-4a3b-8529-4f110619308c
+        refresh-enabled: true
+#
+  config:
+    import:
+      # 告诉 Spring Boot 去 Nacos 找名为 "platform-file-service.yml" 的配置
+      - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
+
+# MinIO 配置
+minio:
+  endpoint: http://localhost:9000 # 容器内部通信用 minio，本地用 localhost
+  access-key: minioadmin
+  secret-key: minioadminpassword
+  bucket-name: manuflex-files
+  external-endpoint: http://localhost:9000 # 前端访问的地址 (如果前端直连)
+
+file:
+  # 这里配置您的网关地址 (宿主机访问地址)
+  gateway-url: http://localhost:8086

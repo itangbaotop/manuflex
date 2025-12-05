@@ -280,6 +280,27 @@ services:
       timeout: 5s
       retries: 5
 
+  minio:
+    image: minio/minio:RELEASE.2024-01-18T22-51-28Z # 推荐固定一个稳定版本
+    container_name: manuflex-minio
+    ports:
+      - "9000:9000" # API 端口
+      - "9001:9001" # Console 控制台端口
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - manuflex-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+
   # 1. API 网关 (入口)
   platform-api-gateway:
     build: ./platform-api-gateway
@@ -407,6 +428,28 @@ services:
         limits:
           memory: 512M
 
+  # 7. 文件服务 (File Service)
+  platform-file-service:
+    build: ./platform-file-service
+    container_name: manuflex-file
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_HOST=nacos
+      - NACOS_NAMESPACE=b6c61ff5-0ec0-4a3b-8529-4f110619308c # 保持与其他服务一致
+      # 如果 MinIO 也在 Docker 网络中，这里通常不需要额外配置，
+      # 因为 application.yml 里 minio.endpoint 配的是 http://${MINIO_HOST:minio}:9000
+      # 只需要确保下面 depends_on 里有 minio
+    depends_on:
+      - nacos
+      - minio # 确保 MinIO 先启动
+    networks:
+      - manuflex-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
 volumes:
   mysql_data:
@@ -418,6 +461,7 @@ volumes:
   prometheus_data:
   grafana_data:
   loki_data:
+  minio_data:
 
 networks:
   manuflex-network:
@@ -425,7 +469,7 @@ networks:
 
 
 #  docker-compose up -d mysql nacos kafka platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-workflow-service platform-lims-service
-#  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-metadata-service platform-data-service
+#  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-file-service
 
 ## 1. 停止并删除旧的 IAM 容器
 #  docker stop manuflex-data

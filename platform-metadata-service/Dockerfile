@@ -8,7 +8,7 @@ WORKDIR /app
 # 注意：这里假设你执行过 mvn package，target 下有 jar 包
 COPY target/*.jar app.jar
 
-# 暴露端口 (虽然 docker-compose 会映射，但写上是个好习惯)
+
 # 具体端口可以在 docker-compose 中覆盖，这里只是声明
 EXPOSE 8082
 

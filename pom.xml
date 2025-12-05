@@ -55,6 +55,8 @@
         <module>platform-workflow-service</module>
         <module>platform-workflow-api</module>
         <module>platform-iam-api</module>
+        <module>platform-file-api</module>
+        <module>platform-file-service</module>
     </modules>
 
 

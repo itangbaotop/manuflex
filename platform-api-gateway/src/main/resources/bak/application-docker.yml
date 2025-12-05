@@ -34,6 +34,11 @@ spring:
           predicates:
             - Path=/api/workflow/**, /engine-rest/**, /camunda/**
 
+        - id: file-service
+          uri: lb://platform-file-service
+          predicates:
+            - Path=/api/file/**
+
     sentinel: # ⬅️ 新增 Sentinel 配置
       transport:
         dashboard: localhost:8858 # Sentinel 控制台地址 (通常是独立部署的 Sentinel Dashboard)

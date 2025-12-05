@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/camunda/**", "/engine-rest/**").permitAll()
+                        .pathMatchers("/api/file/view/**").permitAll()
                         .pathMatchers("/api/iam/auth/register", "/api/iam/auth/login", "/api/iam/auth/refresh-token").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()

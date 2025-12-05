@@ -1,0 +1,29 @@
+server:
+  port: 8086 # 新分配一个端口
+
+spring:
+  application:
+    name: platform-file-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost}:8848
+      config:
+        server-addr: ${NACOS_HOST:localhost}:8848 # Nacos Server 地址
+        file-extension: yml # 配置文件的扩展名
+        group: DEFAULT_GROUP # 配置组
+        namespace: ${NACOS_NAMESPACE:}
+        refresh-enabled: true # 启用动态刷新配置
+  config:
+    import:
+      # ⚠️ 关键修正：显式指定 DataId。默认 DataId 为 ${应用名}.yml
+      # 格式为: nacos:[dataId]?[group]&[refresh]
+      - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
+
+# MinIO 配置
+minio:
+  endpoint: http://${MINIO_HOST:minio}:9000 # 容器内部通信用 minio，本地用 localhost
+  access-key: minioadmin
+  secret-key: minioadminpassword
+  bucket-name: manuflex-files
+  external-endpoint: http://localhost:9000 # 前端访问的地址 (如果前端直连)
