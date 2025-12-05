@@ -38,10 +38,11 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
             <version>${spring-cloud-alibaba.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>top.itangbao.platform</groupId>-->
-<!--            <artifactId>platform-common</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>top.itangbao.platform</groupId>
+            <artifactId>platform-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

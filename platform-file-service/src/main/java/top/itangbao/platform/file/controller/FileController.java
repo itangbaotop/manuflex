@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import top.itangbao.platform.file.api.dto.FileResponse;
@@ -20,6 +21,7 @@ public class FileController {
     @Autowired private FileServiceImpl fileService;
 
     @PostMapping("/upload")
+    @PreAuthorize("hasAnyAuthority('data:create', 'ROLE_USER')")
     public ResponseEntity<FileResponse> upload(@RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(fileService.upload(file));
     }
@@ -64,6 +66,7 @@ public class FileController {
      * 删除文件
      */
     @DeleteMapping("/{objectName}")
+    @PreAuthorize("hasAnyAuthority('data:create', 'ROLE_USER')")
     public ResponseEntity<Void> deleteFile(@PathVariable String objectName) {
         fileService.deleteFile(objectName);
         return ResponseEntity.noContent().build();
@@ -73,6 +76,7 @@ public class FileController {
      * 获取文件信息
      */
     @GetMapping("/{objectName}/info")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER')")
     public ResponseEntity<FileResponse> getFileInfo(@PathVariable String objectName) {
         return ResponseEntity.ok(fileService.getFileInfo(objectName));
     }

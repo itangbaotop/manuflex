@@ -35,7 +35,7 @@ public class DynamicDataController {
      * URL: POST /api/data/tables/{schemaId}
      */
     @PostMapping("/tables/{schemaId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<Void> createOrUpdateDynamicTable(@PathVariable Long schemaId) {
         dynamicDataService.createOrUpdateDynamicTable(schemaId);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -46,7 +46,7 @@ public class DynamicDataController {
      * URL: DELETE /api/data/tables/{schemaId}
      */
     @DeleteMapping("/tables/{schemaId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<Void> deleteDynamicTable(@PathVariable Long schemaId) {
         dynamicDataService.deleteDynamicTable(schemaId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

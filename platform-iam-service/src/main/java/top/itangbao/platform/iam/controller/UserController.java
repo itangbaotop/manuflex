@@ -27,11 +27,11 @@ public class UserController {
 
     /**
      * 获取所有用户
-     * 只有拥有 'ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 角色的用户才能访问
      * @return 所有用户的列表
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('user:read') or hasRole('ADMIN')") // 只有 ADMIN 角色才能访问
+    @PreAuthorize("hasAuthority('user:read') or hasRole('ROLE_ADMIN')") // 只有 ADMIN 角色才能访问
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
@@ -39,12 +39,12 @@ public class UserController {
 
     /**
      * 根据 ID 获取单个用户
-     * 只有拥有 'ADMIN' 角色或用户自身才能访问
+     * 只有拥有 'ROLE_ADMIN' 角色或用户自身才能访问
      * @param id 用户ID
      * @return 用户信息
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id") // ADMIN 或用户自身
+    @PreAuthorize("hasRole('ROLE_ADMIN') or #id == authentication.principal.id") // ADMIN 或用户自身
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         UserDTO user = userService.getUserById(id);
         return ResponseEntity.ok(user);
@@ -52,13 +52,13 @@ public class UserController {
 
     /**
      * 更新用户信息
-     * 只有拥有 'ADMIN' 角色或用户自身才能访问
+     * 只有拥有 'ROLE_ADMIN' 角色或用户自身才能访问
      * @param id 用户ID
      * @param request 更新请求体
      * @return 更新后的用户信息
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id") // ADMIN 或用户自身
+    @PreAuthorize("hasRole('ROLE_ADMIN') or #id == authentication.principal.id") // ADMIN 或用户自身
     @Log(module = "用户管理", action = "更新用户")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest request) {
         UserDTO updatedUser = userService.updateUser(id, request);
@@ -67,12 +67,12 @@ public class UserController {
 
     /**
      * 删除用户
-     * 只有拥有 'ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 角色的用户才能访问
      * @param id 用户ID
      * @return 无内容响应
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')") // 只有 ADMIN 角色才能访问
+    @PreAuthorize("hasRole('ROLE_ADMIN')") // 只有 ADMIN 角色才能访问
     @Log(module = "用户管理", action = "删除用户")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
@@ -83,7 +83,7 @@ public class UserController {
      * 管理员重置用户密码
      */
     @PutMapping("/{id}/password")
-    @PreAuthorize("hasAuthority('user:write') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:write') or hasRole('ROLE_ADMIN')")
     @Log(module = "用户管理", action = "重置密码")
     public ResponseEntity<Void> resetPassword(@PathVariable Long id, @RequestBody Map<String, String> payload) {
         String newPassword = payload.get("password");

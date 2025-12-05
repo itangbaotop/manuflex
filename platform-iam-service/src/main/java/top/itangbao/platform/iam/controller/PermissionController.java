@@ -27,7 +27,7 @@ public class PermissionController {
      * 只有管理员或拥有 'role:read' 权限的用户可访问
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('role:read')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasAuthority('role:read')")
     public ResponseEntity<List<Permission>> getAllPermissions() {
         return ResponseEntity.ok(permissionService.getAllPermissions());
     }

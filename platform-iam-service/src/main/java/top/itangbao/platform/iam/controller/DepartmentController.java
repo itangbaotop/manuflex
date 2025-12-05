@@ -20,13 +20,13 @@ public class DepartmentController {
     private DepartmentService departmentService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('dept:read') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dept:read') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<Department>> getDepartmentTree(@AuthenticationPrincipal CustomUserDetails user) {
         return ResponseEntity.ok(departmentService.getDepartmentTree(user.getTenantId()));
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('dept:write') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dept:write') or hasRole('ROLE_ADMIN')")
     @Log(module = "部门管理", action = "新建部门")
     public ResponseEntity<Department> createDepartment(@RequestBody Department dept, @AuthenticationPrincipal CustomUserDetails user) {
         dept.setTenantId(user.getTenantId());
@@ -34,14 +34,14 @@ public class DepartmentController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('dept:write') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dept:write') or hasRole('ROLE_ADMIN')")
     @Log(module = "部门管理", action = "更新部门")
     public ResponseEntity<Department> updateDepartment(@PathVariable Long id, @RequestBody Department dept) {
         return ResponseEntity.ok(departmentService.updateDepartment(id, dept));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('dept:delete') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dept:delete') or hasRole('ROLE_ADMIN')")
     @Log(module = "部门管理", action = "删除部门")
     public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
@@ -53,7 +53,7 @@ public class DepartmentController {
      * 供微服务内部调用，或前端级联选择使用
      */
     @GetMapping("/{id}/children")
-//    @PreAuthorize("hasAuthority('dept:read') or hasRole('ADMIN')") // 或者允许内部调用放行
+//    @PreAuthorize("hasAuthority('dept:read') or hasRole('ROLE_ADMIN')") // 或者允许内部调用放行
     public ResponseEntity<List<Long>> getChildDepartmentIds(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user) {
         return ResponseEntity.ok(departmentService.getChildDepartmentIds(id, user.getTenantId()));
     }

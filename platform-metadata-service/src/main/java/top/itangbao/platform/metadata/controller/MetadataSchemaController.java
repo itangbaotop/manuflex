@@ -26,12 +26,12 @@ public class MetadataSchemaController {
 
     /**
      * 创建元数据模式
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param request 创建请求体
      * @return 创建成功的模式信息
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<MetadataSchemaDTO> createSchema(@Valid @RequestBody MetadataSchemaCreateRequest request) {
         MetadataSchemaDTO createdSchema = schemaService.createSchema(request);
         return new ResponseEntity<>(createdSchema, HttpStatus.CREATED);
@@ -39,13 +39,13 @@ public class MetadataSchemaController {
 
     /**
      * 根据 ID 获取元数据模式
-     * 只有拥有 'ADMIN' 角色或属于该模式的租户的 'TENANT_ADMIN' 角色才能访问
+     * 只有拥有 'ROLE_ADMIN' 角色或属于该模式的租户的 'ROLE_TENANT_ADMIN' 角色才能访问
      * (注意：这里简化为 ADMIN 或 TENANT_ADMIN 可以访问，实际可能需要更复杂的租户隔离逻辑)
      * @param id 模式ID
      * @return 模式信息
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<MetadataSchemaDTO> getSchemaById(@PathVariable Long id) {
         MetadataSchemaDTO schema = schemaService.getSchemaById(id);
         // 实际这里需要添加逻辑来验证当前用户是否属于该 schema.getTenantId()
@@ -54,13 +54,13 @@ public class MetadataSchemaController {
 
     /**
      * 根据模式名称和租户ID获取元数据模式
-     * 只有拥有 'ADMIN' 角色或属于该模式的租户的 'TENANT_ADMIN' 角色才能访问
+     * 只有拥有 'ROLE_ADMIN' 角色或属于该模式的租户的 'ROLE_TENANT_ADMIN' 角色才能访问
      * @param name 模式名称
      * @param tenantId 租户ID
      * @return 模式信息
      */
     @GetMapping("/by-name")
-    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<MetadataSchemaDTO> getSchemaByNameAndTenantId(
             @RequestParam String name,
             @RequestParam String tenantId) {
@@ -71,12 +71,12 @@ public class MetadataSchemaController {
 
     /**
      * 根据租户ID获取所有元数据模式
-     * 只有拥有 'ADMIN' 角色或属于该租户的 'TENANT_ADMIN' 角色才能访问
+     * 只有拥有 'ROLE_ADMIN' 角色或属于该租户的 'ROLE_TENANT_ADMIN' 角色才能访问
      * @param tenantId 租户ID
      * @return 模式列表
      */
     @GetMapping("/by-tenant/{tenantId}")
-    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<List<MetadataSchemaDTO>> getAllSchemasByTenantId(@PathVariable String tenantId) {
         List<MetadataSchemaDTO> schemas = schemaService.getAllSchemasByTenantId(tenantId);
         // 实际这里需要添加逻辑来验证当前用户是否属于该 tenantId
@@ -85,13 +85,13 @@ public class MetadataSchemaController {
 
     /**
      * 更新元数据模式
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param id 模式ID
      * @param request 更新请求体
      * @return 更新后的模式信息
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<MetadataSchemaDTO> updateSchema(@PathVariable Long id, @Valid @RequestBody MetadataSchemaUpdateRequest request) {
         MetadataSchemaDTO updatedSchema = schemaService.updateSchema(id, request);
         return ResponseEntity.ok(updatedSchema);
@@ -99,12 +99,12 @@ public class MetadataSchemaController {
 
     /**
      * 删除元数据模式
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param id 模式ID
      * @return 无内容响应
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<Void> deleteSchema(@PathVariable Long id) {
         schemaService.deleteSchema(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

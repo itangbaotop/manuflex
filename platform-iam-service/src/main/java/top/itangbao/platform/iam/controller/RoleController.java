@@ -29,7 +29,7 @@ public class RoleController {
      * @return 角色列表
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('role:read') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('role:read') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<Role>> getAllRoles() {
         List<Role> roles = roleService.getAllRoles();
         return ResponseEntity.ok(roles);
@@ -41,7 +41,7 @@ public class RoleController {
      * @return 创建后的角色
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('role:write') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('role:write') or hasRole('ROLE_ADMIN')")
     @Log(module = "角色管理", action = "创建角色")
     public ResponseEntity<Role> createRole(@RequestBody Role role) {
         // 这里简单复用 Role 实体接收参数，也可以定义 CreateRoleRequest DTO
@@ -56,7 +56,7 @@ public class RoleController {
      * @return 更新后的角色
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('role:write') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('role:write') or hasRole('ROLE_ADMIN')")
     @Log(module = "角色管理", action = "更新角色")
     public ResponseEntity<Role> updateRole(@PathVariable Long id, @RequestBody Role role) {
         Role updatedRole = roleService.updateRole(id, role.getName(), role.getDescription(), role.getDataScope());
@@ -69,7 +69,7 @@ public class RoleController {
      * @return 无内容响应
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('role:delete') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('role:delete') or hasRole('ROLE_ADMIN')")
     @Log(module = "角色管理", action = "删除角色")
     public ResponseEntity<Void> deleteRole(@PathVariable Long id) {
         roleService.deleteRole(id);
@@ -78,13 +78,13 @@ public class RoleController {
 
     /**
      * 为角色分配权限
-     * 只有拥有 'role:assign_permission' 权限或 'ADMIN' 角色的用户才能访问
+     * 只有拥有 'role:assign_permission' 权限或 'ROLE_ADMIN' 角色的用户才能访问
      * @param roleId 角色ID
      * @param request 角色权限更新请求
      * @return 更新后的角色信息
      */
     @PutMapping("/{roleId}/permissions")
-    @PreAuthorize("hasAuthority('role:assign_permission') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('role:assign_permission') or hasRole('ROLE_ADMIN')")
     @Log(module = "角色管理", action = "分配权限")
     public ResponseEntity<Role> assignPermissionsToRole(@PathVariable Long roleId, @Valid @RequestBody RolePermissionUpdateRequest request) {
         // 确保请求中的 roleId 与路径变量一致

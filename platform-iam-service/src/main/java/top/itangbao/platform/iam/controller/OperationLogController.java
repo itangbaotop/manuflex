@@ -28,7 +28,7 @@ public class OperationLogController {
      * 支持过滤条件：username, module, status
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')") // 只有管理员能看日志
+    @PreAuthorize("hasRole('ROLE_ADMIN')") // 只有管理员能看日志
     public ResponseEntity<Page<OperationLog>> getLogs(
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String module,

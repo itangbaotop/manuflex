@@ -26,13 +26,13 @@ public class MetadataFieldController {
 
     /**
      * 为指定模式创建元数据字段
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param schemaId 所属模式ID
      * @param request 创建请求体
      * @return 创建成功的字段信息
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<MetadataFieldDTO> createField(
             @PathVariable Long schemaId,
             @Valid @RequestBody MetadataFieldCreateRequest request) {
@@ -42,13 +42,13 @@ public class MetadataFieldController {
 
     /**
      * 根据 ID 获取元数据字段
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param schemaId 所属模式ID (仅用于路径，实际不一定需要)
      * @param id 字段ID
      * @return 字段信息
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<MetadataFieldDTO> getFieldById(
             @PathVariable Long schemaId, // 路径变量，但在这个方法中可能不直接使用
             @PathVariable Long id) {
@@ -58,12 +58,12 @@ public class MetadataFieldController {
 
     /**
      * 获取指定模式下的所有元数据字段
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param schemaId 所属模式ID
      * @return 字段列表
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:read') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<List<MetadataFieldDTO>> getAllFieldsBySchemaId(@PathVariable Long schemaId) {
         List<MetadataFieldDTO> fields = fieldService.getAllFieldsBySchemaId(schemaId);
         return ResponseEntity.ok(fields);
@@ -71,14 +71,14 @@ public class MetadataFieldController {
 
     /**
      * 更新元数据字段
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param schemaId 所属模式ID (仅用于路径，实际不一定需要)
      * @param id 字段ID
      * @param request 更新请求体
      * @return 更新后的字段信息
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<MetadataFieldDTO> updateField(
             @PathVariable Long schemaId, // 路径变量，但在这个方法中可能不直接使用
             @PathVariable Long id,
@@ -89,13 +89,13 @@ public class MetadataFieldController {
 
     /**
      * 删除元数据字段
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param schemaId 所属模式ID (仅用于路径，实际不一定需要)
      * @param id 字段ID
      * @return 无内容响应
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('schema:write') or hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<Void> deleteField(
             @PathVariable Long schemaId, // 路径变量，但在这个方法中可能不直接使用
             @PathVariable Long id) {

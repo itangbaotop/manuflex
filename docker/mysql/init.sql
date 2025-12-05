@@ -38,9 +38,9 @@ CREATE TABLE IF NOT EXISTS `mf_user_roles` (
 
 -- 插入一些初始数据 (可选)
 INSERT IGNORE INTO `mf_roles` (`id`, `name`, `description`) VALUES
-(1, 'ADMIN', 'Administrator Role'),
-(2, 'TENANT_ADMIN', 'Tenant Administrator Role'),
-(3, 'USER', 'Standard User Role');
+(1, 'ROLE_ADMIN', 'Administrator Role'),
+(2, 'ROLE_TENANT_ADMIN', 'Tenant Administrator Role'),
+(3, 'ROLE_USER', 'Standard User Role');
 
 --  新增：插入一些权限数据
 INSERT IGNORE INTO `mf_permissions` (`id`, `name`, `description`) VALUES

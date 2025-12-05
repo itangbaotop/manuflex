@@ -31,14 +31,14 @@ public class DecisionController {
 
     /**
      * 部署 DMN 决策定义 (通过文件上传)
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param deploymentName 部署名称
      * @param tenantId 租户ID
      * @param dmnFile DMN XML 文件
      * @return 部署响应
      */
     @PostMapping(value = "/deployments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化权限
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") // TODO: 细化权限
     public ResponseEntity<DeployDecisionResponse> deployDecisionByFile(
             @RequestParam String deploymentName,
             @RequestParam String tenantId,
@@ -57,12 +57,12 @@ public class DecisionController {
 
     /**
      * 评估决策
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色或特定权限的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色或特定权限的用户才能访问
      * @param request 评估决策请求
      * @return 评估决策响应
      */
     @PostMapping("/evaluate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN', 'USER')") // TODO: 细化权限
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')") // TODO: 细化权限
     public ResponseEntity<EvaluateDecisionResponse> evaluateDecision(@Valid @RequestBody EvaluateDecisionRequest request) {
         EvaluateDecisionResponse response = decisionService.evaluateDecision(request);
         return ResponseEntity.ok(response);
@@ -70,13 +70,13 @@ public class DecisionController {
 
     /**
      * 根据决策定义 Key 获取所有决策定义
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色或特定权限的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色或特定权限的用户才能访问
      * @param decisionDefinitionKey 决策定义 Key
      * @param tenantId 租户ID (可选)
      * @return 决策定义列表
      */
     @GetMapping("/definitions/{decisionDefinitionKey}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化权限
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") // TODO: 细化权限
     public ResponseEntity<List<Map<String, Object>>> getDecisionDefinitions(
             @PathVariable String decisionDefinitionKey,
             @RequestParam(required = false) String tenantId) {
@@ -86,13 +86,13 @@ public class DecisionController {
 
     /**
      * 删除决策部署
-     * 只有拥有 'ADMIN' 或 'TENANT_ADMIN' 角色的用户才能访问
+     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param deploymentId 部署ID
      * @param cascade 是否级联删除 (是否删除所有相关历史)
      * @return 无内容响应
      */
     @DeleteMapping("/deployments/{deploymentId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TENANT_ADMIN')") // TODO: 细化权限
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") // TODO: 细化权限
     public ResponseEntity<Void> deleteDecisionDeployment(
             @PathVariable String deploymentId,
             @RequestParam(defaultValue = "false") boolean cascade) {
