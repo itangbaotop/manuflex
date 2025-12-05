@@ -18,6 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import top.itangbao.platform.common.util.JwtTokenProvider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -42,29 +43,45 @@ public class JwtAuthenticationWebFilter extends AuthenticationWebFilter {
                 return Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION))
                         .filter(authHeader -> authHeader.startsWith("Bearer "))
                         .map(authHeader -> authHeader.substring(7))
-                        .map(jwtTokenProvider::validateAndParse)
-                        .filter(Objects::nonNull) // 如果是 null (验证失败)，直接过滤掉
+                        .handle((token, sink) -> {
+                            try {
+                                // 调用您的优化方法 (确保 JwtTokenProvider 里有这个方法)
+                                Claims claims = jwtTokenProvider.validateAndParse(token);
+                                if (claims != null) {
+                                    sink.next(claims); // 只有不为 null 才向下传递
+                                }
+                            } catch (Exception e) {
+                                // 解析出错，忽略该 Token，视为未登录
+                            }
+                        })
+                        .cast(Claims.class) // 强转类型
                         .map(claims -> {
-                            String username = claims.getSubject(); // 获取用户名
+                            String username = claims.getSubject();
 
-                            // 获取角色
+                            // 1. 解析角色
                             String rolesClaim = claims.get("roles", String.class);
-                            List<SimpleGrantedAuthority> authorities = Arrays.stream(rolesClaim != null && !rolesClaim.isEmpty() ? rolesClaim.split(",") : new String[0])
-                                    .map(SimpleGrantedAuthority::new)
-                                    .collect(Collectors.toList());
-
-                            List<String> permissions = claims.get("permissions", List.class);
-                            if (permissions != null) {
-                                permissions.stream()
+                            List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                            if (rolesClaim != null && !rolesClaim.isEmpty()) {
+                                Arrays.stream(rolesClaim.split(","))
                                         .map(SimpleGrantedAuthority::new)
                                         .forEach(authorities::add);
                             }
 
-                            // 构建 Authentication
+                            // 2. 解析权限 (防止 Metadata 403)
+                            try {
+                                List<String> permissions = claims.get("permissions", List.class);
+                                if (permissions != null) {
+                                    permissions.forEach(perm -> authorities.add(new SimpleGrantedAuthority(perm)));
+                                }
+                            } catch (Exception e) {
+                                // 忽略权限解析错误
+                            }
+
                             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
 
-                            // 存入 Details 供 SuccessHandler 使用
+                            // 存入 Details (为了 SuccessHandler 透传 deptId)
                             auth.setDetails(claims);
+
                             return auth;
                         });
             }

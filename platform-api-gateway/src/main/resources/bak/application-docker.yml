@@ -6,6 +6,14 @@ spring:
     name: platform-api-gateway
   cloud:
     gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"   # 开发环境用 *
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
       routes:
         # IAM Service 路由
         - id: iam-service
