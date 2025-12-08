@@ -100,16 +100,25 @@ public class ProcessController {
     /**
      * 根据流程定义 Key 获取所有活跃的流程实例
      * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色或特定权限的用户才能访问
-     * @param processDefinitionKey 流程定义 Key
+     * @param processDefinitionKey 流程定义 Key (可选)
      * @param tenantId 租户ID (可选)
      * @return 流程实例列表
      */
     @GetMapping("/process-instances/active")
     @PreAuthorize("hasAnyAuthority('workflow:process:read_active_instances', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") 
     public ResponseEntity<List<ProcessInstanceResponse>> getActiveProcessInstances(
-            @RequestParam String processDefinitionKey,
+            @RequestParam(required = false) String processDefinitionKey,
             @RequestParam(required = false) String tenantId) {
         List<ProcessInstanceResponse> responses = processService.getActiveProcessInstances(processDefinitionKey, tenantId);
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/process-instances/history")
+    @PreAuthorize("hasAnyAuthority('workflow:process:read_active_instances', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
+    public ResponseEntity<List<ProcessInstanceResponse>> getHistoricProcessInstances(
+            @RequestParam(required = false) String processDefinitionKey,
+            @RequestParam(required = false) String tenantId) {
+        List<ProcessInstanceResponse> responses = processService.getHistoricProcessInstances(processDefinitionKey, tenantId);
         return ResponseEntity.ok(responses);
     }
 
@@ -187,5 +196,33 @@ public class ProcessController {
     public ResponseEntity<Void> migrateProcessInstances(@Valid @RequestBody ProcessInstanceMigrationRequest request) {
         processService.migrateProcessInstances(request);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * 获取流程定义XML
+     * @param processDefinitionId 流程定义ID
+     * @return XML字符串
+     */
+    @GetMapping("/process-definitions/{processDefinitionId}/xml")
+    @PreAuthorize("hasAnyAuthority('workflow:process:read_definition', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<Map<String, String>> getProcessDefinitionXml(@PathVariable String processDefinitionId) {
+        String xml = processService.getProcessDefinitionXml(processDefinitionId);
+        return ResponseEntity.ok(Map.of("xml", xml));
+    }
+
+    @GetMapping("/process-instances/{processInstanceId}/activities")
+    @PreAuthorize("hasAnyAuthority('workflow:process:read_instance', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<List<String>> getActiveActivities(@PathVariable String processInstanceId) {
+        List<String> activities = processService.getActiveActivities(processInstanceId);
+        return ResponseEntity.ok(activities);
+    }
+
+    @DeleteMapping("/deployments/{deploymentId}")
+    @PreAuthorize("hasAnyAuthority('workflow:process:delete_deployment', 'ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
+    public ResponseEntity<Void> deleteDeployment(
+            @PathVariable String deploymentId,
+            @RequestParam(defaultValue = "true") boolean cascade) {
+        processService.deleteDeployment(deploymentId, cascade);
+        return ResponseEntity.noContent().build();
     }
 }

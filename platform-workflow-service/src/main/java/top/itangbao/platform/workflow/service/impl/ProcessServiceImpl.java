@@ -157,12 +157,16 @@ public class ProcessServiceImpl implements ProcessService {
 
     @Override
     public List<ProcessInstanceResponse> getActiveProcessInstances(String processDefinitionKey, String tenantId) {
-        return runtimeService.createProcessInstanceQuery()
-                .processDefinitionKey(processDefinitionKey)
-                .active()
-                .tenantIdIn(tenantId)
-                .list()
-                .stream()
+        var query = runtimeService.createProcessInstanceQuery().active();
+        
+        if (processDefinitionKey != null && !processDefinitionKey.isEmpty()) {
+            query.processDefinitionKey(processDefinitionKey);
+        }
+        if (tenantId != null && !tenantId.isEmpty()) {
+            query.tenantIdIn(tenantId);
+        }
+        
+        return query.list().stream()
                 .map(processInstance -> {
                     Map<String, Object> currentVariables = runtimeService.getVariables(processInstance.getId());
                     return ProcessInstanceResponse.builder()
@@ -170,7 +174,7 @@ public class ProcessServiceImpl implements ProcessService {
                             .processDefinitionId(processInstance.getProcessDefinitionId())
                             .businessKey(processInstance.getBusinessKey())
                             .tenantId(processInstance.getTenantId())
-                            .ended(false) // 活跃实例，默认未结束
+                            .ended(false)
                             .startTime(LocalDateTime.now())
                             .currentVariables(currentVariables)
                             .build();
@@ -272,6 +276,68 @@ public class ProcessServiceImpl implements ProcessService {
             // logger.warn("Failed to get deployment time for deployment ID {}: {}", deploymentId, e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public String getProcessDefinitionXml(String processDefinitionId) {
+        try {
+            ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
+                    .processDefinitionId(processDefinitionId)
+                    .singleResult();
+            
+            if (processDefinition == null) {
+                throw new ResourceNotFoundException("Process definition not found with ID: " + processDefinitionId);
+            }
+            
+            return new String(repositoryService.getProcessModel(processDefinitionId).readAllBytes());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get process definition XML", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteDeployment(String deploymentId, boolean cascade) {
+        repositoryService.deleteDeployment(deploymentId, cascade);
+    }
+
+    @Override
+    public List<String> getActiveActivities(String processInstanceId) {
+        return runtimeService.getActiveActivityIds(processInstanceId);
+    }
+
+    @Override
+    public List<ProcessInstanceResponse> getHistoricProcessInstances(String processDefinitionKey, String tenantId) {
+        var query = historyService.createHistoricProcessInstanceQuery();
+        
+        if (processDefinitionKey != null && !processDefinitionKey.isEmpty()) {
+            query.processDefinitionKey(processDefinitionKey);
+        }
+        if (tenantId != null && !tenantId.isEmpty()) {
+            query.tenantIdIn(tenantId);
+        }
+        
+        return query.orderByProcessInstanceStartTime().desc().list().stream()
+                .map(historicProcessInstance -> {
+                    Map<String, Object> variables = historyService.createHistoricVariableInstanceQuery()
+                            .processInstanceId(historicProcessInstance.getId())
+                            .list().stream()
+                            .collect(Collectors.toMap(
+                                    hvi -> hvi.getName(),
+                                    hvi -> hvi.getValue()
+                            ));
+                    
+                    return ProcessInstanceResponse.builder()
+                            .id(historicProcessInstance.getId())
+                            .processDefinitionId(historicProcessInstance.getProcessDefinitionId())
+                            .businessKey(historicProcessInstance.getBusinessKey())
+                            .tenantId(historicProcessInstance.getTenantId())
+                            .ended(historicProcessInstance.getEndTime() != null)
+                            .startTime(historicProcessInstance.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+                            .currentVariables(variables)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
 }

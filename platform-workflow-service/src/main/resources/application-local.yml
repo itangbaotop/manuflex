@@ -36,27 +36,30 @@ camunda.bpm:
     enabled: true
   database:
     type: mysql
-    schema-update: true # 首次启动时自动创建 Camunda 的表结构，生产环境请谨慎或设置为 false
+    schema-update: true
   admin-user:
     id: admin
     password: admin
     firstName: Admin
     lastName: User
+  job-execution:
+    enabled: true
+    deployment-aware: true
   generic-properties:
     properties:
-      #设置默认历史数据保留 180 天 (推荐生产环境使用)
       history-time-to-live: P180D
+      job-executor-activate: true
 
 
 logging:
   file:
-    # 确保这是 Promtail 映射的主机路径
-    name: ./logs/iam/application.log
+    name: ./logs/workflow/application.log
   level:
     root: INFO
     org.springframework.web: INFO
     top.itangbao.platform.workflow: DEBUG
-    org.camunda.bpm: INFO
+    org.camunda.bpm.engine: DEBUG
+    org.camunda.bpm.engine.impl.persistence.entity: DEBUG
     org.springframework.jdbc: DEBUG
 
 springdoc:

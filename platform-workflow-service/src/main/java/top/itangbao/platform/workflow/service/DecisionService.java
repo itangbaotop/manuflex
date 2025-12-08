@@ -26,12 +26,26 @@ public interface DecisionService {
     EvaluateDecisionResponse evaluateDecision(EvaluateDecisionRequest request);
 
     /**
+     * 获取所有决策定义
+     * @param tenantId 租户ID (可选)
+     * @return 决策定义列表
+     */
+    List<Map<String, Object>> getAllDecisionDefinitions(String tenantId);
+
+    /**
      * 根据决策定义 Key 获取所有决策定义
      * @param decisionDefinitionKey 决策定义 Key
      * @param tenantId 租户ID (可选)
      * @return 决策定义列表
      */
     List<Map<String, Object>> getDecisionDefinitions(String decisionDefinitionKey, String tenantId);
+
+    /**
+     * 获取决策定义XML
+     * @param decisionDefinitionId 决策定义ID
+     * @return XML字符串
+     */
+    String getDecisionDefinitionXml(String decisionDefinitionId);
 
     /**
      * 删除决策部署

@@ -136,6 +136,7 @@ INSERT INTO mf_permissions (code, name, description) VALUES
                                                          ('data:import', '导入数据', '允许导入Excel/CSV数据'),
                                                          ('data:export', '导出数据', '允许导出数据');
 
+drop database camunda_bpm;
 -- 创建 Camunda 数据库
 CREATE DATABASE IF NOT EXISTS camunda_bpm CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 GRANT ALL PRIVILEGES ON camunda_bpm.* TO 'manuflex_user'@'%';

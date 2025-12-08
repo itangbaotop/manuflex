@@ -69,14 +69,26 @@ public class DecisionController {
     }
 
     /**
+     * 获取所有决策定义
+     * @param tenantId 租户ID (可选)
+     * @return 决策定义列表
+     */
+    @GetMapping("/definitions")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<List<Map<String, Object>>> getAllDecisionDefinitions(
+            @RequestParam(required = false) String tenantId) {
+        List<Map<String, Object>> definitions = decisionService.getAllDecisionDefinitions(tenantId);
+        return ResponseEntity.ok(definitions);
+    }
+
+    /**
      * 根据决策定义 Key 获取所有决策定义
-     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色或特定权限的用户才能访问
      * @param decisionDefinitionKey 决策定义 Key
      * @param tenantId 租户ID (可选)
      * @return 决策定义列表
      */
     @GetMapping("/definitions/{decisionDefinitionKey}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") // TODO: 细化权限
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<List<Map<String, Object>>> getDecisionDefinitions(
             @PathVariable String decisionDefinitionKey,
             @RequestParam(required = false) String tenantId) {
@@ -85,14 +97,25 @@ public class DecisionController {
     }
 
     /**
+     * 获取决策定义XML
+     * @param decisionDefinitionId 决策定义ID
+     * @return XML字符串
+     */
+    @GetMapping("/definitions/{decisionDefinitionId}/xml")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<Map<String, String>> getDecisionDefinitionXml(@PathVariable String decisionDefinitionId) {
+        String xml = decisionService.getDecisionDefinitionXml(decisionDefinitionId);
+        return ResponseEntity.ok(Map.of("xml", xml));
+    }
+
+    /**
      * 删除决策部署
-     * 只有拥有 'ROLE_ADMIN' 或 'ROLE_TENANT_ADMIN' 角色的用户才能访问
      * @param deploymentId 部署ID
-     * @param cascade 是否级联删除 (是否删除所有相关历史)
+     * @param cascade 是否级联删除
      * @return 无内容响应
      */
     @DeleteMapping("/deployments/{deploymentId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')") // TODO: 细化权限
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TENANT_ADMIN')")
     public ResponseEntity<Void> deleteDecisionDeployment(
             @PathVariable String deploymentId,
             @RequestParam(defaultValue = "false") boolean cascade) {

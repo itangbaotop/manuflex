@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Feign 客户端，用于调用 Workflow Service
  */
-@FeignClient(name = "workflow-service", url = "${workflow.service.url}")
+@FeignClient(name = "platform-workflow-service", contextId = "workflowClient")
 public interface WorkflowServiceFeignClient {
 
     // --- 流程管理 API ---

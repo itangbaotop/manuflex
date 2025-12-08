@@ -99,6 +99,30 @@ public class DecisionServiceImpl implements DecisionService {
     }
 
     @Override
+    public List<Map<String, Object>> getAllDecisionDefinitions(String tenantId) {
+        var query = repositoryService.createDecisionDefinitionQuery();
+
+        if (tenantId != null && !tenantId.isEmpty()) {
+            query.tenantIdIn(tenantId);
+        }
+
+        query.orderByDecisionDefinitionVersion().desc();
+
+        return query.list().stream()
+                .map(decisionDefinition -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", decisionDefinition.getId());
+                    map.put("key", decisionDefinition.getKey());
+                    map.put("name", decisionDefinition.getName());
+                    map.put("version", decisionDefinition.getVersion());
+                    map.put("deploymentId", decisionDefinition.getDeploymentId());
+                    map.put("tenantId", decisionDefinition.getTenantId());
+                    return map;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Map<String, Object>> getDecisionDefinitions(String decisionDefinitionKey, String tenantId) {
         var query = repositoryService.createDecisionDefinitionQuery();
 
@@ -126,6 +150,23 @@ public class DecisionServiceImpl implements DecisionService {
                     return map;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getDecisionDefinitionXml(String decisionDefinitionId) {
+        try {
+            DecisionDefinition decisionDefinition = repositoryService.createDecisionDefinitionQuery()
+                    .decisionDefinitionId(decisionDefinitionId)
+                    .singleResult();
+            
+            if (decisionDefinition == null) {
+                throw new RuntimeException("Decision definition not found with ID: " + decisionDefinitionId);
+            }
+            
+            return new String(repositoryService.getDecisionModel(decisionDefinitionId).readAllBytes());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get decision definition XML", e);
+        }
     }
 
     @Override

@@ -81,4 +81,33 @@ public interface ProcessService {
      * @param request 流程实例迁移请求
      */
     void migrateProcessInstances(ProcessInstanceMigrationRequest request);
+
+    /**
+     * 获取流程定义XML
+     * @param processDefinitionId 流程定义ID
+     * @return XML字符串
+     */
+    String getProcessDefinitionXml(String processDefinitionId);
+
+    /**
+     * 删除部署
+     * @param deploymentId 部署ID
+     * @param cascade 是否级联删除
+     */
+    void deleteDeployment(String deploymentId, boolean cascade);
+
+    /**
+     * 获取流程实例的活动节点
+     * @param processInstanceId 流程实例ID
+     * @return 活动节点ID列表
+     */
+    List<String> getActiveActivities(String processInstanceId);
+
+    /**
+     * 获取历史流程实例
+     * @param processDefinitionKey 流程定义Key
+     * @param tenantId 租户ID
+     * @return 流程实例列表
+     */
+    List<ProcessInstanceResponse> getHistoricProcessInstances(String processDefinitionKey, String tenantId);
 }

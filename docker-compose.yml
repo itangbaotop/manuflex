@@ -472,11 +472,11 @@ networks:
 #  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-file-service
 
 ## 1. 停止并删除旧的 IAM 容器
-#  docker stop manuflex-data
+#  docker stop manuflex-workflow
 #
-#  docker rm manuflex-data
+#  docker rm manuflex-workflow
 #  # 2. 删除旧镜像 (可选，但推荐)
-#  docker rmi manuflex_platform-data-service
+#  docker rmi manuflex_platform-workflow-service
 #
 #  # 3. 再次尝试启动
-#  docker-compose up -d --build --no-deps platform-data-service
+#  docker-compose up -d --build --no-deps platform-workflow-service
