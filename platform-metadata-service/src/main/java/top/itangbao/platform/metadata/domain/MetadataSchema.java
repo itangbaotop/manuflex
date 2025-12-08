@@ -28,8 +28,17 @@ public class MetadataSchema {
     @Column(length = 255)
     private String description; // 模式描述
 
-    @Column(name = "tenant_id", nullable = false, length = 50) // 租户ID，用于多租户隔离
+    @Column(name = "tenant_id", nullable = false, length = 50)
     private String tenantId;
+
+    @Column(name = "workflow_enabled")
+    private Boolean workflowEnabled = false; // 是否启用流程
+
+    @Column(name = "workflow_process_key", length = 100)
+    private String workflowProcessKey; // 关联的流程定义Key
+
+    @Column(name = "workflow_form_key", length = 100)
+    private String workflowFormKey; // 关联的表单Key
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
