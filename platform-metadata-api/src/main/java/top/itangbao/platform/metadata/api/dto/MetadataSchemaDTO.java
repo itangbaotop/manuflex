@@ -17,6 +17,9 @@ public class MetadataSchemaDTO {
     private String name;
     private String description;
     private String tenantId;
+    private Boolean workflowEnabled;
+    private String workflowProcessKey;
+    private String workflowFormKey;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<MetadataFieldDTO> fields; // 包含字段列表

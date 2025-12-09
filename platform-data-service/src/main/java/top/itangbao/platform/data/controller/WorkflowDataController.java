@@ -20,12 +20,11 @@ public class WorkflowDataController {
     public ResponseEntity<Map<String, String>> startWorkflowForData(
             @PathVariable String schemaName,
             @PathVariable Long dataId,
-            @RequestBody Map<String, String> request,
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "default") String tenantId) {
+            @RequestBody Map<String, String> request) {
         
         String processKey = request.get("processKey");
         String processInstanceId = workflowIntegrationService.startProcessForData(
-            schemaName, dataId, processKey, tenantId
+            schemaName, dataId, processKey
         );
         
         return ResponseEntity.ok(Map.of("processInstanceId", processInstanceId));

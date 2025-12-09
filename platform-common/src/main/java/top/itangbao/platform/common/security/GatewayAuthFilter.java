@@ -31,10 +31,15 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
+//.header("X-User-Dept-Id", getClaimString(claims, "deptId"))
+//                    .header("X-User-Data-Scopes", getClaimString(claims, "dataScopes"))
+//                    .header("X-User-Tenant-Id", getClaimString(claims, "tenantId"))
         String username = request.getHeader("X-Auth-User");
         String rolesHeader = request.getHeader("X-Auth-Roles");
         String originalJwt = request.getHeader("X-Original-JWT");
+        String deptId = request.getHeader("X-User-Dept-Id");
+        String dataScopes = request.getHeader("X-User-Data-Scopes");
+        String tenantId = request.getHeader("X-User-Tenant-Id");
 
         log.debug("GatewayAuthFilter - X-Auth-User: {}, X-Auth-Roles: {}, X-Original-JWT: {}", username, rolesHeader, originalJwt);
 
@@ -43,8 +48,19 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
 
+            CustomUserDetails userDetails = new CustomUserDetails(
+                    null,
+                    tenantId,
+                    Long.valueOf(deptId),
+                    Arrays.stream(dataScopes.split(",")).collect(Collectors.toSet()),
+                    username,
+                    "",
+                    true,
+                    authorities
+            );
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    username, originalJwt, authorities);
+                    userDetails, originalJwt, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.debug("Authentication set for user: {} with roles: {}", username, rolesHeader);

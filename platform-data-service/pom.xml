@@ -129,6 +129,12 @@
             <artifactId>platform-iam-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>top.itangbao.platform</groupId>
+            <artifactId>platform-workflow-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

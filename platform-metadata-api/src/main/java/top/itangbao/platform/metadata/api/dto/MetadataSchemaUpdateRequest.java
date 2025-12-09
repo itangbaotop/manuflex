@@ -21,6 +21,10 @@ public class MetadataSchemaUpdateRequest {
 
     @Size(max = 50, message = "Tenant ID cannot exceed 50 characters")
     private String tenantId;
-    // 字段更新通常通过单独的字段API进行，或者在复杂场景下整体替换
-    // 这里暂时不包含字段列表的直接更新
+
+    private Boolean workflowEnabled = false;
+
+    private String workflowProcessKey;
+
+    private String workflowFormKey;
 }

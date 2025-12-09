@@ -28,4 +28,11 @@ public class MetadataSchemaCreateRequest {
 
     @Valid // 嵌套校验字段列表
     private List<MetadataFieldCreateRequest> fields;
+
+
+    private Boolean workflowEnabled = false;
+
+    private String workflowProcessKey;
+
+    private String workflowFormKey;
 }

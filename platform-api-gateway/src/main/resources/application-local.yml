@@ -17,28 +17,28 @@ spring:
       routes:
         # IAM Service 路由
         - id: iam-service
-          uri: http://localhost:8081 # IAM 服务的地址
+          uri: lb://platform-iam-service # IAM 服务的地址
           predicates:
             - Path=/api/iam/** # 匹配以 /api/iam/ 开头的所有请求
 
         # Metadata Service 路由
         - id: metadata-service
-          uri: http://localhost:8082 # Metadata 服务的地址
+          uri: lb://platform-metadata-service # Metadata 服务的地址
           predicates:
             - Path=/api/metadata/** # 匹配以 /api/metadata/ 开头的所有请求
 
         - id: data-service
-          uri: http://localhost:8083 # Data 服务的地址
+          uri: lb://platform-data-service # Data 服务的地址
           predicates:
             - Path=/api/data/** # 匹配以 /api/data/ 开头的所有请求
 
         - id: lims-service
-          uri: http://localhost:8084 # LIMS 服务的地址
+          uri: lb://platform-lims-service # LIMS 服务的地址
           predicates:
             - Path=/api/lims/** # 匹配以 /api/lims/ 开头的所有请求
 
         - id: workflow-service
-          uri: http://localhost:8085 # Workflow 服务的地址
+          uri: lb://platform-workflow-service # Workflow 服务的地址
           predicates:
             - Path=/api/workflow/**, /engine-rest/**, /camunda/**
 
@@ -46,6 +46,19 @@ spring:
           uri: lb://platform-file-service
           predicates:
             - Path=/api/file/**
+
+#    sentinel:
+#      transport:
+#        dashboard: localhost:8858 # Sentinel 控制台地址 (通常是独立部署的 Sentinel Dashboard)
+#        port: 8719 # Sentinel 客户端暴露的端口，用于和 Dashboard 通信
+#      datasource: #  配置 Sentinel 规则持久化到 Nacos (可选，但推荐)
+#        flow:
+#          nacos:
+#            server-addr: nacos:8848
+#            group-id: DEFAULT_GROUP
+#            data-id: ${spring.application.name}-flow-rules
+#            data-type: json
+#            rule-type: flow
 
 app:
   jwtSecret: xi5G429vyD9/rLxktYqsZU723o3V5OB65KWoU76ORtFqihOS3gSQSqEWfDzDdc1ThsPv9D2v0AdqvcdXg+2vqg==
@@ -69,7 +82,6 @@ management:
 
 logging:
   file:
-    #  确保这是 Promtail 映射的主机路径
     name: ./logs/gateway/application.log
   level:
     root: INFO

@@ -44,6 +44,11 @@ public class MetadataSchemaServiceImpl implements MetadataSchemaService {
         schema.setDescription(request.getDescription());
         schema.setTenantId(request.getTenantId());
 
+        if (request.getWorkflowEnabled()) {
+            schema.setWorkflowEnabled(request.getWorkflowEnabled());
+            schema.setWorkflowFormKey(request.getWorkflowFormKey());
+            schema.setWorkflowProcessKey(request.getWorkflowProcessKey());
+        }
         // 处理字段列表
         if (request.getFields() != null && !request.getFields().isEmpty()) {
             List<MetadataField> fields = request.getFields().stream()
@@ -101,6 +106,11 @@ public class MetadataSchemaServiceImpl implements MetadataSchemaService {
         if (request.getTenantId() != null) {
             schema.setTenantId(request.getTenantId());
         }
+        if (request.getWorkflowEnabled()) {
+            schema.setWorkflowEnabled(request.getWorkflowEnabled());
+            schema.setWorkflowFormKey(request.getWorkflowFormKey());
+            schema.setWorkflowProcessKey(request.getWorkflowProcessKey());
+        }
 
         MetadataSchema updatedSchema = schemaRepository.save(schema);
         return convertToDTO(updatedSchema);
@@ -126,6 +136,9 @@ public class MetadataSchemaServiceImpl implements MetadataSchemaService {
                 .name(schema.getName())
                 .description(schema.getDescription())
                 .tenantId(schema.getTenantId())
+                .workflowEnabled(schema.getWorkflowEnabled())
+                .workflowProcessKey(schema.getWorkflowProcessKey())
+                .workflowFormKey(schema.getWorkflowFormKey())
                 .createdAt(schema.getCreatedAt())
                 .updatedAt(schema.getUpdatedAt())
                 .fields(fieldDTOs)
