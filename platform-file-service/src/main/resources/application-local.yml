@@ -4,23 +4,11 @@ server:
 spring:
   application:
     name: platform-file-service
-
-  cloud:
-    nacos:
-      discovery:
-        server-addr: localhost:8848
-        namespace: b6c61ff5-0ec0-4a3b-8529-4f110619308c
-      config:
-        server-addr: localhost:8848
-        file-extension: yml
-        group: DEFAULT_GROUP
-        namespace: b6c61ff5-0ec0-4a3b-8529-4f110619308c
-        refresh-enabled: true
-#
-  config:
-    import:
-      # 告诉 Spring Boot 去 Nacos 找名为 "platform-file-service.yml" 的配置
-      - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
+  datasource:
+    url: jdbc:mysql://localhost:3306/manuflex_paas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: manuflex_user
+    password: manuflex_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 # MinIO 配置
 minio:
@@ -39,3 +27,21 @@ app:
 file:
   # 这里配置您的网关地址 (宿主机访问地址)
   gateway-url: http://localhost:8086
+
+# Qdrant 配置
+
+qdrant:
+  host: localhost
+  port: 6334
+  collection-name: knowledge_768
+
+# gemini 配置
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: gemini-2.5-flash
+  embedding-model: text-embedding-004
+
+# 文档处理配置
+document:
+  chunk-size: 500
+  chunk-overlap: 50

@@ -300,6 +300,18 @@ services:
       timeout: 20s
       retries: 3
 
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: manuflex-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    networks:
+      - manuflex-network
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
 
   # 1. API 网关 (入口)
   platform-api-gateway:
@@ -462,13 +474,14 @@ volumes:
   grafana_data:
   loki_data:
   minio_data:
+  qdrant_storage:
 
 networks:
   manuflex-network:
     driver: bridge
 
 
-#  docker-compose up -d mysql nacos kafka platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-workflow-service platform-lims-service
+#  docker-compose up -d mysql nacos minio qdrant kafka platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-workflow-service platform-lims-service
 #  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-workflow-service platform-file-service
 
 ## 1. 停止并删除旧的 IAM 容器
@@ -480,3 +493,5 @@ networks:
 #
 #  # 3. 再次尝试启动
 #  docker-compose up -d --build --no-deps platform-data-service
+
+#  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-file-service
