@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import top.itangbao.platform.agent.core.Agent;
-import top.itangbao.platform.agent.core.AgentResult;
+import top.itangbao.platform.agent.dto.AgentResult;
 import top.itangbao.platform.agent.aiagent.service.AgentService;
 import top.itangbao.platform.common.security.CustomUserDetails;
 import top.itangbao.platform.common.util.SecurityUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,24 +46,41 @@ public class AgentController {
     }
 
     /**
-     * 获取所有可用的Agent
+     * 获取当前 AI 助理具备的能力列表
+     * (重写此方法以适配新架构)
      */
     @GetMapping("/list")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<AgentInfo>> listAgents() {
-        System.out.println("AgentController.listAgents() called");
-        List<Agent> agents = agentService.getAllAgents();
-        List<AgentInfo> agentInfos = agents.stream()
-                .map(agent -> new AgentInfo(
-                        agent.getType(),
-                        agent.getName(),
-                        agent.getDescription()
-                ))
-                .toList();
-        
-        return ResponseEntity.ok(agentInfos);
+        // 在新架构中，Agent 是统一的，这里返回它具备的“技能”作为虚拟 Agent 展示
+        List<AgentInfo> capabilities = new ArrayList<>();
+
+        capabilities.add(new AgentInfo(
+                "FORM",
+                "表单设计助手",
+                "支持通过对话自动创建数据模型和表单界面"
+        ));
+
+        capabilities.add(new AgentInfo(
+                "WORKFLOW",
+                "流程管理助手",
+                "支持查询现有流程、发起新流程和任务处理"
+        ));
+
+        capabilities.add(new AgentInfo(
+                "GENERAL", // 前端会映射为紫色，对应知识库/通用问答
+                "企业知识助手",
+                "基于企业知识库回答业务规则和操作指南"
+        ));
+
+        capabilities.add(new AgentInfo(
+                "DATA",
+                "数据分析助手",
+                "支持自然语言查询业务数据和简单统计"
+        ));
+
+        return ResponseEntity.ok(capabilities);
     }
-    
 
     /**
      * Agent 信息DTO

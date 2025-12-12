@@ -1,4 +1,4 @@
-package top.itangbao.platform.agent.core;
+package top.itangbao.platform.agent.dto;
 
 import lombok.Data;
 import java.util.Map;

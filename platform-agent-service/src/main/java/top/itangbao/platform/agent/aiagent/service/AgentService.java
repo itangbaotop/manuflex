@@ -1,7 +1,6 @@
 package top.itangbao.platform.agent.aiagent.service;
 
-import top.itangbao.platform.agent.core.Agent;
-import top.itangbao.platform.agent.core.AgentResult;
+import top.itangbao.platform.agent.dto.AgentResult;
 
 import java.util.List;
 
@@ -11,7 +10,5 @@ import java.util.List;
 public interface AgentService {
 
     AgentResult executeTask(String userInput, String tenantId, String userId);
-
-    List<Agent> getAllAgents();
 
 }

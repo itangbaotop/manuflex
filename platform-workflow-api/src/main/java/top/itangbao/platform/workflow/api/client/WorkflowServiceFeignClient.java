@@ -108,4 +108,11 @@ public interface WorkflowServiceFeignClient {
             @PathVariable("deploymentId") String deploymentId,
             @RequestParam(value = "cascade", defaultValue = "false") boolean cascade);
 
+
+    /**
+     * 创建表单定义
+     * 对应 FormController.createFormDefinition
+     */
+    @PostMapping("/api/workflow/forms/definitions")
+    void createFormDefinition(@RequestBody Map<String, Object> request);
 }
