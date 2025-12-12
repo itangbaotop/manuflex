@@ -58,6 +58,7 @@
         <module>platform-file-api</module>
         <module>platform-file-service</module>
         <module>platform-agent-service</module>
+        <module>platform-agent-api</module>
     </modules>
 
 

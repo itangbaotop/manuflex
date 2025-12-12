@@ -22,6 +22,7 @@ public class AgentSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/agent/health", "/api/agent/test").permitAll()
                         .requestMatchers("/api/agent/**").authenticated()
+                        .requestMatchers("/api/mcp/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new GatewayAuthFilter(), UsernamePasswordAuthenticationFilter.class);

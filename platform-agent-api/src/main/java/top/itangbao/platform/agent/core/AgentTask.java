@@ -1,5 +1,6 @@
 package top.itangbao.platform.agent.core;
 
+import lombok.Builder;
 import lombok.Data;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import java.util.Map;
  * Agent 任务
  */
 @Data
+@Builder
 public class AgentTask {
     
     /**

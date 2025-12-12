@@ -1,4 +1,4 @@
-package top.itangbao.platform.agent.agents;
+package top.itangbao.platform.agent.aiagent.agents;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

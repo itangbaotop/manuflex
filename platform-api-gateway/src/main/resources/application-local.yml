@@ -50,7 +50,7 @@ spring:
         - id: agent-service
           uri: lb://platform-agent-service
           predicates:
-            - Path=/api/agent/**
+            - Path=/api/agent/**, /api/mcp/**
 
 #    sentinel:
 #      transport:

@@ -1,4 +1,4 @@
-package top.itangbao.platform.agent.service;
+package top.itangbao.platform.agent.aiagent.service;
 
 import top.itangbao.platform.agent.core.Agent;
 import top.itangbao.platform.agent.core.AgentResult;

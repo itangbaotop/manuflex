@@ -1,4 +1,4 @@
-package top.itangbao.platform.agent.controller;
+package top.itangbao.platform.agent.aiagent.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -6,7 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import top.itangbao.platform.agent.core.Agent;
 import top.itangbao.platform.agent.core.AgentResult;
-import top.itangbao.platform.agent.service.AgentService;
+import top.itangbao.platform.agent.aiagent.service.AgentService;
 import top.itangbao.platform.common.security.CustomUserDetails;
 import top.itangbao.platform.common.util.SecurityUtils;
 

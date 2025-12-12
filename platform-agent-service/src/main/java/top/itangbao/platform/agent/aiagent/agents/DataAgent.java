@@ -1,4 +1,4 @@
-package top.itangbao.platform.agent.agents;
+package top.itangbao.platform.agent.aiagent.agents;
 
 import dev.langchain4j.model.chat.ChatModel;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,5 @@
 package top.itangbao.platform.agent.core;
 
-import java.util.Map;
-
 /**
  * AI Agent 基础接口
  */

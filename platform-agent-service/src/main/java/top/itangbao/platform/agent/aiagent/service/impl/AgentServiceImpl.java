@@ -1,4 +1,4 @@
-package top.itangbao.platform.agent.service.impl;
+package top.itangbao.platform.agent.aiagent.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import top.itangbao.platform.agent.core.Agent;
 import top.itangbao.platform.agent.core.AgentResult;
 import top.itangbao.platform.agent.core.AgentTask;
-import top.itangbao.platform.agent.service.AgentService;
+import top.itangbao.platform.agent.aiagent.service.AgentService;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,11 +26,11 @@ public class AgentServiceImpl implements AgentService {
      */
     public AgentResult executeTask(String userInput, String tenantId, String userId) {
         // 创建任务
-        AgentTask task = new AgentTask();
-        task.setTaskId(UUID.randomUUID().toString());
-        task.setUserInput(userInput);
-        task.setTenantId(tenantId);
-        task.setUserId(userId);
+        AgentTask task = AgentTask.builder()
+                .taskId(UUID.randomUUID().toString())
+                .userInput(userInput)
+                .tenantId(tenantId)
+                .userId(userId).build();
 
         // 推断任务类型
         task.setTaskType(inferTaskType(userInput));
