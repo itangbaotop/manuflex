@@ -27,7 +27,7 @@ public class KnowledgeController {
     private RAGService ragService;
     
     @PostMapping("/upload")
-//    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<KnowledgeDocument> uploadDocument(
             @RequestParam("file") MultipartFile file,
             @RequestParam("tenantId") String tenantId,
@@ -60,7 +60,7 @@ public class KnowledgeController {
     }
     
     @PostMapping("/query")
-//    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, String>> query(@RequestBody Map<String, String> request) {
         String question = request.get("question");
         String tenantId = request.get("tenantId");

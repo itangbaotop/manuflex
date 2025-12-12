@@ -463,6 +463,28 @@ services:
         limits:
           memory: 512M
 
+  # 8. ai agent 服务
+  platform-agent-service:
+    build: ./platform-agent-service
+    container_name: manuflex-agent
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_HOST=nacos
+      - NACOS_NAMESPACE=b6c61ff5-0ec0-4a3b-8529-4f110619308c # 保持与其他服务一致
+      # 如果 MinIO 也在 Docker 网络中，这里通常不需要额外配置，
+      # 因为 application.yml 里 minio.endpoint 配的是 http://${MINIO_HOST:minio}:9000
+      # 只需要确保下面 depends_on 里有 minio
+    depends_on:
+      - nacos
+    networks:
+      - manuflex-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
 volumes:
   mysql_data:
   redis_data:
@@ -485,13 +507,13 @@ networks:
 #  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-metadata-service platform-data-service platform-workflow-service platform-file-service
 
 ## 1. 停止并删除旧的 IAM 容器
-#  docker stop manuflex-data
+#  docker stop manuflex-agent
 #
-#  docker rm manuflex-data
+#  docker rm manuflex-agent
 #  # 2. 删除旧镜像 (可选，但推荐)
-#  docker rmi manuflex_platform-data-service
+#  docker rmi manuflex_platform-agent-service
 #
 #  # 3. 再次尝试启动
-#  docker-compose up -d --build --no-deps platform-data-service
+#  docker-compose up -d --build --no-deps platform-agent-service
 
-#  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-file-service
+#  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-file-service platform-agent-service

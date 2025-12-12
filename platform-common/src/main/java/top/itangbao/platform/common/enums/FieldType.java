@@ -10,5 +10,5 @@ public enum FieldType {
     ENUM,
     TEXT, // 长文本
     FILE, // 文件上传
-    REFERENCE // 引用其他模式的实体
+    SELECT, REFERENCE // 引用其他模式的实体
 }

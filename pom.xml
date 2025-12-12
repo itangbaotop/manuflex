@@ -57,6 +57,7 @@
         <module>platform-iam-api</module>
         <module>platform-file-api</module>
         <module>platform-file-service</module>
+        <module>platform-agent-service</module>
     </modules>
 
 
