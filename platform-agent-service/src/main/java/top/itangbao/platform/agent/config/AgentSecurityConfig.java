@@ -26,8 +26,6 @@ public class AgentSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/agent/health", "/api/agent/test").permitAll()
-                        .requestMatchers("/api/agent/**").authenticated()
-                        .requestMatchers("/api/mcp/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(gatewayAuthFilter(), UsernamePasswordAuthenticationFilter.class);

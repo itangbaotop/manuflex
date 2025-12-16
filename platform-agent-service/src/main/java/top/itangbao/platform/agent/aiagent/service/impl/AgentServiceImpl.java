@@ -52,6 +52,7 @@ public class AgentServiceImpl implements AgentService {
                         .start();
 
             } catch (Exception e) {
+                log.error("AI Stream Error for user {}: {}", userId, e.getMessage(), e);
                 emitter.error(e);
             }
         });

@@ -1,0 +1,10 @@
+   __  ___                 ________
+  /  |/  /__ ____  __ __  / __/ / /__ __ __
+ / /|_/ / _ `/ _ \/ // / / _// / / -_) \ /
+/_/  /_/\_,_/_//_/\_,_/ /_/ /_/_/\__/_\_\
+
+Application: ${spring.application.name}
+Profile: ${spring.profiles.active}
+Nacos Server: ${spring.cloud.nacos.config.server-addr}
+Nacos Namespace: ${spring.cloud.nacos.config.namespace}
+=================================================

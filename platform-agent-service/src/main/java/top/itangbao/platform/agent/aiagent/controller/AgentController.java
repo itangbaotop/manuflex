@@ -10,6 +10,8 @@ import top.itangbao.platform.agent.dto.AgentResult;
 import top.itangbao.platform.agent.aiagent.service.AgentService;
 import top.itangbao.platform.common.security.CustomUserDetails;
 import top.itangbao.platform.common.util.SecurityUtils;
+import top.itangbao.platform.metadata.api.client.MetadataServiceFeignClient;
+import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,15 @@ import java.util.Map;
 public class AgentController {
     
     private final AgentService agentService;
+
+    private final MetadataServiceFeignClient metadataServiceFeignClient;
+
+    @PostMapping("/test")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> test() {
+        MetadataSchemaDTO schemaById = metadataServiceFeignClient.getSchemaById(3L);
+        return ResponseEntity.ok("test");
+    }
     
     /**
      * 执行Agent任务
