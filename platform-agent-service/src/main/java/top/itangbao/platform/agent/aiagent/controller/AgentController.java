@@ -1,9 +1,11 @@
 package top.itangbao.platform.agent.aiagent.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import top.itangbao.platform.agent.dto.AgentResult;
 import top.itangbao.platform.agent.aiagent.service.AgentService;
 import top.itangbao.platform.common.security.CustomUserDetails;
@@ -43,6 +45,22 @@ public class AgentController {
             AgentResult errorResult = AgentResult.failure("认证失败: " + e.getMessage());
             return ResponseEntity.ok(errorResult);
         }
+    }
+
+    @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public Flux<String> streamTask(@RequestBody Map<String, String> request) {
+        CustomUserDetails loginUser = SecurityUtils.getLoginUser();
+        String tenantId = null;
+        String userId = null;
+        if (loginUser != null) {
+            tenantId = loginUser.getTenantId();
+            userId = loginUser.getUsername();
+        }
+
+        String userInput = request.get("input");
+
+        return agentService.executeTaskStream(userInput, tenantId, userId);
     }
 
     /**

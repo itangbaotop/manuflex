@@ -39,7 +39,10 @@ public class AgentConfig {
         return AiServices.builder(ManuflexAssistant.class)
                 .chatModel(chatModel)
                 .tools(schemaTools, workflowTools, knowledgeTools, dataTools)
-                .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
+                .chatMemoryProvider(memoryId -> MessageWindowChatMemory.builder()
+                        .maxMessages(6)
+                        .id(memoryId)
+                        .build())
                 .build();
     }
 }

@@ -516,4 +516,6 @@ networks:
 #  # 3. 再次尝试启动
 #  docker-compose up -d --build --no-deps platform-agent-service
 
-#  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-file-service platform-agent-service
+#  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-file-service platform-agent-service platform-metadata-service platform-data-service platform-workflow-service
+
+#  docker-compose up -d --build --no-deps platform-api-gateway platform-iam-service platform-agent-service platform-metadata-service platform-data-service

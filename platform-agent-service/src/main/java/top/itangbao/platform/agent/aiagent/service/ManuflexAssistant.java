@@ -1,6 +1,7 @@
 package top.itangbao.platform.agent.aiagent.service;
 
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 
@@ -44,5 +45,5 @@ public interface ManuflexAssistant {
            
         请保持回答专业、简洁，并始终使用中文。
         """)
-    String chat(@UserMessage String userMessage, @V("tenantId") String tenantId, @V("userId") String userId);
+    TokenStream chat(@UserMessage String userMessage, @V("tenantId") String tenantId, @V("userId") String userId);
 }
