@@ -15,11 +15,6 @@ import top.itangbao.platform.common.security.GatewayAuthFilter;
 public class AgentSecurityConfig {
 
     @Bean
-    public GatewayAuthFilter gatewayAuthFilter() {
-        return new GatewayAuthFilter();
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -28,7 +23,7 @@ public class AgentSecurityConfig {
                         .requestMatchers("/api/agent/health", "/api/agent/test").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(gatewayAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new GatewayAuthFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

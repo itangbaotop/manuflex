@@ -6,6 +6,8 @@ import dev.langchain4j.agent.tool.Tool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import top.itangbao.platform.agent.config.SecurityHeaderContext;
+import top.itangbao.platform.agent.config.UserTokenCache;
 import top.itangbao.platform.common.enums.FieldType;
 import top.itangbao.platform.metadata.api.client.MetadataServiceFeignClient;
 import top.itangbao.platform.metadata.api.dto.MetadataFieldCreateRequest;
@@ -38,12 +40,44 @@ public class SchemaTools {
      */
     @Tool("根据用户描述创建业务表单、数据模型或实体。当用户想要'新建表单'、'设计模型'时使用此工具。")
     public String createFormSchema(
-            @dev.langchain4j.agent.tool.P("表单名称...") String formName,
+            @dev.langchain4j.agent.tool.P("表单名称（英文） 例：custom...") String formName,
             @dev.langchain4j.agent.tool.P("描述...") String description,
             @dev.langchain4j.agent.tool.P("租户ID") String tenantId,
-            @dev.langchain4j.agent.tool.P("字段定义...") String fieldsJson) {
+            @dev.langchain4j.agent.tool.P("操作用户ID") String userId,
+            @dev.langchain4j.agent.tool.P(
+                """
+                用户描述的每个字段必须转换为一个 JSON 对象，且**必须包含**以下 Key：
+    
+                1. "name": (String) 字段的英文变量名，使用小驼峰 (如: orderDate, totalAmount)。
+                2. "label": (String) 字段的中文显示名称 (如: 订单日期, 总金额)。
+                3. "type": (String) 字段类型，必须是以下枚举之一：
+                   - STRING (单行文本)
+                   - TEXT (多行长文本)
+                   - NUMBER (数字/金额)
+                   - DATE (日期)
+                   - BOOLEAN (是/否)
+                   - SELECT (下拉选择, 必须提供 options)
+                   - FILE (文件上传)
+                4. "required": (Boolean) true 或 false。
+                5. "options": (List<String>) 仅当 type=SELECT 时必填，例如 ["A", "B"]。
+                
+                示例 JSON 结构 (供你参考构建参数):
+                [
+                  {"name": "applicant", "label": "申请人", "type": "STRING", "required": true},
+                  {"name": "leaveType", "label": "请假类型", "type": "SELECT", "options": ["事假", "病假"], "required": true}
+                ]
+                """
+            ) String fieldsJson) {
 
         try {
+            Map<String, String> headers = UserTokenCache.get(userId);
+            if (headers != null) {
+                log.info("🔍 SchemaTools: 成功为用户 {} 恢复上下文，准备调用 Metadata 服务", userId);
+                SecurityHeaderContext.set(headers);
+            } else {
+                log.warn("⚠️ SchemaTools: 未找到用户 {} 的上下文 Header，调用可能会失败！", userId);
+            }
+
             List<Map<String, Object>> fieldsList = objectMapper.readValue(fieldsJson, List.class);
 
             // 1. 创建数据模型 (Metadata)
@@ -51,6 +85,7 @@ public class SchemaTools {
                     .name(formName)
                     .description(description)
                     .tenantId(tenantId)
+                    .workflowEnabled(false)
                     .fields(buildFieldRequests(fieldsList))
                     .build();
 
@@ -64,6 +99,8 @@ public class SchemaTools {
         } catch (Exception e) {
             log.error("操作失败", e);
             return "❌ 操作失败: " + e.getMessage();
+        } finally {
+            SecurityHeaderContext.clear();
         }
     }
 

@@ -20,10 +20,18 @@ app:
   jwtExpirationMs: 3600000 # Access Token 过期时间，例如 1 小时 (3600 * 1000 毫秒)
   jwtRefreshExpirationMs: 604800000 # Refresh Token 过期时间，例如 7 天 (7 * 24 * 3600 * 1000 毫秒)
 
+ai:
+  provider: ${AI_PROVIDER:openai}
+
 # gemini 配置
 gemini:
   api-key: ${GEMINI_API_KEY:}
   model: gemini-2.5-flash
+
+openai:
+  api-key: ${OPENAI_API_KEY:}
+  model: ${OPENAI_MODEL:gpt-4o}
+  base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
 
 logging:
   file:

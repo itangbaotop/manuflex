@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import top.itangbao.platform.agent.aiagent.tools.SchemaTools;
 import top.itangbao.platform.agent.dto.AgentResult;
 import top.itangbao.platform.agent.aiagent.service.AgentService;
 import top.itangbao.platform.common.security.CustomUserDetails;
@@ -29,10 +30,20 @@ public class AgentController {
 
     private final MetadataServiceFeignClient metadataServiceFeignClient;
 
+    private final SchemaTools schemaTools;
+
     @PostMapping("/test")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> test() {
-        MetadataSchemaDTO schemaById = metadataServiceFeignClient.getSchemaById(3L);
+//        MetadataSchemaDTO schemaById = metadataServiceFeignClient.getSchemaById(3L);
+
+        String formName = "customer";
+        String description = "客户表单";
+        String tenantId = "001";
+        String fieldsJson = "[{\"name\": \"name\", \"label\": \"姓名\", \"type\": \"STRING\", \"required\": true}, {\"name\": \"phone\", \"label\": \"电话\", \"type\": \"STRING\", \"required\": true}]";
+
+        String formSchema = schemaTools.createFormSchema(formName, description, tenantId, "4", fieldsJson);
+
         return ResponseEntity.ok("test");
     }
     

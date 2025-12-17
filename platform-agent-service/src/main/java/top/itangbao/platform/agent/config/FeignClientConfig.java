@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Enumeration;
+import java.util.Map;
 
 @Slf4j
 @Configuration
@@ -20,6 +20,12 @@ public class FeignClientConfig {
         return new RequestInterceptor() {
             @Override
             public void apply(RequestTemplate template) {
+                Map<String, String> asyncHeaders = SecurityHeaderContext.get();
+                if (asyncHeaders != null) {
+                    asyncHeaders.forEach(template::header);
+                    return;
+                }
+
                 ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
                 if (attributes != null) {
                     HttpServletRequest request = attributes.getRequest();
