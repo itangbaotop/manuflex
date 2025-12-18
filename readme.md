@@ -36,8 +36,8 @@ Manuflex 是一个基于 **Spring Cloud Alibaba** 构建的高性能、可配置
 
 
 PS:
-引入大数据可参考： https://github.com/itangbaotop/tdm.git
-自定义业务可参考： https://github.com/itangbaotop/qms.git
+- 引入大数据可参考： https://github.com/itangbaotop/tdm.git
+- 自定义业务可参考： https://github.com/itangbaotop/qms.git
 
 ## 🏗 快速开始
 
