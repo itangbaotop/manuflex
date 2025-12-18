@@ -82,7 +82,7 @@ public class AgentController {
 
         String userInput = request.get("input");
 
-        return agentService.executeTaskStream(userInput, tenantId, userId);
+        return agentService.executeTaskStream(userInput, tenantId, userId).map(chunk -> chunk.startsWith("data:") ? chunk.substring(5).trim() : chunk);
     }
 
     /**
