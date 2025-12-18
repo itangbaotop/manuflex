@@ -81,8 +81,9 @@ public class AgentController {
         }
 
         String userInput = request.get("input");
+        String imageBase64 = (String) request.get("image");
 
-        return agentService.executeTaskStream(userInput, tenantId, userId).map(chunk -> chunk.startsWith("data:") ? chunk.substring(5).trim() : chunk);
+        return agentService.executeTaskStream(userInput, imageBase64, tenantId, userId).map(chunk -> chunk.startsWith("data:") ? chunk.substring(5).trim() : chunk);
     }
 
     /**

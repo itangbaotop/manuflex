@@ -7,7 +7,7 @@ Manuflex 是一个基于 **Spring Cloud Alibaba** 构建的高性能、可配置
 ## 🚀 核心架构理念
 
 * **元数据驱动（Metadata-Driven）**: 所有的业务对象（Schema）和字段（Field）均通过元数据定义，系统动态生成数据库表结构及基础 CRUD 能力。
-* **AI 智能代理（Agentic AI）**: 集成 MCP (Model Context Protocol)，通过 RAG（检索增强生成）技术，让 AI 能够理解平台 Schema 并辅助用户完成数据分析、流程发起及知识检索。
+* **AI 智能代理（Agentic AI）**: 集成 MCP (Model Context Protocol)、多模态感知，通过 RAG（检索增强生成）技术，让 AI 能够理解平台 Schema 并辅助用户完成数据分析、流程发起及知识检索。
 * **流程编排（Workflow Central）**: 深度集成流程引擎，支持 BPMN/DMN，将动态业务数据与自动化工作流无缝绑定。
 * **极简定制化**: 针对特定行业（如 LIMS 实验室信息管理系统），只需配置相应的元数据与流程规则，即可完成从通用平台到垂直领域的切换。
 

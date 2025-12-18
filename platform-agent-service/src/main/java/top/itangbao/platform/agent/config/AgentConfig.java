@@ -1,5 +1,6 @@
 package top.itangbao.platform.agent.config;
 
+import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -34,6 +35,15 @@ public class AgentConfig {
 
     @Value("${openai.base-url:https://api.openai.com/v1}")
     private String openAiBaseUrl;
+
+
+    @Bean
+    public ChatMemoryProvider chatMemoryProvider() {
+        return memoryId -> MessageWindowChatMemory.builder()
+                .id(memoryId)
+                .maxMessages(20) // 设置记忆窗口大小
+                .build();
+    }
 
 
     @Bean
@@ -125,11 +135,17 @@ public class AgentConfig {
     }
 
     @Bean
-    public ChatAssistant chatAssistant(StreamingChatModel streamingChatModel) {
+    public ChatAssistant chatAssistant(StreamingChatModel streamingChatModel,
+                                       ChatMemoryProvider chatMemoryProvider,
+                                       // 注入所有工具 Bean
+                                       SchemaTools schemaTools,
+                                       WorkflowTools workflowTools,
+                                       DataAnalysisTools dataTools,
+                                       KnowledgeBaseTools knowledgeTools) {
         return AiServices.builder(ChatAssistant.class)
                 .streamingChatModel(streamingChatModel)
-                // 闲聊不需要工具
-                .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
+                .chatMemoryProvider(chatMemoryProvider)
+                .tools(schemaTools, workflowTools, dataTools, knowledgeTools)
                 .build();
     }
 }

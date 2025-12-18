@@ -5,7 +5,8 @@ public enum AgentIntent {
     WORKFLOW("流程查询与管理"),
     DATA("数据查询与分析"),
     KNOWLEDGE("知识库问答与SOP"),
-    CHAT("闲聊与通用问题");
+    CHAT("闲聊与通用问题"),
+    UNKNOWN("未知");
 
     private final String description;
 

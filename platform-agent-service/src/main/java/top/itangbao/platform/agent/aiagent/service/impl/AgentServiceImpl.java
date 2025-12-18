@@ -1,5 +1,8 @@
 package top.itangbao.platform.agent.aiagent.service.impl;
 
+import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.TextContent;
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.service.TokenStream;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +38,7 @@ public class AgentServiceImpl implements AgentService {
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     @Override
-    public Flux<String> executeTaskStream(String userInput, String tenantId, String userId) {
+    public Flux<String> executeTaskStream(String userInput, String imageBase64, String tenantId, String userId) {
         Map<String, String> headers = new HashMap<>();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attributes != null) {
@@ -55,22 +58,39 @@ public class AgentServiceImpl implements AgentService {
                     UserTokenCache.put(userId, headers);
                     SecurityHeaderContext.set(headers);
 
-                    log.info("🤖 [Router] 分析意图: {}", userInput);
-                    // 1. 路由分类
-                    AgentIntent intent = routerAssistant.classify(userInput);
-                    log.info("🎯 [Router] 意图识别: {}", intent);
-
-                    // 2. 分发给专家
                     TokenStream tokenStream;
-                    switch (intent) {
-                        case FORM -> tokenStream = formAssistant.chat(userInput, tenantId, userId);
-                        case WORKFLOW -> tokenStream = workflowAssistant.chat(userInput, tenantId, userId);
-                        case DATA -> tokenStream = dataAssistant.chat(userInput, tenantId, userId);
-                        case KNOWLEDGE -> tokenStream = knowledgeAssistant.chat(userInput, tenantId, userId);
-                        default -> tokenStream = chatAssistant.chat(userInput);
+
+                    // 3. 多模态逻辑判断
+                    if (imageBase64 != null && !imageBase64.isEmpty()) {
+                        log.info("🖼️ [Multimodal] 检测到图片输入，路由至 ChatAssistant");
+
+                        // 构建图文混合消息
+                        UserMessage multiModalMessage = UserMessage.from(
+                                TextContent.from(userInput),
+                                // 注意：前端传来的 Base64 通常不带 data:image/png;base64 前缀，如果有需要处理
+                                ImageContent.from(imageBase64, "image/png")
+                        );
+
+                        tokenStream = chatAssistant.chat(multiModalMessage);
+                    } else {
+                        // 4. 纯文本逻辑：走原来的路由
+                        log.info("🤖 [Router] 分析意图: {}", userInput);
+                        AgentIntent intent = routerAssistant.classify(userInput);
+                        log.info("🎯 [Router] 意图识别: {}", intent);
+
+                        switch (intent) {
+                            case KNOWLEDGE -> tokenStream = knowledgeAssistant.chat(userInput, tenantId, userId);
+                            case CHAT, UNKNOWN -> {
+                                log.info("🚀 [Agent] 启用全能智能体模式");
+                                tokenStream = chatAssistant.chat(UserMessage.from(userInput));
+                            }
+                            default -> {
+                                tokenStream = chatAssistant.chat(UserMessage.from(userInput));
+                            }
+                        }
                     }
 
-                    // 3. 桥接 TokenStream 到 Flux
+                    // 5. 执行流
                     tokenStream
                             .onPartialResponse(emitter::next)
                             .onCompleteResponse(response -> {
@@ -81,12 +101,7 @@ public class AgentServiceImpl implements AgentService {
                             .onError(error -> {
                                 log.error("AI Stream Error", error);
                                 UserTokenCache.remove(userId);
-                                // 遇到上下文错误提示重置
-                                if (error.getMessage() != null && error.getMessage().contains("INVALID_ARGUMENT")) {
-                                    emitter.next("\n\n[系统: 上下文过长，请刷新页面重置会话]\n\n");
-                                } else {
-                                    emitter.next("\n\n[系统错误: " + error.getMessage() + "]\n\n");
-                                }
+                                emitter.next("\n\n[系统错误: " + error.getMessage() + "]\n\n");
                                 emitter.complete();
                             })
                             .start();

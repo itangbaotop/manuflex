@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface AgentService {
 
-    Flux<String> executeTaskStream(String userInput, String tenantId, String userId);
+    Flux<String> executeTaskStream(String userInput, String imageBase64, String tenantId, String userId);
 
     AgentResult executeTask(String userInput, String tenantId, String userId);
 
