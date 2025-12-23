@@ -45,9 +45,6 @@ public class DynamicDataServiceImpl implements DynamicDataService {
     private final MetadataServiceClient metadataServiceClient;
     private final ObjectMapper objectMapper;
 
-    @Autowired
-    private IamFeignClient iamFeignClient;
-
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -166,7 +163,7 @@ public class DynamicDataServiceImpl implements DynamicDataService {
                 .orElseThrow(() -> new ResourceNotFoundException("Metadata schema not found"));
 
         String tableName = dynamicTableManager.buildTableName(tenantId, schemaName);
-        List<String> columnNames = getColumnNames(tableName);
+        List<String> columnNames = dynamicTableManager.getColumnNames(tableName);
 
         String selectSql = "SELECT * FROM `" + tableName + "` WHERE id = ?1 AND tenant_id = ?2";
         List<Object[]> resultList = entityManager.createNativeQuery(selectSql)
@@ -189,7 +186,7 @@ public class DynamicDataServiceImpl implements DynamicDataService {
                 .orElseThrow(() -> new ResourceNotFoundException("Metadata schema not found with name '" + schemaName + "' for tenant '" + tenantId + "'"));
 
         String tableName = dynamicTableManager.buildTableName(tenantId, schemaName);
-        List<String> columnNames = getColumnNames(tableName);
+        List<String> columnNames = dynamicTableManager.getColumnNames(tableName);
 
         StringBuilder whereClause = new StringBuilder(" WHERE tenant_id = ? ");
         List<Object> queryParams = new ArrayList<>();
@@ -204,6 +201,12 @@ public class DynamicDataServiceImpl implements DynamicDataService {
 
                 String[] parts = filterKeyWithOperator.split("\\.");
                 String fieldName = parts[0];
+
+                if (!columnNames.contains(fieldName)) {
+                    logger.warn("检测到非法字段访问: {}", fieldName);
+                    continue;
+                }
+
                 String operator = parts.length > 1 ? parts[1].toLowerCase() : "eq";
 
                 if (!columnNames.contains(fieldName)) {
@@ -271,6 +274,8 @@ public class DynamicDataServiceImpl implements DynamicDataService {
                 } else {
                     orderByClause.append("ASC");
                 }
+            } else {
+                throw new IllegalArgumentException("排序字段非法");
             }
         } else {
             orderByClause.append(" ORDER BY `id` ASC");
@@ -522,31 +527,6 @@ public class DynamicDataServiceImpl implements DynamicDataService {
         }
     }
 
-    // 辅助方法：获取表的列名
-    private List<String> getColumnNames(String tableName) {
-        try {
-            List<?> results = entityManager.createNativeQuery(
-                            "SELECT column_name FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ?1 ORDER BY ORDINAL_POSITION")
-                    .setParameter(1, tableName)
-                    .getResultList();
-
-            return results.stream()
-                    .map(item -> {
-                        if (item instanceof String) {
-                            return (String) item;
-                        } else if (item instanceof Object[]) {
-                            return (String) ((Object[]) item)[0];
-                        } else {
-                            logger.warn("Unexpected column name type: {}", item.getClass().getName());
-                            return item.toString();
-                        }
-                    })
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            logger.error("Error getting column names for table '{}': {}", tableName, e.getMessage());
-            return Collections.emptyList();
-        }
-    }
 
     /**
      * 生产级动态数据校验
@@ -724,7 +704,6 @@ public class DynamicDataServiceImpl implements DynamicDataService {
     private void applyDataPermissionFilter(StringBuilder sql, List<Object> params) {
         Set<String> scopes = UserContext.getDataScopes();
         String username = UserContext.getUsername();
-        Long deptId = UserContext.getDeptId();
 
         // 1. 如果是超级管理员，或者拥有 "ALL" 权限，直接放行 (什么都不加 = 看全部)
         if (scopes.contains("ALL") || "admin".equals(username)) { // 简单判断 admin
@@ -734,50 +713,20 @@ public class DynamicDataServiceImpl implements DynamicDataService {
         // 2. 拼接权限 SQL
         List<String> conditions = new ArrayList<>();
 
-        if (scopes.contains("DEPT_AND_CHILD")) {
-            if (deptId != null) {
-                try {
-                    List<Long> allChildIds = iamFeignClient.getChildDepartmentIds(deptId);
+        Set<Long> accessibleDeptIds = UserContext.getAccessibleDeptIds();
 
-                    if (allChildIds != null && !allChildIds.isEmpty()) {
-                        // 构建 IN 语句: dept_id IN (?, ?, ?)
-                        String placeholders = allChildIds.stream().map(id -> "?").collect(Collectors.joining(", "));
-                        conditions.add("dept_id IN (" + placeholders + ")");
-                        params.addAll(allChildIds);
-                    } else {
-                        // 兜底：如果查不到子部门，至少要把自己加进去
-                        conditions.add("dept_id = ?");
-                        params.add(deptId);
-                    }
-                } catch (Exception e) {
-                    logger.error("Failed to get child departments from IAM", e);
-                    // 降级策略：如果远程调用失败，退化为只查本部门，防止报错
-                    conditions.add("dept_id = ?");
-                    params.add(deptId);
-                }
+        if (scopes.contains("DEPT_AND_CHILD") || scopes.contains("DEPT")) {
+            if (!accessibleDeptIds.isEmpty()) {
+                // 构建 IN 语句: dept_id IN (?, ?, ?)
+                String placeholders = accessibleDeptIds.stream()
+                        .map(id -> "?")
+                        .collect(Collectors.joining(", "));
+                conditions.add("dept_id IN (" + placeholders + ")");
+                params.addAll(accessibleDeptIds);
             }
-        }
-        // 3. 策略 B: 本部门 (DEPT) - 严格匹配
-        else if (scopes.contains("DEPT")) {
-            if (deptId != null) {
-                conditions.add("dept_id = ?");
-                params.add(deptId);
-            }
-        }
-
-        // 策略 B: 仅本人 (SELF)
-        // 如果同时有 DEPT 和 SELF，通常取并集 (OR) 或者取最大范围。
-        // 这里假设：如果有 DEPT 权限，就不用管 SELF 了；如果没有 DEPT，才限制 SELF。
-        if (conditions.isEmpty()) {
-            // 默认策略：如果没有更高级的权限，就被限制在“仅本人”
-            // (scopes.contains("SELF") 或者是空)
-            if (username != null) {
-                conditions.add("created_by = ?");
-                params.add(username);
-            } else {
-                // 极端情况：没登录也没权限 -> 查不到任何数据
-                conditions.add("1 = 0");
-            }
+        } else if (username != null) {
+            conditions.add("created_by = ?");
+            params.add(username);
         }
 
         // 将条件拼接到 SQL

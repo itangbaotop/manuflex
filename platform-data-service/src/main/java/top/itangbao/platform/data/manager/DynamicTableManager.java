@@ -1,5 +1,8 @@
 package top.itangbao.platform.data.manager;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
@@ -10,6 +13,9 @@ import top.itangbao.platform.metadata.api.dto.MetadataFieldDTO;
 import top.itangbao.platform.metadata.api.dto.MetadataSchemaDTO;
 
 
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -19,6 +25,35 @@ public class DynamicTableManager {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    private Cache<String, List<String>> columnCache;
+
+    @PostConstruct
+    public void init() {
+        // 初始化缓存：最多 1000 个表的列信息，写入 1 小时后过期
+        this.columnCache = Caffeine.newBuilder()
+                .maximumSize(1000)
+                .expireAfterWrite(1, TimeUnit.HOURS)
+                .build();
+    }
+
+    public List<String> getColumnNames(String tableName) {
+        // 使用缓存，如果没命中则执行原有的 DB 查询逻辑
+        return columnCache.get(tableName, key -> queryActualColumnsFromDb(key));
+    }
+
+    private List<String> queryActualColumnsFromDb(String tableName) {
+        try {
+            List<?> results = entityManager.createNativeQuery(
+                            "SELECT column_name FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ?1 ORDER BY ORDINAL_POSITION")
+                    .setParameter(1, tableName)
+                    .getResultList();
+            return results.stream().map(item -> item.toString()).collect(Collectors.toList());
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
 
     /**
      * 根据 MetadataSchemaDTO 动态创建数据表
@@ -62,6 +97,8 @@ public class DynamicTableManager {
 
         logger.info("Executing DDL to create table '{}':\n{}", tableName, ddl.toString());
         entityManager.createNativeQuery(ddl.toString()).executeUpdate();
+
+        columnCache.invalidate(tableName);
         logger.info("Table '{}' created successfully.", tableName);
     }
 
@@ -94,6 +131,8 @@ public class DynamicTableManager {
             }
             // TODO: 处理列修改 (类型、约束等) - 需要更复杂的 ALTER TABLE 语句和数据迁移策略
         }
+
+        columnCache.invalidate(tableName);
     }
 
     /**
@@ -112,6 +151,8 @@ public class DynamicTableManager {
         } else {
             logger.warn("Table '{}' does not exist. Skipping drop.", tableName);
         }
+
+        columnCache.invalidate(tableName);
     }
 
     /**

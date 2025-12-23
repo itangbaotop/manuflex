@@ -14,8 +14,9 @@ public class CustomUserDetails extends User {
     private String tenantId;
     private Long deptId;
     private Set<String> dataScopes;
+    private Set<Long> accessibleDeptIds;
 
-    public CustomUserDetails(Long id, String tenantId, Long deptId, Set<String> dataScopes,
+    public CustomUserDetails(Long id, String tenantId, Long deptId, Set<String> dataScopes, Set<Long> accessibleDeptIds,
                              String username, String password, boolean enabled,
                              Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, true, true, true, authorities);
@@ -23,6 +24,7 @@ public class CustomUserDetails extends User {
         this.tenantId = tenantId;
         this.deptId = deptId;
         this.dataScopes = dataScopes;
+        this.accessibleDeptIds = accessibleDeptIds;
     }
 
     public Long getId() { return id; }
@@ -45,5 +47,13 @@ public class CustomUserDetails extends User {
 
     public void setDataScopes(Set<String> dataScopes) {
         this.dataScopes = dataScopes;
+    }
+
+    public Set<Long> getAccessibleDeptIds() {
+        return accessibleDeptIds;
+    }
+
+    public void setAccessibleDeptIds(Set<Long> accessibleDeptIds) {
+        this.accessibleDeptIds = accessibleDeptIds;
     }
 }

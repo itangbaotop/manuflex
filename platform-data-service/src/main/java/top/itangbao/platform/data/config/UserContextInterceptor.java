@@ -1,5 +1,7 @@
 package top.itangbao.platform.data.config;
 
+import com.alibaba.nacos.common.utils.StringUtils;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -13,12 +15,15 @@ import java.util.Set;
 
 @Component
 public class UserContextInterceptor implements HandlerInterceptor {
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         // 1. 从 Header 读取网关透传的数据
         String username = request.getHeader("X-Auth-User");
         String deptIdStr = request.getHeader("X-User-Dept-Id");
         String dataScopesStr = request.getHeader("X-User-Data-Scopes");
+        String deptIdsHeader = request.getHeader("X-User-Accessible-Depts");
+
 
         System.out.println("====== INTERCEPTOR IS RUNNING ======");
         System.out.println("User: " + request.getHeader("X-Auth-User"));
@@ -39,8 +44,16 @@ public class UserContextInterceptor implements HandlerInterceptor {
             }
         }
 
+        Set<Long> accessibleDeptIds = new HashSet<>();
+
+        if (StringUtils.hasText(deptIdsHeader)) {
+            Arrays.stream(deptIdsHeader.split(","))
+                    .map(Long::parseLong)
+                    .forEach(accessibleDeptIds::add);
+        }
+
         // 3. 存入上下文
-        UserContext.set(username, deptId, dataScopes);
+        UserContext.set(username, deptId, dataScopes, accessibleDeptIds);
         return true;
     }
 

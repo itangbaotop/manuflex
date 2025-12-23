@@ -14,6 +14,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import top.itangbao.platform.common.util.JwtTokenProvider;
@@ -100,6 +101,7 @@ public class JwtAuthenticationWebFilter extends AuthenticationWebFilter {
                     .header("X-User-Dept-Id", getClaimString(claims, "deptId"))
                     .header("X-User-Data-Scopes", getClaimString(claims, "dataScopes"))
                     .header("X-User-Tenant-Id", getClaimString(claims, "tenantId"))
+                    .header("X-User-Accessible-Depts", StringUtils.collectionToCommaDelimitedString(claims.get("accessibleDeptIds", List.class)))
                     .build();
 
             ServerWebExchange exchange = webFilterExchange.getExchange().mutate().request(request).build();

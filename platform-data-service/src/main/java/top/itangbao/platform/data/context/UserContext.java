@@ -11,11 +11,13 @@ public class UserContext {
     private static final ThreadLocal<String> currentUsername = new ThreadLocal<>();
     private static final ThreadLocal<Long> currentDeptId = new ThreadLocal<>();
     private static final ThreadLocal<Set<String>> currentDataScopes = new ThreadLocal<>();
+    private static final ThreadLocal<Set<Long>> currentAccessibleDeptIds = new ThreadLocal<>();
 
-    public static void set(String username, Long deptId, Set<String> dataScopes) {
+    public static void set(String username, Long deptId, Set<String> dataScopes, Set<Long> accessibleDeptIds) {
         currentUsername.set(username);
         currentDeptId.set(deptId);
         currentDataScopes.set(dataScopes);
+        currentAccessibleDeptIds.set(accessibleDeptIds);
     }
 
     public static String getUsername() { return currentUsername.get(); }
@@ -26,9 +28,14 @@ public class UserContext {
         return currentDataScopes.get() == null ? Collections.emptySet() : currentDataScopes.get();
     }
 
+    public static Set<Long> getAccessibleDeptIds() {
+        return currentAccessibleDeptIds.get() == null ? Collections.emptySet() : currentAccessibleDeptIds.get();
+    }
+
     public static void clear() {
         currentUsername.remove();
         currentDeptId.remove();
         currentDataScopes.remove();
+        currentAccessibleDeptIds.remove();
     }
 }

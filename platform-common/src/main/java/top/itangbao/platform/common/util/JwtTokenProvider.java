@@ -84,6 +84,7 @@ public class JwtTokenProvider {
                 .claim("tenantId", userPrincipal.getTenantId())
                 .claim("deptId", userPrincipal.getDeptId())
                 .claim("dataScopes", userPrincipal.getDataScopes())
+                .claim("accessibleDeptIds", userPrincipal.getAccessibleDeptIds())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS512)

@@ -8,11 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +43,7 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
         String deptId = request.getHeader("X-User-Dept-Id");
         String dataScopes = request.getHeader("X-User-Data-Scopes");
         String tenantId = request.getHeader("X-User-Tenant-Id");
+        String deptIdsHeader = request.getHeader("X-User-Accessible-Depts");
 
         log.debug("GatewayAuthFilter - X-Auth-User: {}, X-Auth-Roles: {}, X-Original-JWT: {}", username, rolesHeader, originalJwt);
 
@@ -48,11 +52,20 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
 
+            Set<Long> accessibleDeptIds = new HashSet<>();
+
+            if (StringUtils.hasText(deptIdsHeader)) {
+                Arrays.stream(deptIdsHeader.split(","))
+                        .map(Long::parseLong)
+                        .forEach(accessibleDeptIds::add);
+            }
+
             CustomUserDetails userDetails = new CustomUserDetails(
                     null,
                     tenantId,
                     Long.valueOf(deptId),
                     Arrays.stream(dataScopes.split(",")).collect(Collectors.toSet()),
+                    accessibleDeptIds,
                     username,
                     "",
                     true,
