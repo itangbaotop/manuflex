@@ -30,6 +30,6 @@ minio:
 
 
 app:
-  jwtSecret: xi5G429vyD9/rLxktYqsZU723o3V5OB65KWoU76ORtFqihOS3gSQSqEWfDzDdc1ThsPv9D2v0AdqvcdXg+2vqg==
+  jwtSecret: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuBPMYYuTlJWVajcWkg9FkGQg7Pxpid0tHJl8dG+ruECca8T4WV87e7DvN4OZxUbongp4P4KgG1xHGXswMV9EpK2GnOx2BbHTh+yU3uI2JucpOZQL3uWcKQ+cZIgMIHWDrQ/660ueyLwxxDXoytZaKYW/OGzUEAZxtByLuhO6MWXyMgfi8RoNNOZOxFmyk1G59hF6MLqcC+4j452oCa6woz9HrfhK3DAwuBFfQerM/eYLvShx5p92/xKseSwa3j6Wve1zAY3ZH/wv/TXdQJ18ykaqXkw6qn9ELzh6Hg2ACTDu9k7hs67M9JWKIkQZe6DrOBNjVD5ZRoEkA+ulZiZetQIDAQAB
   jwtExpirationMs: 3600000 # Access Token 过期时间，例如 1 小时 (3600 * 1000 毫秒)
   jwtRefreshExpirationMs: 604800000 # Refresh Token 过期时间，例如 7 天 (7 * 24 * 3600 * 1000 毫秒)
